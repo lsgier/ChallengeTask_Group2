@@ -1,4 +1,4 @@
-package challengetask.gropu02.fsstructure;
+package main.challengetask.group02.fsstructure;
 
 public class Directory {
 

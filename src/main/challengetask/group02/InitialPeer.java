@@ -24,7 +24,7 @@ public class InitialPeer {
 		        InetAddress.getByName("127.0.0.1"));
 		// b.addInterface("eth0");
 		Peer master = new PeerBuilder(new Number160(rnd)).ports(4000).bindings(b).start();
-		System.out.println("Server started Listening to: " + DiscoverNetworks.discoverInterfaces(b));
+		System.out.println("InitialPeer started Listening to: " + DiscoverNetworks.discoverInterfaces(b));
 		System.out.println("address visible to outside is " + master.peerAddress());
 		while (true) {
 			for (PeerAddress pa : master.peerBean().peerMap().all()) {

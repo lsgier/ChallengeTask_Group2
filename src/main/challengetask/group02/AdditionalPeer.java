@@ -1,4 +1,4 @@
-package main.challengetask.group02;
+package challengetask.group02;
 
 import java.io.IOException;
 import java.net.Inet4Address;

@@ -1,5 +1,8 @@
 package challengetask.group02.fsstructure;
 
-public class Directory {
+
+import challengetask.group02.fsstructure.Entry;
+
+public class Directory extends Entry{
 
 }

@@ -2,41 +2,48 @@ package challengetask.group02.fsstructure;
 
 import net.tomp2p.peers.Number160;
 
+import java.io.Serializable;
+
 /**
  * Created by melchior on 09.04.15.
  */
-public class Entry {
-    //ID might be unused. Why should a DHT entry need to contain its own Key?
-    private Number160 ID;
+public class Entry implements Serializable {
 
-    private Number160 ParentID;
-
-    //This might also be unnecessary. If we store the EntryName in the Parent instead of in the object itself we can very quickly
-    //find the ID of a desired Child. See my comment in the trello task "FS Performance" https://trello.com/c/5ECEngc9/27-fs-performance
-    private String EntryName;
-
-    public Entry(Number160 ID, Number160 parentID, String entryName) {
-        this.ID = ID;
-        ParentID = parentID;
-        EntryName = entryName;
-    }
-    //TODO Object containing meta information
+    protected Number160 ID;
+    protected Number160 parentID;
+    protected String entryName;
+    //TODO field for meta-info object
 
     public Number160 getID() {
         return ID;
     }
 
     public Number160 getParentID() {
-        return ParentID;
+        return parentID;
     }
 
     public void setParentID(Number160 parentID) {
-        ParentID = parentID;
+        //avoid that the root directory (has no parent) can be moved to a subdirectory which would mean that the entry-point to the fs is lost.
+        if(this.parentID ==null) {
+            //TODO throw exception?
+            return;
+        }
+
+        else {
+            this.parentID = parentID;
+        }
+    }
+
+    public void setEntryName(String entryName) {
+        //TODO implement DHT request (or use challengetask.group02.controllers) to change the name of this object in the parent objects children list.
+        this.entryName = entryName;
     }
 
     public String getEntryName() {
-        return EntryName;
+        //TODO implement DHT request (or use challengetask.group02.controllers) to find out name
+        return entryName;
     }
+
 
 
 

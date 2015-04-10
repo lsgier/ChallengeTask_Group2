@@ -1,4 +1,4 @@
-package test.challengetask.group02.fsstructure;
+package challengetask.group02.fsstructure;
 
 public class DirectoryTest {
 

@@ -1,4 +1,4 @@
-package main.challengetask.group02;
+package challengetask.group02;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -24,10 +24,10 @@ public class AdditionalPeer {
 		        InetAddress.getByName("127.0.0.1"));
 		// b.addInterface("eth0");
 		Peer client = new PeerBuilder(new Number160(rnd)).ports(4001).bindings(b).start();
-		System.out.println("Client started and Listening to: " + DiscoverNetworks.discoverInterfaces(b));
+		System.out.println("AdditionalPeer started and Listening to: " + DiscoverNetworks.discoverInterfaces(b));
 		System.out.println("address visible to outside is " + client.peerAddress());
 
-		String ipAddress = "192.168.90.53";
+		String ipAddress = (args[0]);
 		InetAddress address = Inet4Address.getByName(ipAddress);
 		int masterPort = 4000;
 		PeerAddress pa = new PeerAddress(Number160.ZERO, address, masterPort, masterPort);

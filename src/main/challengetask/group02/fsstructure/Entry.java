@@ -4,9 +4,6 @@ import net.tomp2p.peers.Number160;
 
 import java.io.Serializable;
 
-/**
- * Created by melchior on 09.04.15.
- */
 public class Entry implements Serializable {
 
     protected Number160 ID;

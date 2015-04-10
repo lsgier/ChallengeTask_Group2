@@ -17,4 +17,16 @@ public class Directory extends Entry{
 
         children = new Hashtable<String, Number160>();
     }
+
+    public void addChild(String entryName, Number160 ID) {
+        children.put(entryName, ID);
+    }
+
+    public Number160 getChild(String entryName) {
+        return children.get(entryName);
+    }
+
+    public Hashtable<String, Number160> getChildren() {
+        return children;
+    }
 }

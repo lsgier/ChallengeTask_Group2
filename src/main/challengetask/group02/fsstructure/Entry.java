@@ -6,6 +6,11 @@ import java.io.Serializable;
 
 public class Entry implements Serializable {
 
+    public enum TYPE {
+    	FILE,
+    	DIRECTORY;
+    }
+	
     protected Number160 ID;
     protected Number160 parentID;
     protected String entryName;

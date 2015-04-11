@@ -1,7 +1,12 @@
 package challengetask.group02.fsstructure;
 
+
+import challengetask.group02.fsstructure.Entry.TYPE;
+
 import net.tomp2p.peers.Number160;
+
 import org.junit.Test;
+
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
@@ -15,22 +20,33 @@ public class DirectoryTest {
 
     @Test
     public void testAddingChildren() {
-        root.addChild("home", Number160.createHash(1));
-        root.addChild("etc", Number160.createHash(2));
-        root.addChild("bin", Number160.createHash(3));
-        root.addChild("dev", Number160.createHash(4));
+        root.addChild("home", Number160.createHash(1), TYPE.DIRECTORY);
+        root.addChild("etc", Number160.createHash(2), TYPE.DIRECTORY);
+        root.addChild("bin", Number160.createHash(3), TYPE.DIRECTORY);
+        root.addChild("dev", Number160.createHash(4), TYPE.DIRECTORY);
 
-        assertEquals(Number160.createHash(1), root.getChild("home"));
-        assertEquals(Number160.createHash(2), root.getChild("etc"));
-        assertEquals(Number160.createHash(3), root.getChild("bin"));
-        assertEquals(Number160.createHash(4), root.getChild("dev"));
+        assertEquals(Number160.createHash(1), root.getChild("home", TYPE.DIRECTORY));
+        assertEquals(Number160.createHash(2), root.getChild("etc", TYPE.DIRECTORY));
+        assertEquals(Number160.createHash(3), root.getChild("bin", TYPE.DIRECTORY));
+        assertEquals(Number160.createHash(4), root.getChild("dev", TYPE.DIRECTORY));
     }
 
     @Test
     public void duplicatesShouldOverwriteOldEntry() {
-        root.addChild("home", Number160.createHash(1));
-        root.addChild("home", Number160.createHash(7));
-        assertEquals(Number160.createHash(7),root.getChild("home"));
+        root.addChild("home", Number160.createHash(1), TYPE.DIRECTORY);
+        root.addChild("home", Number160.createHash(7), TYPE.DIRECTORY);
+        assertEquals(Number160.createHash(7),root.getChild("home", TYPE.DIRECTORY));
+    }
+    
+    @Test
+    public void distinguishFilesDirectories() {
+    	
+    	root.removeChildren();
+    	
+    	root.addChild("file.txt", Number160.createHash(100), TYPE.FILE);
+    	
+    	assertTrue(root.getChildren(TYPE.FILE).size() != 0);
+    	assertTrue(root.getChildren(TYPE.DIRECTORY).size() == 0);
     }
 
 

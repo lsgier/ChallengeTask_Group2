@@ -14,7 +14,7 @@ public class Entry implements Serializable {
     protected Number160 ID;
     protected Number160 parentID;
     protected String entryName;
-    //TODO field for meta-info object
+    protected Meta meta;
 
     public Number160 getID() {
         return ID;

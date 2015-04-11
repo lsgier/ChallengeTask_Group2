@@ -1,7 +1,5 @@
 package challengetask.group02.fsstructure;
 
-
-import challengetask.group02.fsstructure.Entry.*;
 import net.tomp2p.peers.Number160;
 
 import java.util.Hashtable;

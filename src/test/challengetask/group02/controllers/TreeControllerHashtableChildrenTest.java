@@ -1,29 +1,28 @@
 package challengetask.group02.controllers;
 
 import challengetask.group02.fsstructure.Directory;
-import junit.framework.TestCase;
+import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.FutureDHT;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Random;
-
-import static challengetask.group02.fsstructure.Entry.TYPE.DIRECTORY;
 
 public class TreeControllerHashtableChildrenTest {
     static final Random RND = new Random( 42L );
     static int nr = 10;
     static int port = 7777;
     static int local = 3;
+
+    static String rootName = "/";
 
 
     public static TreeControllerStrategy controller;
@@ -41,12 +40,32 @@ public class TreeControllerHashtableChildrenTest {
 
 
             //create a root node
-            Directory root = new Directory(Number160.ZERO, null, "rootName");
+            Directory rootDir = new Directory(Number160.ZERO, null, rootName);
             //upload root into DHT
-            Data data = new Data(root);
+            Data data = new Data(rootDir);
             FutureDHT futureDHT = peers[3].put(Number160.ZERO).data(data).start();
             futureDHT.awaitUninterruptibly();
 
+            //create two subdirectory
+            Number160 homeDirKey = Number160.createHash("home");
+            Number160 binDirKey = Number160.createHash("bin");
+            Directory homeDir = new Directory(homeDirKey, Number160.ZERO, "home");
+            Directory binDir = new Directory(binDirKey, Number160.ZERO, "bin");
+
+            //upload dirs into DHT
+            data = new Data(homeDir);
+            FutureDHT futureDHT2 = peers[3].put(homeDirKey).data(data).start();
+            data = new Data(binDir);
+            futureDHT = peers[4].put(binDirKey).data(data).start();
+            //futureDHT2.awaitUninterruptibly();
+            //futureDHT.awaitUninterruptibly();
+
+            //link children to parent
+            rootDir.addChild("home", homeDirKey, Entry.TYPE.DIRECTORY);
+            rootDir.addChild("bin", binDirKey, Entry.TYPE.DIRECTORY);
+            data = new Data(rootDir);
+            futureDHT = peers[3].put(Number160.ZERO).data(data).start();
+            futureDHT.awaitUninterruptibly();
 
 
         }
@@ -60,6 +79,8 @@ public class TreeControllerHashtableChildrenTest {
     @Test
     public void testFindEntryGetRoot() throws Exception {
         Directory root = (Directory) controller.findEntry("/");
+        assertEquals(rootName, root.getEntryName());
+
         System.out.println("Found a root node named: " + root.getEntryName());
 
 
@@ -78,7 +99,18 @@ public class TreeControllerHashtableChildrenTest {
 
     }
 
+    @Test
     public void testReadDir() throws Exception {
+
+        ArrayList<String> children = controller.readDir("/");
+
+        assertTrue(children.contains("home"));
+        assertTrue(children.contains("bin"));
+
+
+        for (String child : children) {
+            System.out.println(child);
+        }
 
     }
 

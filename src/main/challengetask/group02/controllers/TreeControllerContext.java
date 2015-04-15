@@ -1,6 +1,9 @@
 package challengetask.group02.controllers;
 
-import net.tomp2p.peers.Number160;
+import net.tomp2p.dht.PeerDHT;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * The FS operations handled by the controller are implemented in the strategy pattern. See github wiki for explanation:
@@ -10,6 +13,15 @@ import net.tomp2p.peers.Number160;
  */
 public class TreeControllerContext {
 
+    TreeControllerStrategy controller;
+
+    public TreeControllerContext(PeerDHT peer) {
+        this.controller = new TreeControllerHashtableChildren(peer);
+    }
+
+    public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException {
+        return controller.readDir(path);
+    }
 
     //TODO test creating a root directory object "/" and some other directories
 

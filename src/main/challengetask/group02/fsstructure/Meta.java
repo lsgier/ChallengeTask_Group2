@@ -12,6 +12,5 @@ public class Meta {
 	private Date lastModified;
 	private PeerAddress owner;
 	private long size; //in Bytes probably
-	private ArrayList<Directory> path;
 
 }

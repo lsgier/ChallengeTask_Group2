@@ -15,6 +15,11 @@ public class Entry implements Serializable {
     protected Number160 parentID;
     protected String entryName;
     protected Meta meta;
+    protected TYPE type;
+
+    public TYPE getType() {
+        return type;
+    }
 
     public Number160 getID() {
         return ID;

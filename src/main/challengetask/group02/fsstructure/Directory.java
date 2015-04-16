@@ -10,13 +10,15 @@ public class Directory extends Entry{
     private Hashtable<String, Number160> dirChildren;
     
     public Directory(Number160 ID, Number160 parentID, String entryName) {
+        this.type = TYPE.DIRECTORY;
+
         this.ID = ID;
         this.parentID = parentID;
         this.entryName = entryName;
 
         fileChildren = new Hashtable<String, Number160>();
         dirChildren = new Hashtable<String, Number160>();
-        
+
     }
 
     //Distinguishing between files and directories    

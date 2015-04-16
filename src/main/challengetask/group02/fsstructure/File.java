@@ -11,9 +11,10 @@ public class File extends Entry {
 	//Like discussed, calculating and fetching data is done via controller classes
 	
 	public File() {
-		
+		this.type = TYPE.FILE;
+
 		completeFlag = false;
-		
+
 	}
 	
 	public void setBlocks(ArrayList<Block> blocks) {

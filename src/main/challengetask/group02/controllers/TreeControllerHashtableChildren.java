@@ -51,6 +51,7 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
         //first, get the root directory
         //TODO QUESTION create root if root is not found?
+        //->no; root node is created during the first bootstrap
         Directory currentDir = (Directory) getEntryFromID(Number160.ZERO);
 
         for(Path dir: subPaths) {

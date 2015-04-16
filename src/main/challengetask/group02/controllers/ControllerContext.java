@@ -11,11 +11,12 @@ import java.util.ArrayList;
  *
  *
  */
-public class TreeControllerContext {
+public class ControllerContext {
 
     TreeControllerStrategy controller;
 
-    public TreeControllerContext(PeerDHT peer) {
+
+    public ControllerContext(PeerDHT peer) {
         this.controller = new TreeControllerHashtableChildren(peer);
     }
 

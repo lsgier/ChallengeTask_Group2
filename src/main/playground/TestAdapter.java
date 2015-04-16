@@ -1,7 +1,8 @@
 package playground;
 
-import challengetask.group02.controllers.TreeControllerContext;
-import challengetask.group02.controllers.TreeControllerStrategy;
+import challengetask.group02.controllers.ControllerContext;
+import challengetask.group02.fuserunner.FuseRunner;
+import net.fusejna.FuseException;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
@@ -14,9 +15,9 @@ public class TestAdapter {
 
     static final Random RND = new Random( 42L );
 
-    static TreeControllerContext treeController;
+    static ControllerContext treeController;
 
-    public static TreeControllerContext getController() {
+    public static ControllerContext getController() {
         if (treeController == null) {
             //initialize network
             PeerDHT[] peers = new PeerDHT[0];
@@ -28,16 +29,16 @@ public class TestAdapter {
             bootstrap(peers);
 
 
-            treeController = new TreeControllerContext(peers[3]);
+            treeController = new ControllerContext(peers[3]);
         }
 
 
         return treeController;
     }
 
-    public static void main() {
-        getController();
-        //TODO FUSE mount
+    public static void main(String args[]) throws FuseException {
+        FuseRunner rrrrrrrrr = new FuseRunner(getController(), "./TestMount");
+        rrrrrrrrr.run();
     }
 
 

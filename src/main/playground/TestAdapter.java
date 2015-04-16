@@ -8,8 +8,11 @@ import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class TestAdapter {
+
+    static final Random RND = new Random( 42L );
 
     static TreeControllerContext treeController;
 

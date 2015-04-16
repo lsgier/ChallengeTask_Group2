@@ -29,6 +29,15 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
     private Number160 currentDirectoryID;
 
     private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
+        /*TODO things that can go wrong here
+        * (basic DHT stuff; put and get)
+        * fs errors:
+        * - no result->why was this referenced
+        * - child name not found
+        *
+        *
+        * */
+
         FutureGet futureGet = peer.get(ID).start();
         futureGet.awaitUninterruptibly();
         return (Entry) futureGet.data().object();

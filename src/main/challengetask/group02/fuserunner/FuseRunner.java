@@ -6,6 +6,7 @@ import net.fusejna.types.TypeMode;
 import net.fusejna.util.FuseFilesystemAdapterAssumeImplemented;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
@@ -54,9 +55,18 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     }
 
     @Override
-    public int readdir(final String path, final DirectoryFiller filler)
-    {
-        filler.add(filename);
+    public int readdir(final String path, final DirectoryFiller filler) {
+        try {
+            for (String child : controller.readDir(path)) {
+                filler.add(child);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
         return 0;
     }
 }

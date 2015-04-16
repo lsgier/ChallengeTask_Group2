@@ -1,12 +1,16 @@
 package playground;
 
 import challengetask.group02.controllers.ControllerContext;
+import challengetask.group02.fsstructure.Directory;
+import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fuserunner.FuseRunner;
 import net.fusejna.FuseException;
+import net.tomp2p.dht.FutureDHT;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.storage.Data;
 
 import java.io.IOException;
 import java.util.Random;
@@ -23,10 +27,43 @@ public class TestAdapter {
             PeerDHT[] peers = new PeerDHT[0];
             try {
                 peers = createAndAttachPeersDHT(10, 7777);
+
+                bootstrap(peers);
+
+                //create a root node
+                Directory rootDir = new Directory(Number160.ZERO, null, "rootNodeName");
+                //upload root into DHT
+                Data data = new Data(rootDir);
+                FutureDHT futureDHT = peers[3].put(Number160.ZERO).data(data).start();
+                futureDHT.awaitUninterruptibly();
+
+                //create two subdirectory
+                Number160 homeDirKey = Number160.createHash("home");
+                Number160 binDirKey = Number160.createHash("bin");
+                Directory homeDir = new Directory(homeDirKey, Number160.ZERO, "home");
+                Directory binDir = new Directory(binDirKey, Number160.ZERO, "bin");
+
+                //upload dirs into DHT
+                data = new Data(homeDir);
+                FutureDHT futureDHT2 = peers[3].put(homeDirKey).data(data).start();
+                data = new Data(binDir);
+                futureDHT = peers[4].put(binDirKey).data(data).start();
+                //futureDHT2.awaitUninterruptibly();
+                //futureDHT.awaitUninterruptibly();
+
+                //link children to parent
+                rootDir.addChild("home", homeDirKey, Entry.TYPE.DIRECTORY);
+                rootDir.addChild("bin", binDirKey, Entry.TYPE.DIRECTORY);
+                data = new Data(rootDir);
+                futureDHT = peers[3].put(Number160.ZERO).data(data).start();
+                futureDHT.awaitUninterruptibly();
+
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            bootstrap(peers);
+
 
 
             treeController = new ControllerContext(peers[3]);
@@ -63,6 +100,7 @@ public class TestAdapter {
                 peers[i].peerBean().peerMap().peerFound(peers[j].peerAddress(), null, null, null);
 
             }
+            System.out.println("Bootstrapped peer " + i);
 
         }
     }

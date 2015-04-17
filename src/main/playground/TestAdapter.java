@@ -74,7 +74,7 @@ public class TestAdapter {
     }
 
     public static void main(String args[]) throws FuseException {
-        FuseRunner rrrrrrrrr = new FuseRunner(getController(), "./TestMount");
+        FuseRunner rrrrrrrrr = new FuseRunner(getController(), args[0]);
         rrrrrrrrr.run();
     }
 

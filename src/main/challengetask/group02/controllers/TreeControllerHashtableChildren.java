@@ -4,6 +4,7 @@ import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
 import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
@@ -31,11 +32,6 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
     //TODO implement random number
     private int random = 0;
 
-    private enum ACTIONTYPE {
-        NEWENTRY,
-        ADDCHILD,
-        RENAME;
-    }
 
     private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
         /*TODO things that can go wrong here
@@ -56,8 +52,17 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         return (Entry) futureGet.data().object();
     }
 
-    private void consistencySafeTreeModifier(Entry entry, ACTIONTYPE action) {
+    private void putNewEntry(Entry entry) throws IOException {
+        FuturePut futurePut = peer.put(entry.getID()).data(new Data(entry)).start();
+        futurePut.awaitUninterruptibly();
+    }
 
+    private void linkChildToParent(Directory parent, Entry child) throws IOException {
+        //TODO vDHT
+        //TODO QUESTION asynchronous?
+        parent.addChild(child.getEntryName(), child.getID(), child.getType());
+        FuturePut futurePut = peer.put(parent.getID()).data(new Data(parent)).start();
+        futurePut.awaitUninterruptibly();
     }
 
     public Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
@@ -100,25 +105,21 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
     public void createDir(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
         Path subPaths = Paths.get(path);
-        int pathlength = subPaths.getNameCount();
-        Path parentPath= subPaths.subpath(0, pathlength - 2);
+        int pathLength = subPaths.getNameCount();
+        if (pathLength == 0) {
+            throw new NotADirectoryException("Don't create a root node like that! Path: "+path);
+        }
 
         Number160 newKey = Number160.createHash(random);
 
-
-
-        Entry parentEntry = findEntry(parentPath.toString());
+        Entry parentEntry = findEntry(subPaths.getParent().toString());
         if (parentEntry.getType() == FILE) {
-            throw new NotADirectoryException(parentPath.toString());
+            throw new NotADirectoryException(subPaths.getParent().toString());
         }
 
-        Directory newDir = new Directory(newKey, parentEntry.getID(), subPaths.getName(pathlength-1).toString());
-
-        //TODO upload newDir
-        //TODO link newDir to parent
-
-
-
+        Directory newDir = new Directory(newKey, parentEntry.getID(), subPaths.getFileName().toString());
+        putNewEntry(newDir);
+        linkChildToParent((Directory) parentEntry, newDir);
     }
 
     public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {

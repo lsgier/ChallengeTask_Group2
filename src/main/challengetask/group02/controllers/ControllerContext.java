@@ -29,6 +29,10 @@ public class ControllerContext {
         return controller.findEntry(path);
     }
 
+    public void createDir(String path) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+        controller.createDir(path);
+    }
+
     //TODO test creating a root directory object "/" and some other directories
 
     //TODO moving the other directories into the root directory

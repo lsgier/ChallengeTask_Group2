@@ -30,6 +30,10 @@ public class TreeControllerHashtableChildrenTest {
 
     @BeforeClass
     public static void setup() {
+        //setup logging to console
+        //org.apache.log4j.BasicConfigurator.configure();
+
+
         try {
             //initialize network
             PeerDHT[] peers = createAndAttachPeersDHT(nr, port);
@@ -95,7 +99,29 @@ public class TreeControllerHashtableChildrenTest {
 
     }
 
+    @Test
     public void testCreateDir() throws Exception {
+        String testPath = "/newTestDir";
+        controller.createDir(testPath);
+
+
+        assertTrue(controller.readDir("/").contains("newTestDir"));
+
+        Directory newDir = (Directory) controller.findEntry(testPath);
+        assertEquals(Entry.TYPE.DIRECTORY, newDir.getType());
+        assertEquals(testPath, "/" + newDir.getEntryName());
+
+        String testSubPath = testPath+"/subTest";
+        controller.createDir(testSubPath);
+
+        assertTrue(controller.readDir(testPath).contains("subTest"));
+        System.out.println(controller.readDir(testPath));
+
+        Directory newSubDir = (Directory) controller.findEntry(testSubPath);
+        assertEquals(Entry.TYPE.DIRECTORY, newSubDir.getType());
+        assertEquals(testSubPath, testPath+"/"+newSubDir.getEntryName());
+
+
 
     }
 

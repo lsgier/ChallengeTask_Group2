@@ -2,6 +2,7 @@ package challengetask.group02.controllers;
 
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
+import challengetask.group02.fsstructure.File;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
@@ -38,12 +39,16 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         *
         * */
 
+        if (ID == null) {
+            System.out.println("trying to get Entry with ID null!");
+            return new Directory(null, null, "dummy");
+        }
         FutureGet futureGet = peer.get(ID).start();
         futureGet.awaitUninterruptibly();
         return (Entry) futureGet.data().object();
     }
 
-    public Entry findEntry(String path) throws IOException, ClassNotFoundException {
+    public Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
         Path subPaths = Paths.get(path);
 
         //TODO IDEA could another controller implementation use a cache or something? it could remember the last used path.
@@ -52,13 +57,29 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         //first, get the root directory
         //TODO QUESTION create root if root is not found?
         //->no; root node is created during the first bootstrap
-        Directory currentDir = (Directory) getEntryFromID(Number160.ZERO);
+        Directory currentDirectory = (Directory) getEntryFromID(Number160.ZERO);
 
-        for(Path dir: subPaths) {
-            currentDir = (Directory) getEntryFromID(currentDir.getChild(dir.toString(), DIRECTORY));
-         }
+        Number160 currentChildFile;
+        Number160 currentChildDir;
 
-        return currentDir;
+        for (Path dir : subPaths) {
+            currentChildFile = currentDirectory.getChild(dir.toString(), FILE);
+            currentChildDir = currentDirectory.getChild(dir.toString(), DIRECTORY);
+
+            if (currentChildFile != null && subPaths.endsWith(dir)) {
+                return getEntryFromID(currentDirectory.getChild(dir.toString(), FILE));
+            }
+            if (currentChildFile != null && !subPaths.endsWith(dir)) {
+                throw new NotADirectoryException("");
+            }
+            if (currentChildDir == null) {
+                throw new NoSuchFileOrDirectoryException(dir.toString());
+            } else {
+                currentDirectory = (Directory) getEntryFromID(currentDirectory.getChild(dir.toString(), DIRECTORY));
+            }
+        }
+
+        return currentDirectory;
     }
 
     public String getPath(Number160 EntryID) {
@@ -69,16 +90,18 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
     }
 
-    public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException {
-        Directory dir = (Directory) findEntry(path);
+    public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
+
+        Entry result = findEntry(path);
+        if (result.getType() == FILE) {
+            throw new NotADirectoryException(path);
+        }
+        Directory dir = (Directory) result;
         Hashtable<String, Number160> children = dir.getChildren(FILE);
         children.putAll(dir.getChildren(DIRECTORY));
 
         return new ArrayList<String>(children.keySet());
     }
-
-
-
 
 
 }

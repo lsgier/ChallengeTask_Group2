@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public interface TreeControllerStrategy {
 
     //traverses the given path to get to the leaf-object of the path
-    Entry findEntry(String path) throws IOException, ClassNotFoundException;
+    Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException;
 
     //the reverse of findEntry
     String getPath(Number160 EntryID);
@@ -18,7 +18,7 @@ public interface TreeControllerStrategy {
     void createDir(String path);
 
     //returns just the list with the names of the files and directories in that path
-    ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException;
+    ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException;
 
     //returns
 

@@ -1,5 +1,6 @@
 package challengetask.group02.controllers;
 
+import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.PeerDHT;
 
 import java.io.IOException;
@@ -20,8 +21,12 @@ public class ControllerContext {
         this.controller = new TreeControllerHashtableChildren(peer);
     }
 
-    public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException {
+    public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
         return controller.readDir(path);
+    }
+
+    public Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
+        return controller.findEntry(path);
     }
 
     //TODO test creating a root directory object "/" and some other directories

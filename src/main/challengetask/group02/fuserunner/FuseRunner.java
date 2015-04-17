@@ -1,6 +1,9 @@
 package challengetask.group02.fuserunner;
 
 import challengetask.group02.controllers.ControllerContext;
+import challengetask.group02.controllers.NoSuchFileOrDirectoryException;
+import challengetask.group02.controllers.NotADirectoryException;
+import challengetask.group02.fsstructure.Entry;
 import net.fusejna.*;
 import net.fusejna.types.TypeMode;
 import net.fusejna.util.FuseFilesystemAdapterAssumeImplemented;
@@ -27,20 +30,34 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     }
 
 
-    final String filename = "/hello.txt";
     final String contents = "Hello World!\n";
 
     @Override
-    public int getattr(final String path, final StructStat.StatWrapper stat)
-    {
-        if (path.equals(File.separator)) { // Root directory
-            stat.setMode(TypeMode.NodeType.DIRECTORY);
-            return 0;
+    public int getattr(final String path, final StructStat.StatWrapper stat) {
+        try {
+            Entry entry = controller.findEntry(path);
+            if (entry.getType() == Entry.TYPE.DIRECTORY) {
+                stat.setMode(TypeMode.NodeType.DIRECTORY);
+                return 0;
+            }
+            if (entry.getType() == Entry.TYPE.FILE) {
+                stat.setMode(TypeMode.NodeType.FILE);
+                //stat.setMode(TypeMode.NodeType.FILE).size(contents.length());
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NotADirectoryException e) {
+            System.out.println("Tried to treat this file as a directory: " + e.getMessage());
+            return -ErrorCodes.ENOTDIR();
+        } catch (NoSuchFileOrDirectoryException e) {
+            System.out.println("Tried get attributes of this non-existing file: " + e.getMessage());
+            return -ErrorCodes.ENOENT();
         }
-        if (path.equals(filename)) { // hello.txt
-            stat.setMode(TypeMode.NodeType.FILE).size(contents.length());
-            return 0;
-        }
+
         return -ErrorCodes.ENOENT();
     }
 
@@ -64,6 +81,12 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        } catch (NotADirectoryException e) {
+            System.out.println("Tried to treat this file as a directory: "+e.getMessage());
+            return -ErrorCodes.ENOTDIR();
+        } catch (NoSuchFileOrDirectoryException e) {
+            System.out.println("Tried read this non-existing directory: " + e.getMessage());
+            return -ErrorCodes.ENOENT();
         }
 
 

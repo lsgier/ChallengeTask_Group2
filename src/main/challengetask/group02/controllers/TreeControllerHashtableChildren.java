@@ -28,6 +28,14 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
     private String currentDirectory;
     private Number160 currentDirectoryID;
+    //TODO implement random number
+    private int random = 0;
+
+    private enum ACTIONTYPE {
+        NEWENTRY,
+        ADDCHILD,
+        RENAME;
+    }
 
     private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
         /*TODO things that can go wrong here
@@ -40,12 +48,16 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         * */
 
         if (ID == null) {
-            System.out.println("trying to get Entry with ID null!");
+            System.err.println("BUG: trying to get Entry with ID null!");
             return new Directory(null, null, "dummy");
         }
         FutureGet futureGet = peer.get(ID).start();
         futureGet.awaitUninterruptibly();
         return (Entry) futureGet.data().object();
+    }
+
+    private void consistencySafeTreeModifier(Entry entry, ACTIONTYPE action) {
+
     }
 
     public Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
@@ -86,7 +98,26 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         return null;
     }
 
-    public void createDir(String path) {
+    public void createDir(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
+        Path subPaths = Paths.get(path);
+        int pathlength = subPaths.getNameCount();
+        Path parentPath= subPaths.subpath(0, pathlength - 2);
+
+        Number160 newKey = Number160.createHash(random);
+
+
+
+        Entry parentEntry = findEntry(parentPath.toString());
+        if (parentEntry.getType() == FILE) {
+            throw new NotADirectoryException(parentPath.toString());
+        }
+
+        Directory newDir = new Directory(newKey, parentEntry.getID(), subPaths.getName(pathlength-1).toString());
+
+        //TODO upload newDir
+        //TODO link newDir to parent
+
+
 
     }
 

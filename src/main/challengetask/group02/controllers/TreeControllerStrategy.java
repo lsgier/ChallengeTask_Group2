@@ -14,8 +14,7 @@ public interface TreeControllerStrategy {
     //the reverse of findEntry
     String getPath(Number160 EntryID);
 
-    //if path is relative, concatenate current directory
-    void createDir(String path);
+    void createDir(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
 
     //returns just the list with the names of the files and directories in that path
     ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException;

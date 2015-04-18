@@ -16,6 +16,8 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     private final String path;
     private ControllerContext controller;
 
+
+
     public FuseRunner(ControllerContext controller, String path) {
         this.controller = controller;
         this.path = path;
@@ -41,11 +43,11 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
                 return 0;
             }
             if (entry.getType() == Entry.TYPE.FILE) {
-                stat.setMode(TypeMode.NodeType.FILE);
-                //stat.setMode(TypeMode.NodeType.FILE).size(contents.length());
+                //by far just use default content, but later need something like entry.getSize() or whatever
+                stat.setMode(TypeMode.NodeType.FILE).size(controller.getDefaultFileContent().length());
+
+                return 0;
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -65,8 +67,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int read(final String path, final ByteBuffer buffer, final long size, final long offset, final StructFuseFileInfo.FileInfoWrapper info)
     {
         // Compute substring that we are being asked to read
-        final String s = contents.substring((int) offset,
-                (int) Math.max(offset, Math.min(contents.length() - offset, offset + size)));
+        final String s = controller.getDefaultFileContent();
         buffer.put(s.getBytes());
         return s.getBytes().length;
     }
@@ -88,8 +89,70 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             System.out.println("Tried read this non-existing directory: " + e.getMessage());
             return -ErrorCodes.ENOENT();
         }
+        return 0;
+    }
 
+    @Override
+    public int mkdir(final String path, final TypeMode.ModeWrapper mode)
+    {
+        try{
+            controller.createDir(path);
+            //mode.setMode(TypeMode.NodeType.DIRECTORY);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NotADirectoryException e) {
+            System.out.println("Tried to treat this file as a directory: " + e.getMessage());
+            return -ErrorCodes.ENOTDIR();
+        } catch (NoSuchFileOrDirectoryException e) {
+            System.out.println("Tried read this non-existing directory: " + e.getMessage());
+            return -ErrorCodes.ENOENT();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 
+    @Override
+    public int create(final String path, final TypeMode.ModeWrapper mode, final StructFuseFileInfo.FileInfoWrapper info)
+    {
+        try{
+            controller.createFile(path);
+            //mode.setMode(TypeMode.NodeType.DIRECTORY);
+        }  catch (Exception e){
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public int rename(final String path, final String newName)
+    {
+        try{
+            controller.rename(path, newName);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public int rmdir(final String path){
+        try{
+            controller.deleteDirectory(path);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public int unlink(final String path)
+    {
+        try{
+            controller.deleteFile(path);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         return 0;
     }
 }

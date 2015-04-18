@@ -33,6 +33,26 @@ public class ControllerContext {
         controller.createDir(path);
     }
 
+    public String getDefaultFileContent() {
+        return controller.getDefaultFileContent();
+    }
+
+    public void createFile(String path) {
+        controller.createFile(path);
+    }
+
+    public void rename(String path, String newName) {
+        controller.rename(path, newName);
+    }
+
+    public void deleteDirectory(String path) {
+        controller.deleteDirectory(path);
+    }
+
+    public void deleteFile(String path) {
+        controller.deleteFile(path);
+    }
+
     //TODO test creating a root directory object "/" and some other directories
 
     //TODO moving the other directories into the root directory

@@ -67,6 +67,7 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         futurePut.awaitUninterruptibly();
     }
 
+
     public Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
         Path subPaths = Paths.get(path);
 
@@ -136,62 +137,4 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
         return new ArrayList<String>(children.keySet());
     }
-
-    @Override
-    public String getDefaultFileContent() {
-        return "File reading functions are not yet implemented";
-    }
-
-    @Override
-    public void createFile(String path) {
-        //not yet implemented
-        //this method have to create the empty file
-        //in the DHT in the simillar manner as it is done in createDir()
-        //ERRORS:
-        /*
-        * -ErrorCodes.EEXIST(); file already exists
-        * -ErrorCodes.ENOENT(); no such parent to add the child
-        * -ErrorCodes.EIO(); general IO error (can not create the file)
-        * */
-    }
-
-    @Override
-    public void rename(String path, String newName) {
-        // not yet implemented
-        // this method has to rename the file or the directory
-        // in the DHT
-        // ERRORS:
-        /*
-        * -ErrorCodes.ENOENT(); no such entry exists
-        * -ErrorCodes.ENOTDIR(); It is not a directory
-        * -ErrorCodes.EIO(); general IO error (can not create the file)
-        * */
-    }
-
-    @Override
-    public void deleteDirectory(String path) {
-        // not yet implemented
-        // this method has to delete the directory
-        // in the DHT
-        // ERRORS:
-        /*
-        * -ErrorCodes.ENOENT(); no such entry exists
-        * -ErrorCodes.ENOTDIR(); It is not a directory
-        * -ErrorCodes.EIO(); general IO error (can not create the file)
-        * */
-    }
-
-    @Override
-    public void deleteFile(String path) {
-        // not yet implemented
-        // this method has to delete the file
-        // in the DHT
-        // ERRORS:
-        /*
-        * -ErrorCodes.ENOENT(); no such entry exists
-        * -ErrorCodes.EIO(); general IO error (can not create the file)
-        * */
-    }
-
-
 }

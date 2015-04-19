@@ -18,23 +18,4 @@ public interface TreeControllerStrategy {
 
     //returns just the list with the names of the files and directories in that path
     ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException;
-
-    String getDefaultFileContent();
-
-    void createFile(String path);
-
-    void rename(String path, String newName);
-
-    void deleteDirectory(String path);
-
-    void deleteFile(String path);
-
-    //returns
-
-
-
-
-
-    
-
 }

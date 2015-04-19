@@ -14,44 +14,37 @@ import java.util.ArrayList;
  */
 public class ControllerContext {
 
-    TreeControllerStrategy controller;
+    TreeControllerStrategy treeController;
 
 
     public ControllerContext(PeerDHT peer) {
-        this.controller = new TreeControllerHashtableChildren(peer);
+        this.treeController = new TreeControllerHashtableChildren(peer);
     }
 
     public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
-        return controller.readDir(path);
+        return treeController.readDir(path);
     }
 
     public Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
-        return controller.findEntry(path);
+        return treeController.findEntry(path);
     }
 
     public void createDir(String path) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
-        controller.createDir(path);
+        treeController.createDir(path);
     }
 
     public String getDefaultFileContent() {
-        return controller.getDefaultFileContent();
+        return null;
     }
 
-    public void createFile(String path) {
-        controller.createFile(path);
-    }
+    public void createFile(String path) {}
 
-    public void rename(String path, String newName) {
-        controller.rename(path, newName);
-    }
 
-    public void deleteDirectory(String path) {
-        controller.deleteDirectory(path);
-    }
+    public void rename(String path, String newName) {}
 
-    public void deleteFile(String path) {
-        controller.deleteFile(path);
-    }
+    public void deleteDirectory(String path) {}
+
+    public void deleteFile(String path) {}
 
     //TODO test creating a root directory object "/" and some other directories
 

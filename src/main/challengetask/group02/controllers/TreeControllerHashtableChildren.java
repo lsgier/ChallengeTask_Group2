@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+//test
+
 import static challengetask.group02.fsstructure.Entry.TYPE.DIRECTORY;
 import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
 

@@ -20,6 +20,10 @@ public class Entry implements Serializable {
     public TYPE getType() {
         return type;
     }
+    
+    public void setID(Number160 ID) {
+    	this.ID = ID;
+    }
 
     public Number160 getID() {
         return ID;

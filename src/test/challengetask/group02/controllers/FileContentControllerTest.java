@@ -2,8 +2,13 @@ package challengetask.group02.controllers;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.util.Random;
 import java.util.zip.CRC32;
 
+import net.tomp2p.dht.PeerBuilderDHT;
+import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 
 import org.junit.Before;
@@ -16,8 +21,8 @@ import challengetask.group02.controllers.FileContentController;
 import challengetask.group02.fsstructure.Block;
 
 public class FileContentControllerTest {
-
-	private String str = ("asdfaölskjfölkewj"
+	
+	private static String str = ("asdfaölskjfölkewj"
 			+ "ölwkejfölkjdsföljweölfjwölekfjölwkejfölkwejfölkw"
 			+ "söldjfökeföljeölksjfölkajwöelkjföalkjefölakwjeöf"
 			+ "ölwkejfölkjdsföljweölfjwölekfjölwkejfölkwejfölkw"
@@ -111,7 +116,12 @@ public class FileContentControllerTest {
 			+ "ölwkejfölkjdsföljweölfjwölekfjölwkejfölkwejfölkw"
 			+ "söldjfökeföljeölksjfölkajwöelkjföalkjefölakwjeöf");
 	
-	private void copyStringToByteArray(String str, byte[] arr) {		
+	private static PeerDHT[] peer;
+	private static FileContentController fcc;
+	private static File file;
+	private static byte[] arr;
+	
+	private static void copyStringToByteArray(String str, byte[] arr) {		
 		
 		for(int i = 0; i < str.length(); i++) {
 			arr[i] = (byte)str.charAt(i);			
@@ -119,24 +129,33 @@ public class FileContentControllerTest {
 	}
 	
 	@BeforeClass
-	public static void method() {
+	public static void method() {		
 		
-		//create and bootstrap peers
-		//put file into DHT
+		peer = new PeerDHT[10];
 		
+        try {
+            peer = createAndAttachPeersDHT(10, 7777);
+
+            bootstrap(peer);      
+            
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
+        fcc = new FileContentController(peer[4]);
+        
+        arr = new byte[str.length()];
+		copyStringToByteArray(str,arr);		
 	}
 	
 	
 	
 	@Test
 	public void testCreateFile() {
+				
 		
-		FileContentController fcc = new FileContentController();
 		
-		byte[] arr = new byte[str.length()];
-		copyStringToByteArray(str,arr);
-		
-		File file = fcc.createFile("Random name", arr);
+		file = fcc.createFile("Random name", arr);
 		
 		//relevant objects have been created
 		assertNotNull(file.getID());
@@ -158,9 +177,7 @@ public class FileContentControllerTest {
 	public void testGetFileContent() {
 		
 		
-		/*FileContentController fcc = new FileContentController();
-		
-		file = fcc.getFileContent(file);
+		byte[] content = fcc.getFileContent(file);
 		
 		for(Number160 ID: file.getBlocks()) {
 			
@@ -181,8 +198,37 @@ public class FileContentControllerTest {
 			CRC32 crc32 = new CRC32();			
 			crc32.update(block.getData());			
 			assertEquals(crc32.getValue(), block.getChecksum());		
-		}*/
+		}
 		
 	}
+	
+    public static PeerDHT[] createAndAttachPeersDHT(int nr, int port) throws IOException {
+        
+    	Random random = new Random();
+    	
+    	PeerDHT[] peers = new PeerDHT[nr];
+        for (int i = 0; i < nr; i++) {
+            if (i == 0) {
+                peers[0] = new PeerBuilderDHT(new PeerBuilder(new Number160(random)).ports(port).start()).start();
+
+            } else {
+                peers[i] = new PeerBuilderDHT(new PeerBuilder(new Number160(random)).masterPeer(peers[0].peer()).start()).start();
+
+            }
+        }
+        return peers;
+    }	
+    
+    public static void bootstrap(PeerDHT[] peers) {
+        //make perfect bootstrap, the regular can take a while
+        for (int i = 0; i < peers.length; i++) {
+            for (int j = 0; j < peers.length; j++) {
+                peers[i].peerBean().peerMap().peerFound(peers[j].peerAddress(), null, null, null);
+
+            }
+            System.out.println("Bootstrapped peer " + i);
+
+        }
+    }    
 
 }

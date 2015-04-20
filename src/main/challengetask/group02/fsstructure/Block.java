@@ -1,8 +1,10 @@
 package challengetask.group02.fsstructure;
 
+import java.io.Serializable;
+
 import net.tomp2p.peers.Number160;
 
-public class Block {
+public class Block implements Serializable {
 	
 	public static final int BLOCK_SIZE = 1024;
 	

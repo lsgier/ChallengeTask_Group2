@@ -1,15 +1,27 @@
 package challengetask.group02.controllers;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.zip.CRC32;
 
+import net.tomp2p.dht.FutureDHT;
+import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.storage.Data;
 import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.File;
 import challengetask.group02.Constants;
 
 //This class is used to split up the files and also fetch them
 public class FileContentController {
+	
+	private PeerDHT peer;
+	
+	public FileContentController(PeerDHT peer) {
+		
+		this.peer = peer;
+	}
 		
 	//Not sure if byte[] is the best choice, Object might be better, depends on TomP2P
 	//Just began here, more to come the next few days
@@ -91,6 +103,8 @@ public class FileContentController {
 	public byte[] getFileContent(File file) {
 		
 		//There's still room for performance boosts with using Threads
+		
+		System.out.println(file.getFileSize());
 		byte[] content = new byte[(int) file.getFileSize()];
 		//since this is an int, we can only store 2^32 Byte (4.096 GB) per file
 		int position = 0;
@@ -126,22 +140,57 @@ public class FileContentController {
 	//overloaded methods, invoked differently depending on File or Block argument
 	public void putIntoDHT(Number160 ID, File file) {
 		
+		Data data;
 		
-		//will be completed later
-		
-		
+		try {
+			data = new Data(file);
+			FutureDHT futureDHT = peer.put(ID).data(data).start();
+	        futureDHT.awaitUninterruptibly();	
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 	
 	public void putIntoDHT(Number160 ID, Block block) {
 		
+		Data data;
 		
+		try {
+			data = new Data(block);
+			FutureDHT futureDHT = peer.put(ID).data(data).start();
+			futureDHT.awaitUninterruptibly();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 	}
 	
 	public Block getBlockDHT(Number160 ID) {
 		
-		Block block = new Block();
+		Block block;
 		
-		return block;
+		try {			
+			FutureGet futureGet = peer.get(ID).start();
+			futureGet.awaitUninterruptibly();
+			
+			block = (Block)futureGet.data().object();
+			
+			return block;
+			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}  
+		
+		return null;
 	}	
 	
+	public PeerDHT getPeer() {
+		return peer;
+	}
+
+	public void setPeer(PeerDHT peer) {
+		this.peer = peer;
+	}	
 }

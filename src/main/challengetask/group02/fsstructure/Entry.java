@@ -6,6 +6,8 @@ import java.io.Serializable;
 
 public class Entry implements Serializable {
 
+	//not so sure if that's a good idea, Object.getClass() allows to get the class type
+	//then this would be obsolete.
     public enum TYPE {
     	FILE,
     	DIRECTORY;

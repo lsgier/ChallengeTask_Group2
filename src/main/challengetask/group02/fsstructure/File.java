@@ -1,22 +1,33 @@
 package challengetask.group02.fsstructure;
 
 import challengetask.group02.fsstructure.Entry;
+
 import java.util.ArrayList;
+
+import net.tomp2p.peers.Number160;
 
 public class File extends Entry {
 	
-	private boolean completeFlag;
 	private long fileSize;
-	private ArrayList<Block> blocks;	
+	private ArrayList<Number160> blocks;	
 	
 	//Like discussed, calculating and fetching data is done via controller classes
 	
-	public File(long fileSize) {
+	public File(String fileName, long fileSize, Number160 ID) {
 		this.type = TYPE.FILE;
 
-		completeFlag = false;
 		this.fileSize = fileSize;
-		blocks = new ArrayList<Block>();
+		this.entryName = fileName;
+		
+		//this are the IDs of the blocks
+		blocks = new ArrayList<Number160>();
+		
+		this.ID = ID;
+	}
+
+	
+	//empty constructor
+	public File() {
 
 	}
 	
@@ -30,22 +41,19 @@ public class File extends Entry {
 		return fileSize;
 	}
 	
-	public void addBlock(Block block) {
+	public void addBlock(Number160 block) {
 		
 		blocks.add(block);
 	}
 	
-	public void setBlocks(ArrayList<Block> blocks) {
-		
-		
+	public void setBlocks(ArrayList<Number160> blocks) {
+		this.blocks = blocks;		
 	}
 	
-	public ArrayList<Block> getBlocks() {
+	public ArrayList<Number160> getBlocks() {
 		
 		return blocks;		
 	}
-	
-	
-	
+
 	
 }

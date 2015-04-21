@@ -1,15 +1,27 @@
 package challengetask.group02.controllers;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.zip.CRC32;
 
+import net.tomp2p.dht.FutureDHT;
+import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.storage.Data;
 import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.File;
 import challengetask.group02.Constants;
 
 //This class is used to split up the files and also fetch them
 public class FileContentController {
+	
+	private PeerDHT peer;
+	
+	public FileContentController(PeerDHT peer) {
+		
+		this.peer = peer;
+	}
 		
 	//Not sure if byte[] is the best choice, Object might be better, depends on TomP2P
 	//Just began here, more to come the next few days
@@ -18,13 +30,14 @@ public class FileContentController {
 		int dataSize = content.length;
 
 		//used for hashing
-		Random random = new Random();				
-		File file = new File(dataSize);
+		Random random = new Random();
 		
-		//this is used for the checksum calculation
-		CRC32 crc32 = new CRC32();
+		//create a hash for the file itself
+		Number160 fileID = new Number160(random);
 		
-		int seq_number = 0;	
+		File file = new File(fileName, dataSize, fileID);
+				
+		int seqNumber = 0;	
 		int position = 0;
 		long crc;
 		
@@ -39,12 +52,18 @@ public class FileContentController {
 				byte[] blockData = new byte[Constants.BLOCK_SIZE];
 				
 				System.arraycopy(content, position, blockData, 0, Constants.BLOCK_SIZE);
+				
+				//this is used for the checksum calculation
+				CRC32 crc32 = new CRC32();
+				
 				crc32.update(blockData);
 				crc = crc32.getValue();
 				
-				Block block = new Block(ID, seq_number, crc, Constants.BLOCK_SIZE, blockData);
+				Block block = new Block(ID, seqNumber, crc, Constants.BLOCK_SIZE, blockData);				
+				file.addBlock(block.getID());
 				
-				file.addBlock(block);
+				//save the block in the DHT
+				putIntoDHT(block.getID(), block);
 				
 				position +=	Constants.BLOCK_SIZE;
 				dataSize -= Constants.BLOCK_SIZE;
@@ -53,23 +72,125 @@ public class FileContentController {
 				byte[] blockData = new byte[dataSize];
 				
 				System.arraycopy(content,  position,  blockData, 0, dataSize);
+				//this is used for the checksum calculation
+				CRC32 crc32 = new CRC32();
+				
 				crc32.update(blockData);
 				crc = crc32.getValue();
 				
-				Block block = new Block(ID, seq_number, crc, dataSize, blockData);
-				file.addBlock(block);
+				Block block = new Block(ID, seqNumber, crc, dataSize, blockData);
+				file.addBlock(block.getID());
+				
+				//save the block in the DHT
+				putIntoDHT(block.getID(), block);
 				
 				position += dataSize;
 				dataSize = 0;				
 			}
 			
-			seq_number++;			
+			seqNumber++;			
 		}		
+		
+		//file goes into DHT at last
+		putIntoDHT(file.getID(), file);
 		
 		return file;		
 	}	
 	
+	
+	//I suppose the file object is already retrieved by other controllers
+	//the argument here is thus File, not Number160
+	public byte[] getFileContent(File file) {
+		
+		//There's still room for performance boosts with using Threads
+		
+		System.out.println(file.getFileSize());
+		byte[] content = new byte[(int) file.getFileSize()];
+		//since this is an int, we can only store 2^32 Byte (4.096 GB) per file
+		int position = 0;
+		int seqNumber = 0;
+		
+		//fetch the IDs
+		for(Number160 ID: file.getBlocks()) {
+			
+			Block block = getBlockDHT(ID);
+			
+			//Calculating the CRC to check data integrity
+			CRC32 crc32 = new CRC32();
+			crc32.update(block.getData());
+			
+			if(crc32.getValue() != block.getChecksum()) {
+				//throw ChecksumException();
+			}
+			
+			if(seqNumber != block.getSeq_number()) {
+				//throw SeqNumberException();
+			}
+			
+			System.arraycopy(block, 0, content, position, block.getSize());
+			position += block.getSize();			
+		}		
+		
+		return content;		
+	}
+	
+	
+	//DHT FUNCTIONALITY --------------------------------------------------------
+	
+	//overloaded methods, invoked differently depending on File or Block argument
+	public void putIntoDHT(Number160 ID, File file) {
+		
+		Data data;
+		
+		try {
+			data = new Data(file);
+			FutureDHT futureDHT = peer.put(ID).data(data).start();
+	        futureDHT.awaitUninterruptibly();	
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+	
+	public void putIntoDHT(Number160 ID, Block block) {
+		
+		Data data;
+		
+		try {
+			data = new Data(block);
+			FutureDHT futureDHT = peer.put(ID).data(data).start();
+			futureDHT.awaitUninterruptibly();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+	}
+	
+	public Block getBlockDHT(Number160 ID) {
+		
+		Block block;
+		
+		try {			
+			FutureGet futureGet = peer.get(ID).start();
+			futureGet.awaitUninterruptibly();
+			
+			block = (Block)futureGet.data().object();
+			
+			return block;
+			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}  
+		
+		return null;
+	}	
+	
+	public PeerDHT getPeer() {
+		return peer;
+	}
 
-	
-	
+	public void setPeer(PeerDHT peer) {
+		this.peer = peer;
+	}	
 }

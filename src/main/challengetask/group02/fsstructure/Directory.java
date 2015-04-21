@@ -23,7 +23,7 @@ public class Directory extends Entry{
 
     //Distinguishing between files and directories    
     public void addChild(String entryName, Number160 ID, TYPE type) {
-    	
+    	//TODO check that there cannot be a file and a directory with the same name
     	if(type.equals(TYPE.FILE)) {
     		fileChildren.put(entryName, ID);    	
     	} else if (type.equals(TYPE.DIRECTORY)) {
@@ -60,6 +60,17 @@ public class Directory extends Entry{
     	
     	fileChildren.clear();
     	dirChildren.clear();
+    }
+
+    public void renameChild(String oldName, String newName) {
+        if (fileChildren.contains(oldName)) {
+            Number160 value = fileChildren.remove(oldName);
+            fileChildren.put(newName, value);
+        }
+        if (dirChildren.contains(oldName)) {
+            Number160 value = dirChildren.remove(oldName);
+            dirChildren.put(newName, value);
+        }
     }
 }
 

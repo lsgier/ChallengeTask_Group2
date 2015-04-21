@@ -134,4 +134,20 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
         return new ArrayList<String>(children.keySet());
     }
+
+    @Override
+    public void renameEntry(String path, String newName) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
+        //TODO vDHT
+
+        //Modify entry name
+        Entry entry = findEntry(path);
+        String oldName = entry.getEntryName();
+        entry.setEntryName(newName);
+        putNewEntry(entry);
+
+        //Modify parent
+        Directory parent = (Directory) getEntryFromID(entry.getParentID());
+        parent.renameChild(oldName, newName);
+        putNewEntry(parent);
+    }
 }

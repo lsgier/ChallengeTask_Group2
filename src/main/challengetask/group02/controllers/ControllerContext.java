@@ -40,7 +40,9 @@ public class ControllerContext {
     public void createFile(String path) {}
 
 
-    public void rename(String path, String newName) {}
+    public void rename(String path, String newName) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+        treeController.renameEntry(path, newName);
+    }
 
     public void deleteDirectory(String path) {}
 

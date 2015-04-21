@@ -2,12 +2,10 @@ package challengetask.group02.controllers;
 
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
-import challengetask.group02.fsstructure.File;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
-import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 
 import java.io.IOException;
@@ -15,8 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Hashtable;
-
-//test
+import java.util.UUID;
 
 import static challengetask.group02.fsstructure.Entry.TYPE.DIRECTORY;
 import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
@@ -28,12 +25,6 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
     public TreeControllerHashtableChildren(PeerDHT peer) {
         this.peer = peer;
     }
-
-    private String currentDirectory;
-    private Number160 currentDirectoryID;
-    //TODO implement random number
-    private int random = 0;
-
 
     private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
         /*TODO things that can go wrong here
@@ -75,8 +66,11 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         //->typically multiple operations happen in the same directory.
 
         //first, get the root directory
-        //TODO QUESTION create root if root is not found?
+
+        //TODO QUESTION ask user to create root node if no root is found? this way the system stays usable if the root gets broken.
+        //RESOLVED? QUESTION create root if root is not found?
         //->no; root node is created during the first bootstrap
+
         Directory currentDirectory = (Directory) getEntryFromID(Number160.ZERO);
 
         Number160 currentChildFile;
@@ -115,7 +109,7 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
             throw new NotADirectoryException("Don't create a root node like that! Path: "+path);
         }
 
-        Number160 newKey = Number160.createHash(random);
+        Number160 newKey = Number160.createHash(UUID.randomUUID().hashCode());
 
         Entry parentEntry = findEntry(subPaths.getParent().toString());
         if (parentEntry.getType() == FILE) {

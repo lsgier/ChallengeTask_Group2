@@ -3,6 +3,7 @@ package challengetask.group02.controllers;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.FutureDHT;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
@@ -105,6 +106,7 @@ public class TreeControllerHashtableChildrenTest {
         controller.createDir(testPath);
 
 
+        System.out.println("testCreateDir-- children of \"/\" after creating /newTestDir \n" + controller.readDir("/") + "\n");
         assertTrue(controller.readDir("/").contains("newTestDir"));
 
         Directory newDir = (Directory) controller.findEntry(testPath);
@@ -114,8 +116,8 @@ public class TreeControllerHashtableChildrenTest {
         String testSubPath = testPath+"/subTest";
         controller.createDir(testSubPath);
 
+        System.out.println("testCreateDir-- children of \"/newTestDir/\" after creating /newTestDir/subTest \n" + controller.readDir(testPath) + "\n\n");
         assertTrue(controller.readDir(testPath).contains("subTest"));
-        System.out.println(controller.readDir(testPath));
 
         Directory newSubDir = (Directory) controller.findEntry(testSubPath);
         assertEquals(Entry.TYPE.DIRECTORY, newSubDir.getType());
@@ -165,3 +167,4 @@ public class TreeControllerHashtableChildrenTest {
         }
     }
 }
+

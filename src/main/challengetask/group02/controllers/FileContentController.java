@@ -104,7 +104,6 @@ public class FileContentController {
 		
 		//There's still room for performance boosts with using Threads
 		
-		System.out.println(file.getFileSize());
 		byte[] content = new byte[(int) file.getFileSize()];
 		//since this is an int, we can only store 2^32 Byte (4.096 GB) per file
 		int position = 0;
@@ -120,20 +119,19 @@ public class FileContentController {
 			crc32.update(block.getData());
 			
 			if(crc32.getValue() != block.getChecksum()) {
-				//throw ChecksumException();
+				//TODO throw ChecksumException();
 			}
 			
 			if(seqNumber != block.getSeq_number()) {
-				//throw SeqNumberException();
+				//TODO throw SeqNumberException();
 			}
 			
-			System.arraycopy(block, 0, content, position, block.getSize());
+			System.arraycopy(block.getData(), 0, content, position, block.getSize());
 			position += block.getSize();			
 		}		
 		
 		return content;		
-	}
-	
+	}	
 	
 	//DHT FUNCTIONALITY --------------------------------------------------------
 	
@@ -147,7 +145,6 @@ public class FileContentController {
 			FutureDHT futureDHT = peer.put(ID).data(data).start();
 	        futureDHT.awaitUninterruptibly();	
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}

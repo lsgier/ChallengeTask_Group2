@@ -9,10 +9,11 @@ import net.tomp2p.peers.Number160;
 public class File extends Entry {
 	
 	private long fileSize;
+	private Meta meta;
+
 	private ArrayList<Number160> blocks;	
 	
-	//Like discussed, calculating and fetching data is done via controller classes
-	
+	//Like discussed, calculating and fetching data is done via controller classes	
 	public File(String fileName, long fileSize, Number160 ID) {
 		this.type = TYPE.FILE;
 
@@ -24,7 +25,6 @@ public class File extends Entry {
 		
 		this.ID = ID;
 	}
-
 	
 	//empty constructor
 	public File() {
@@ -54,6 +54,12 @@ public class File extends Entry {
 		
 		return blocks;		
 	}
-
 	
+	public Meta getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Meta meta) {
+		this.meta = meta;
+	}	
 }

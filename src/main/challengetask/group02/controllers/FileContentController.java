@@ -104,7 +104,6 @@ public class FileContentController {
 		
 		//There's still room for performance boosts with using Threads
 		
-		System.out.println(file.getFileSize());
 		byte[] content = new byte[(int) file.getFileSize()];
 		//since this is an int, we can only store 2^32 Byte (4.096 GB) per file
 		int position = 0;
@@ -127,7 +126,7 @@ public class FileContentController {
 				//throw SeqNumberException();
 			}
 			
-			System.arraycopy(block, 0, content, position, block.getSize());
+			System.arraycopy(block.getData(), 0, content, position, block.getSize());
 			position += block.getSize();			
 		}		
 		

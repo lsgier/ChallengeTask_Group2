@@ -119,11 +119,11 @@ public class FileContentController {
 			crc32.update(block.getData());
 			
 			if(crc32.getValue() != block.getChecksum()) {
-				//throw ChecksumException();
+				//TODO throw ChecksumException();
 			}
 			
 			if(seqNumber != block.getSeq_number()) {
-				//throw SeqNumberException();
+				//TODO throw SeqNumberException();
 			}
 			
 			System.arraycopy(block.getData(), 0, content, position, block.getSize());
@@ -131,8 +131,7 @@ public class FileContentController {
 		}		
 		
 		return content;		
-	}
-	
+	}	
 	
 	//DHT FUNCTIONALITY --------------------------------------------------------
 	
@@ -146,7 +145,6 @@ public class FileContentController {
 			FutureDHT futureDHT = peer.put(ID).data(data).start();
 	        futureDHT.awaitUninterruptibly();	
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 public interface TreeControllerStrategy {
 
+    Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException;
+
     //traverses the given path to get to the leaf-object of the path
     Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException;
 

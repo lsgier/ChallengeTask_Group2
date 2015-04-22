@@ -16,31 +16,42 @@ public class Directory extends Entry{
         this.parentID = parentID;
         this.entryName = entryName;
 
-        fileChildren = new Hashtable<String, Number160>();
-        dirChildren = new Hashtable<String, Number160>();
+        fileChildren = new Hashtable<>();
+        dirChildren = new Hashtable<>();
 
     }
 
     //Distinguishing between files and directories    
-    public void addChild(String entryName, Number160 ID, TYPE type) {
+    public void addChild(String name, Number160 ID, TYPE type) {
     	//TODO check that there cannot be a file and a directory with the same name
     	if(type.equals(TYPE.FILE)) {
-    		fileChildren.put(entryName, ID);    	
+    		fileChildren.put(name, ID);
     	} else if (type.equals(TYPE.DIRECTORY)) {
-    		dirChildren.put(entryName, ID);
+    		dirChildren.put(name, ID);
     	}        
+    }
+
+    public Number160 getChild(String name) {
+        return getChildren().get(name);
     }
     
 
-    public Number160 getChild(String entryName, TYPE type) {
+    public Number160 getChild(String name, TYPE type) {
         
     	if(type.equals(TYPE.FILE)){
-    		return fileChildren.get(entryName);
+    		return fileChildren.get(name);
         	
         } else if(type.equals(TYPE.DIRECTORY)) {
-        	return dirChildren.get(entryName);
+        	return dirChildren.get(name);
         }    	
     	return null;
+    }
+
+    public Hashtable<String, Number160> getChildren() {
+        Hashtable<String, Number160> allChildren = new Hashtable<String, Number160>();
+        allChildren.putAll(fileChildren);
+        allChildren.putAll(dirChildren);
+        return allChildren;
     }
 
     //Overloading
@@ -63,14 +74,19 @@ public class Directory extends Entry{
     }
 
     public void renameChild(String oldName, String newName) {
-        if (fileChildren.contains(oldName)) {
+        if (fileChildren.containsKey(oldName)) {
             Number160 value = fileChildren.remove(oldName);
             fileChildren.put(newName, value);
         }
-        if (dirChildren.contains(oldName)) {
+        if (dirChildren.containsKey(oldName)) {
             Number160 value = dirChildren.remove(oldName);
             dirChildren.put(newName, value);
         }
+    }
+
+    public void removeChild(String name) {
+        fileChildren.remove(name);
+        dirChildren.remove(name);
     }
 }
 

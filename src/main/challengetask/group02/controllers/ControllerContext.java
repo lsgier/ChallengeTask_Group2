@@ -2,6 +2,7 @@ package challengetask.group02.controllers;
 
 import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.peers.Number160;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,11 +15,17 @@ import java.util.ArrayList;
  */
 public class ControllerContext {
 
-    TreeControllerStrategy treeController;
+    private final FileContentController fileContentController;
+    private final TreeControllerStrategy treeController;
 
 
     public ControllerContext(PeerDHT peer) {
         this.treeController = new TreeControllerHashtableChildren(peer);
+        this.fileContentController = new FileContentController(peer);
+    }
+
+    public Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
+        return treeController.getEntryFromID(ID);
     }
 
     public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {

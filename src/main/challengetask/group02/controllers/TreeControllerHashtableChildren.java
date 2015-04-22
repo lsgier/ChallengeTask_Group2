@@ -26,7 +26,8 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         this.peer = peer;
     }
 
-    private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
+    public Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
+        //TODO vDHT
         /*TODO things that can go wrong here
         * (basic DHT stuff; put and get)
         * fs errors:
@@ -136,18 +137,42 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
     }
 
     @Override
-    public void renameEntry(String path, String newName) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
+    public void renameEntry(String from, String to) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
         //TODO vDHT
 
-        //Modify entry name
-        Entry entry = findEntry(path);
-        String oldName = entry.getEntryName();
-        entry.setEntryName(newName);
-        putNewEntry(entry);
+        Path oldPath = Paths.get(from);
+        Path newPath = Paths.get(to);
 
-        //Modify parent
-        Directory parent = (Directory) getEntryFromID(entry.getParentID());
-        parent.renameChild(oldName, newName);
-        putNewEntry(parent);
+        Entry entry = findEntry(from);
+
+        String oldName = oldPath.getFileName().toString();
+        String newName = newPath.getFileName().toString();
+
+        //if path different
+        //add new link to new parent
+        //remove link from old parent
+
+        if (oldPath.getParent().compareTo(newPath.getParent()) == 0) {
+            //Modify entry name
+            entry.setEntryName(newName);
+            putNewEntry(entry);
+
+            //Modify parent
+            Directory parent = (Directory) getEntryFromID(entry.getParentID());
+            parent.renameChild(oldName, newName);
+            putNewEntry(parent);
+        } else {
+            Directory oldParent = (Directory) findEntry(oldPath.getParent().toString());
+            Directory newParent = (Directory) findEntry(newPath.getParent().toString());
+
+            newParent.addChild(newName, entry.getID(), entry.getType());
+            oldParent.removeChild(oldName);
+
+            entry.setEntryName(newName);
+
+            putNewEntry(oldParent);
+            putNewEntry(newParent);
+            putNewEntry(entry);
+        }
     }
 }

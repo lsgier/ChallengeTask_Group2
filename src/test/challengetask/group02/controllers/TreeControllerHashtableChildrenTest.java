@@ -50,29 +50,6 @@ public class TreeControllerHashtableChildrenTest {
             Data data = new Data(rootDir);
             FutureDHT futureDHT = peers[3].put(Number160.ZERO).data(data).start();
             futureDHT.awaitUninterruptibly();
-
-            //create two subdirectory
-            Number160 homeDirKey = Number160.createHash("home");
-            Number160 binDirKey = Number160.createHash("bin");
-            Directory homeDir = new Directory(homeDirKey, Number160.ZERO, "home");
-            Directory binDir = new Directory(binDirKey, Number160.ZERO, "bin");
-
-            //upload dirs into DHT
-            data = new Data(homeDir);
-            FutureDHT futureDHT2 = peers[3].put(homeDirKey).data(data).start();
-            data = new Data(binDir);
-            futureDHT = peers[4].put(binDirKey).data(data).start();
-            //futureDHT2.awaitUninterruptibly();
-            //futureDHT.awaitUninterruptibly();
-
-            //link children to parent
-            rootDir.addChild("home", homeDirKey, Entry.TYPE.DIRECTORY);
-            rootDir.addChild("bin", binDirKey, Entry.TYPE.DIRECTORY);
-            data = new Data(rootDir);
-            futureDHT = peers[3].put(Number160.ZERO).data(data).start();
-            futureDHT.awaitUninterruptibly();
-
-
         }
 
         catch (Exception e) {
@@ -129,16 +106,33 @@ public class TreeControllerHashtableChildrenTest {
 
     @Test
     public void testReadDir() throws Exception {
+        controller.createDir("/home");
+        controller.createDir("/bin");
 
         ArrayList<String> children = controller.readDir("/");
 
         assertTrue(children.contains("home"));
         assertTrue(children.contains("bin"));
+    }
 
+    @Test
+    public void testRenameEntry() throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+        String oldName = "/entryToRename";
+        String newName = "newName";
 
-        for (String child : children) {
-            System.out.println(child);
-        }
+        controller.createDir(oldName);
+
+        Number160 entryID = controller.findEntry(oldName).getID();
+
+        controller.renameEntry(oldName, newName);
+
+        //assert that the entry has the new name
+        assertEquals(newName, controller.getEntryFromID(entryID).getEntryName());
+
+        //assert that the parent also stores the new name
+        assertTrue(controller.readDir("/").contains(newName));
+
+        //TODO test all of the rename functionalities (just rename entry, move entry to new destination, move and rename)
 
     }
 

@@ -49,11 +49,18 @@ public class DirectoryTest {
     	assertTrue(root.getChildren(TYPE.DIRECTORY).size() == 0);
     }
 
+    @Test
+    public void testRenamingChild() {
+        String oldName = "child";
+        String newName = "childWithNewName";
+        Number160 childID = Number160.createHash(37829);
 
-    //TODO test listing the content of root "/" and assert if added directories are in it
+        Directory child = new Directory(childID, Number160.ZERO, oldName);
+        root.addChild(child.getEntryName(), child.getID(), child.getType());
 
-    //TODO test requesting a certain subderictory of root "/"
+        root.renameChild(oldName, newName);
 
-    //TODO test what happens if a nonexisting subdirectory is requested
+        assertEquals(childID, root.getChild(newName));
 
+    }
 }

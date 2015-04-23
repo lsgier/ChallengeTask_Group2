@@ -5,6 +5,7 @@ import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 /**
@@ -44,7 +45,9 @@ public class ControllerContext {
         return null;
     }
 
-    public void createFile(String path) {}
+    public void createFile(String path) {
+        this.treeController.createFile(path);
+    }
 
 
     public void rename(String path, String newName) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
@@ -57,6 +60,10 @@ public class ControllerContext {
 
     public byte[] readFile(String path, long size, long offset) {
         return this.fileContentController.readFile(path, size, offset);
+    }
+
+    public int writeFile(String path, ByteBuffer buf, long bufSize, long writeOffset) {
+        return this.fileContentController.writeFile(buf, bufSize, writeOffset);
     }
 
     //TODO test creating a root directory object "/" and some other directories

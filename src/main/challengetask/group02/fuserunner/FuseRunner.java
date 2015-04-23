@@ -155,4 +155,12 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         }
         return 0;
     }
+
+    @Override
+    public int write(final String path, final ByteBuffer buf, final long bufSize, final long writeOffset,
+                     final StructFuseFileInfo.FileInfoWrapper wrapper)
+    {
+        return controller.writeFile(path, buf, bufSize, writeOffset);
+        //return ((MemoryFile) p).write(buf, bufSize, writeOffset);
+    }
 }

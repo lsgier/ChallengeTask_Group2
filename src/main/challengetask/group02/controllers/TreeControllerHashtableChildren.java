@@ -175,4 +175,12 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
             putNewEntry(entry);
         }
     }
+
+    @Override
+    public void createFile(String path) {
+        //creates empty file for the given path
+        //has to be in tree controller, not in content controller
+        //because it just creates an empty entry
+        //the content for the file is put there from another place
+    }
 }

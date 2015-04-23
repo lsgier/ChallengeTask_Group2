@@ -55,6 +55,10 @@ public class ControllerContext {
 
     public void deleteFile(String path) {}
 
+    public byte[] readFile(String path, long size, long offset) {
+        return this.fileContentController.readFile(path, size, offset);
+    }
+
     //TODO test creating a root directory object "/" and some other directories
 
     //TODO moving the other directories into the root directory

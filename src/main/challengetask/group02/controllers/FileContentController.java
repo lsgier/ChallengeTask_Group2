@@ -189,5 +189,9 @@ public class FileContentController {
 
 	public void setPeer(PeerDHT peer) {
 		this.peer = peer;
-	}	
+	}
+
+	public byte[] readFile(String path, long size, long offset) {
+		return "xxx".getBytes();
+	}
 }

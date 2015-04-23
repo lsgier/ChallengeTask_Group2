@@ -58,13 +58,9 @@ public class TestAdapter {
                 futureDHT = peers[3].put(Number160.ZERO).data(data).start();
                 futureDHT.awaitUninterruptibly();
 
-
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
 
             treeController = new ControllerContext(peers[3]);
         }

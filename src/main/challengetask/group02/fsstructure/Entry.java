@@ -4,13 +4,13 @@ import net.tomp2p.peers.Number160;
 
 import java.io.Serializable;
 
-public class Entry implements Serializable {
+public class Entry implements Serializable, Cloneable {
 
 	//not so sure if that's a good idea, Object.getClass() allows to get the class type
 	//then this would be obsolete.
     public enum TYPE {
     	FILE,
-    	DIRECTORY;
+    	DIRECTORY, type;
     }
 	
     protected Number160 ID;
@@ -56,8 +56,5 @@ public class Entry implements Serializable {
         //TODO implement DHT request (or use challengetask.group02.controllers) to find out name
         return entryName;
     }
-
-
-
 
 }

@@ -23,5 +23,5 @@ public interface TreeControllerStrategy {
 
     void renameEntry(String path, String newName) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
 
-    void createFile(String path);
+    void createFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
 }

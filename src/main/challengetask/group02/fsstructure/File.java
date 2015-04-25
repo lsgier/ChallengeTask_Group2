@@ -25,6 +25,17 @@ public class File extends Entry {
 		
 		this.ID = ID;
 	}
+
+	public File(Number160 ID, Number160 parentID, String entryName) {
+		this.type = TYPE.FILE;
+
+		this.ID = ID;
+		this.parentID = parentID;
+		this.entryName = entryName;
+
+		this.fileSize = 0;
+
+	}
 	
 	//empty constructor
 	public File() {

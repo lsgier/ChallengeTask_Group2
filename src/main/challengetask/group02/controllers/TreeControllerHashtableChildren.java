@@ -2,6 +2,8 @@ package challengetask.group02.controllers;
 
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
+import challengetask.group02.fsstructure.File;
+import challengetask.group02.helpers.DHTPutGetHelper;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
@@ -44,19 +46,6 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         FutureGet futureGet = peer.get(ID).start();
         futureGet.awaitUninterruptibly();
         return (Entry) futureGet.data().object();
-    }
-
-    private void putNewEntry(Entry entry) throws IOException {
-        FuturePut futurePut = peer.put(entry.getID()).data(new Data(entry)).start();
-        futurePut.awaitUninterruptibly();
-    }
-
-    private void linkChildToParent(Directory parent, Entry child) throws IOException {
-        //TODO vDHT
-        //TODO QUESTION asynchronous?
-        parent.addChild(child.getEntryName(), child.getID(), child.getType());
-        FuturePut futurePut = peer.put(parent.getID()).data(new Data(parent)).start();
-        futurePut.awaitUninterruptibly();
     }
 
     @Override
@@ -118,8 +107,32 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         }
 
         Directory newDir = new Directory(newKey, parentEntry.getID(), subPaths.getFileName().toString());
-        putNewEntry(newDir);
-        linkChildToParent((Directory) parentEntry, newDir);
+
+        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+        helper.addNewEntry((Directory) parentEntry, newDir);
+    }
+
+    @Override
+    public void createFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
+
+        Path subPaths = Paths.get(path);
+
+        int pathLength = subPaths.getNameCount();
+        if (pathLength == 0) {
+            throw new NoSuchFileOrDirectoryException("Can not create such file");
+        }
+
+        Number160 newKey = Number160.createHash(UUID.randomUUID().hashCode());
+
+        Entry parentEntry = findEntry(subPaths.getParent().toString());
+        if (parentEntry.getType() == FILE) {
+            throw new NotADirectoryException(subPaths.getParent().toString());
+        }
+
+        File newFile = new File (newKey, parentEntry.getID(), subPaths.getFileName().toString());
+
+        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+        helper.addNewEntry((Directory) parentEntry, newFile);
     }
 
     @Override
@@ -140,6 +153,9 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
     public void renameEntry(String from, String to) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
         //TODO vDHT
 
+        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+
+
         Path oldPath = Paths.get(from);
         Path newPath = Paths.get(to);
 
@@ -153,34 +169,17 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         //remove link from old parent
 
         if (oldPath.getParent().compareTo(newPath.getParent()) == 0) {
-            //Modify entry name
-            entry.setEntryName(newName);
-            putNewEntry(entry);
 
-            //Modify parent
             Directory parent = (Directory) getEntryFromID(entry.getParentID());
-            parent.renameChild(oldName, newName);
-            putNewEntry(parent);
+            helper.updateEntryName((Directory) parent, entry, newName);
+
         } else {
             Directory oldParent = (Directory) findEntry(oldPath.getParent().toString());
             Directory newParent = (Directory) findEntry(newPath.getParent().toString());
 
-            newParent.addChild(newName, entry.getID(), entry.getType());
-            oldParent.removeChild(oldName);
-
-            entry.setEntryName(newName);
-
-            putNewEntry(oldParent);
-            putNewEntry(newParent);
-            putNewEntry(entry);
+            helper.moveEntry(newParent, oldParent, entry, newName);
         }
     }
 
-    @Override
-    public void createFile(String path) {
-        //creates empty file for the given path
-        //has to be in tree controller, not in content controller
-        //because it just creates an empty entry
-        //the content for the file is put there from another place
-    }
+
 }

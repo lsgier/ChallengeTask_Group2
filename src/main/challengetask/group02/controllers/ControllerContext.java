@@ -45,7 +45,7 @@ public class ControllerContext {
         return null;
     }
 
-    public void createFile(String path) {
+    public void createFile(String path) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
         this.treeController.createFile(path);
     }
 

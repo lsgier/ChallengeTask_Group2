@@ -44,7 +44,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             }
             if (entry.getType() == Entry.TYPE.FILE) {
                 //by far just use default content, but later need something like entry.getSize() or whatever
-                stat.setMode(TypeMode.NodeType.FILE).size(controller.getDefaultFileContent().length());
+                stat.setMode(TypeMode.NodeType.FILE).size(0);
 
                 return 0;
             }

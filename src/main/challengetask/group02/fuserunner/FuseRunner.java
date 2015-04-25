@@ -67,9 +67,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int read(final String path, final ByteBuffer buffer, final long size, final long offset, final StructFuseFileInfo.FileInfoWrapper info)
     {
         // Compute substring that we are being asked to read
-        final String s = controller.getDefaultFileContent();
-        buffer.put(s.getBytes());
-        return s.getBytes().length;
+        final byte[] s = controller.readFile(path, size, offset);
+        buffer.put(s);
+        return s.length;
     }
 
     @Override
@@ -157,4 +157,11 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     }
 
     //check if new branch works
+    @Override
+    public int write(final String path, final ByteBuffer buf, final long bufSize, final long writeOffset,
+                     final StructFuseFileInfo.FileInfoWrapper wrapper)
+    {
+        return controller.writeFile(path, buf, bufSize, writeOffset);
+        //return ((MemoryFile) p).write(buf, bufSize, writeOffset);
+    }
 }

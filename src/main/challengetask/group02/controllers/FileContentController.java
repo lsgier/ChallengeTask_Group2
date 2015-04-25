@@ -1,6 +1,7 @@
 package challengetask.group02.controllers;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.zip.CRC32;
 
@@ -189,5 +190,33 @@ public class FileContentController {
 
 	public void setPeer(PeerDHT peer) {
 		this.peer = peer;
-	}	
+	}
+
+	public byte[] readFile(String path, long size, long offset) {
+		return "xxx".getBytes();
+	}
+
+	public int writeFile(ByteBuffer buf, long bufSize, long writeOffset) {
+		return 0; //the size of the content that was written
+		/*
+		private int write(final ByteBuffer buffer, final long bufSize, final long writeOffset)
+		{
+			final int maxWriteIndex = (int) (writeOffset + bufSize);
+			final byte[] bytesToWrite = new byte[(int) bufSize];
+			synchronized (this) {
+				if (maxWriteIndex > contents.capacity()) {
+					// Need to create a new, larger buffer
+					final ByteBuffer newContents = ByteBuffer.allocate(maxWriteIndex);
+					newContents.put(contents);
+					contents = newContents;
+				}
+				buffer.get(bytesToWrite, 0, (int) bufSize);
+				contents.position((int) writeOffset);
+				contents.put(bytesToWrite);
+				contents.position(0); // Rewind
+			}
+			return (int) bufSize;
+		}
+		 */
+	}
 }

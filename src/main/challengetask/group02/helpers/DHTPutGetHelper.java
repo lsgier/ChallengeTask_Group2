@@ -15,6 +15,26 @@ import java.util.Map;
 /**
  * Created by anvar on 25/04/15.
  */
+
+/**
+ *
+ * This is the end-point class to work with the tree
+ * just right now it does things the same way as before (no checks, direct put)
+ * further will be expanded with vDHT mechanisms
+ *
+ * The general guideline is: if there's a need to use peer.put() at some point,
+ * utilize this class.
+
+ * As input the class accepts entries plus the things that have to be changed, but not
+ * the entries that already updated. That will allow to use vDHT and frees us
+ * from writing the Entry -> Action mechanism classes.
+ *
+ * The "get" part of the Helper will probably be also written -- every time we
+ * get something from DHT, consistency also have to be checked. For that need
+ * code, but later. Maybe instead will have ConsistentPutHelper and ConsistentGetHelper
+ * or something like it.
+ *
+ */
 public class DHTPutGetHelper {
     PeerDHT peer;
 

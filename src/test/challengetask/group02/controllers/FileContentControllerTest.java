@@ -514,7 +514,7 @@ public class FileContentControllerTest {
 	
 	private static PeerDHT[] peer;
 	private static FileContentController fcc;
-	private static File file;
+	public static File file;
 	private static byte[] arr;
 	
 	private static void copyStringToByteArray(String str, byte[] arr) {		
@@ -549,8 +549,6 @@ public class FileContentControllerTest {
 	
 	@Test
 	public void testCreateFile() {
-				
-		
 		
 		file = fcc.createFile("Random name", arr);
 		
@@ -563,40 +561,25 @@ public class FileContentControllerTest {
 			assertEquals(file.getBlocks().size(), file.getFileSize()/Constants.BLOCK_SIZE);
 		} else {
 			assertEquals(file.getBlocks().size(), file.getFileSize()/Constants.BLOCK_SIZE+1);
-		}
-		
-				
-		
+		}	
 	}
 	
 	@Test
-	public void testGetFileContent() {
+	public void testReadFile() {
+	
+		long testLength = 2000;
+		long testOffset = 3244;
 		
+		if(file == null)
+			testCreateFile();
 		
-		byte[] content = fcc.getFileContent(file);
+		byte[] content = fcc.readFile(file, testLength, testOffset);
 		
-		for(Number160 ID: file.getBlocks()) {
-			
-			Block block = fcc.getBlockDHT(ID);
-			
-			int length = block.getSize();
-			
-			//checking if block sizes make sense
-			assertFalse(length != Constants.BLOCK_SIZE && length != file.getFileSize()%Constants.BLOCK_SIZE);
-			
-			//sequence number always needs to be smaller than the number of blocks, starting at 0 - n-1
-			assertTrue(block.getSeq_number() < file.getBlocks().size());
-			
-			//hash needs to be set
-			assertNotNull(block.getID());
-			
-			//calculating and checking checksums
-			CRC32 crc32 = new CRC32();			
-			crc32.update(block.getData());			
-			assertEquals(crc32.getValue(), block.getChecksum());		
-		}
-		
+		assertEquals(content.length, testLength);
 	}
+	
+	
+	
 	
     public static PeerDHT[] createAndAttachPeersDHT(int nr, int port) throws IOException {
         

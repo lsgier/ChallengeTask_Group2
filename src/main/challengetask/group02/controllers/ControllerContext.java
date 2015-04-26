@@ -1,6 +1,7 @@
 package challengetask.group02.controllers;
 
 import challengetask.group02.fsstructure.Entry;
+import challengetask.group02.fsstructure.File;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 
@@ -59,7 +60,10 @@ public class ControllerContext {
     public void deleteFile(String path) {}
 
     public byte[] readFile(String path, long size, long offset) {
-        return this.fileContentController.readFile(path, size, offset);
+        
+    	//first argument has to be file, this has to be determined elsewhere!
+    	File file = null;
+    	return this.fileContentController.readFile(file, size, offset);
     }
 
     public int writeFile(String path, ByteBuffer buf, long bufSize, long writeOffset) {

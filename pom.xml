@@ -43,6 +43,7 @@
     <build>
         <sourceDirectory>src/main</sourceDirectory>
         <plugins>
+        	<pluginManagement>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -93,7 +94,7 @@
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
             </plugin>
-
+            </pluginManagement>
         </plugins>
     </build>
 

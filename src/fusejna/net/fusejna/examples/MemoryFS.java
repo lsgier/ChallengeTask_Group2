@@ -128,6 +128,7 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented
 
 		private int read(final ByteBuffer buffer, final long size, final long offset)
 		{
+			System.out.println("offset for read: " + offset);
 			final int bytesToRead = (int) Math.min(contents.capacity() - offset, size);
 			final byte[] bytesRead = new byte[bytesToRead];
 			synchronized (this) {

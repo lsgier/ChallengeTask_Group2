@@ -50,6 +50,8 @@ public class Discover {
 
 		System.out.println("Server started Listening to: " + DiscoverNetworks.discoverInterfaces(b));
 		System.out.println("address visible to outside is " + master.peerAddress());
+
+
 		while (true) {
 			for (PeerAddress pa : master.peerBean().peerMap().all()) {
 				System.out.println("PeerAddress: " + pa);

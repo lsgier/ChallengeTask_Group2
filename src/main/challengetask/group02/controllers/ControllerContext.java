@@ -67,7 +67,11 @@ public class ControllerContext {
     }
 
     public int writeFile(String path, ByteBuffer buf, long bufSize, long writeOffset) {
-        return this.fileContentController.writeFile(buf, bufSize, writeOffset);
+    	
+    	//TODO grab the file
+    	File file = null;
+    	return this.fileContentController.writeFile(file, buf, bufSize, writeOffset);
+        //return this.fileContentController.writeFile(buf, bufSize, writeOffset);
     }
 
     //TODO test creating a root directory object "/" and some other directories

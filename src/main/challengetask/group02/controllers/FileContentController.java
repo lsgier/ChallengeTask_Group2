@@ -27,6 +27,91 @@ public class FileContentController {
 		this.peer = peer;
 		dhtPutGetHelper = new DHTPutGetHelper(this.peer);
 	}
+	
+	
+	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) {
+		
+		Random random = new Random();
+		
+		byte[] content = new byte[(int) bufSize];
+		long fileSize = file.getFileSize();
+		
+		int startBlock = (int)(writeOffset/Constants.BLOCK_SIZE);
+		int endBlock = (int)((bufSize+writeOffset-1)/Constants.BLOCK_SIZE);
+				
+		//copy the bytebuffer (data to write) into our content array
+		//assuming we the content has length bufSize, otherwise BufferUnderFlowException will be thrown
+		buffer.get(content, 0, (int) bufSize);
+		ArrayList<Number160> blockIDs = file.getBlocks();	
+
+		//first block is special case
+		int startBytes = 0;
+		//last block is special case
+		int endBytes = 0;
+		//maintains the pointer where to read/write
+		int positon = 0;
+		
+		for(int index = startBlock; index <= endBlock; index++) {
+			
+			//startBytes = Constants.BLOCK_SIZE - (int)offset%Constants.BLOCK_SIZE;
+			Block block;
+			int bytesToWrite = 0;
+			
+			
+			//if the block doesn't exist, create a new one
+			if(index > blockIDs.size()-1) {
+				
+				Number160 ID = new Number160(random);				
+				//block = new Block(...);				
+			} else {
+				//if the block exists, fetch it
+				block = getBlockDHT(blockIDs.get(index)); 
+				
+			}			
+			
+			//we have to make a distinction between which block we are visiting at the moment
+			if(startBlock == endBlock) {
+				bytesToWrite = (int)bufSize;				
+			} else {				
+				if(index == startBlock) {		
+					startBytes = Constants.BLOCK_SIZE - (int)writeOffset%Constants.BLOCK_SIZE;
+					bytesToWrite = 0;
+				} else if(index == endBlock) {					
+					
+					
+					
+				} else {					
+					
+					
+				}						
+			}
+		}
+		
+		return 0; //the size of the content that was written
+	}
+	
+	/*
+	private int write(final ByteBuffer buffer, final long bufSize, final long writeOffset)
+	{
+		final int maxWriteIndex = (int) (writeOffset + bufSize);
+		final byte[] bytesToWrite = new byte[(int) bufSize];
+		synchronized (this) {
+			if (maxWriteIndex > contents.capacity()) {
+				// Need to create a new, larger buffer
+				final ByteBuffer newContents = ByteBuffer.allocate(maxWriteIndex);
+				newContents.put(contents);
+				contents = newContents;
+			}
+			buffer.get(bytesToWrite, 0, (int) bufSize);
+			contents.position((int) writeOffset);
+			contents.put(bytesToWrite);
+			contents.position(0); // Rewind
+		}
+		return (int) bufSize;
+	}
+	 */
+
+	
 		
 	public File createFile(String fileName, byte[] content) {
 		
@@ -118,11 +203,13 @@ public class FileContentController {
 		int startBlock = (int)(offset/Constants.BLOCK_SIZE);
 		
 		//how many blocks to read? depends on the position of the offset
-		int endBlock = (int)((size+offset)/Constants.BLOCK_SIZE);
+		//the -1 because the byte where the offset points to is read as well
+		//example offset "abcdefgh" with offset = 3 and length = 3 is "def"
+		int endBlock = (int)((size+offset-1)/Constants.BLOCK_SIZE);
 		
 		//number of bytes read from the first block
 		int startBytes = 0;
-		//number of bytes read from the second block
+		//number of bytes read from the last block
 		int endBytes = 0;
 		int position = 0;
 		
@@ -228,30 +315,4 @@ public class FileContentController {
 		this.peer = peer;
 	}
 
-	public int writeFile(ByteBuffer buf, long bufSize, long writeOffset) {
-		return 0; //the size of the content that was written
-		
-		//still basic check if file exists (even though already checked by fuse before
-		
-		/*
-		private int write(final ByteBuffer buffer, final long bufSize, final long writeOffset)
-		{
-			final int maxWriteIndex = (int) (writeOffset + bufSize);
-			final byte[] bytesToWrite = new byte[(int) bufSize];
-			synchronized (this) {
-				if (maxWriteIndex > contents.capacity()) {
-					// Need to create a new, larger buffer
-					final ByteBuffer newContents = ByteBuffer.allocate(maxWriteIndex);
-					newContents.put(contents);
-					contents = newContents;
-				}
-				buffer.get(bytesToWrite, 0, (int) bufSize);
-				contents.position((int) writeOffset);
-				contents.put(bytesToWrite);
-				contents.position(0); // Rewind
-			}
-			return (int) bufSize;
-		}
-		 */
-	}
 }

@@ -23,6 +23,6 @@ cd "$(dirname "$BASH_SOURCE")/.."
 
 
 
-#mvn clean compile assembly:single
+mvn clean compile assembly:single
 java -cp target/p2pfs.jar $@
 

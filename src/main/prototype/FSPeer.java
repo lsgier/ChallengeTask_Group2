@@ -27,13 +27,23 @@ public class FSPeer {
     public static void main(String[] args) throws Exception {
         String mountPoint = args[0];
 
-        if (args.length > 1) {
-            String serverIP = args[1];
-            startClient(serverIP);
-        } else {
+        if (args.length == 1){
             startServer();
             createRoot();
         }
+
+        if (args.length > 1){
+            String serverIP = args[1];
+            int port;
+
+            if (args.length == 3){
+                port = Integer.parseInt(args[2]);
+            } else {
+                port = 4000;
+            }
+            startClient(serverIP, port);
+        }
+
         new FuseRunner(new ControllerContext(peerDHT), mountPoint).run();
     }
 
@@ -59,15 +69,16 @@ public class FSPeer {
         futureDHT.awaitUninterruptibly();
     }
 
-    public static void startClient(String ipAddress) throws Exception {
+    public static void startClient(String ipAddress, int port) throws Exception {
         Random rnd = new Random();
         Bindings b = new Bindings().addProtocol(StandardProtocolFamily.INET).addAddress(InetAddress.getByName("127.0.0.1"));
 
-        peerDHT = new PeerBuilderDHT(new PeerBuilder(new Number160(rnd)).ports(4001).start()).start();
+        peerDHT = new PeerBuilderDHT(new PeerBuilder(new Number160(rnd)).ports(port).start()).start();
         System.out.println("Client started and Listening to: " + DiscoverNetworks.discoverInterfaces(b));
         System.out.println("address visible to outside is " + peerDHT.peerAddress());
 
         InetAddress address = Inet4Address.getByName(ipAddress);
+
         int masterPort = 4000;
         PeerAddress pa = new PeerAddress(Number160.ZERO, address, masterPort, masterPort);
 

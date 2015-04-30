@@ -87,6 +87,25 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
     }
 
     @Override
+    public File getFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException, NotAFileException {
+        Entry entry = findEntry(path);
+        if (entry.getType() == FILE) {
+            return (File) entry;
+        } else {
+            throw new NotAFileException(path);
+        }
+    }
+    @Override
+    public Directory getDirectory(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException, NotAFileException {
+        Entry entry = findEntry(path);
+        if (entry.getType() == DIRECTORY) {
+            return (Directory) entry;
+        } else {
+            throw new NotADirectoryException(path);
+        }
+    }
+
+    @Override
     public String getPath(Number160 EntryID) {
         return null;
     }

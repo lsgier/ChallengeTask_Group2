@@ -156,6 +156,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         return 0;
     }
 
+    //check if new branch works
     @Override
     public int write(final String path, final ByteBuffer buf, final long bufSize, final long writeOffset,
                      final StructFuseFileInfo.FileInfoWrapper wrapper)

@@ -45,16 +45,6 @@ public class File extends Entry {
 
 	}
 	
-	public void setFileSize(long fileSize) {
-		
-		this.fileSize = fileSize;
-	}
-	
-	public long getFileSize() {
-		
-		return fileSize;
-	}
-	
 	public void addBlock(Number160 block) {
 		
 		blocks.add(block);

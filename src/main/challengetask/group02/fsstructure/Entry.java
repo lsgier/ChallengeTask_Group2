@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 public class Entry implements Serializable, Cloneable {
 
-	//not so sure if that's a good idea, Object.getClass() allows to get the class type
+    //not so sure if that's a good idea, Object.getClass() allows to get the class type
 	//then this would be obsolete.
     public enum TYPE {
     	FILE,
@@ -18,6 +18,15 @@ public class Entry implements Serializable, Cloneable {
     protected String entryName;
     protected Meta meta;
     protected TYPE type;
+    protected long size;
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
 
     public TYPE getType() {
         return type;

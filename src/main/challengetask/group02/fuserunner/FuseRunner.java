@@ -3,6 +3,7 @@ package challengetask.group02.fuserunner;
 import challengetask.group02.controllers.ControllerContext;
 import challengetask.group02.controllers.NoSuchFileOrDirectoryException;
 import challengetask.group02.controllers.NotADirectoryException;
+import challengetask.group02.controllers.NotAFileException;
 import challengetask.group02.fsstructure.Entry;
 import net.fusejna.*;
 import net.fusejna.types.TypeMode;
@@ -15,7 +16,6 @@ import java.nio.ByteBuffer;
 public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     private final String path;
     private ControllerContext controller;
-
 
 
     public FuseRunner(ControllerContext controller, String path) {
@@ -44,7 +44,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             }
             if (entry.getType() == Entry.TYPE.FILE) {
                 //by far just use default content, but later need something like entry.getSize() or whatever
-                stat.setMode(TypeMode.NodeType.FILE).size(0);
+                stat.setMode(TypeMode.NodeType.FILE).size(entry.getSize());
 
                 return 0;
             }
@@ -64,10 +64,23 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     }
 
     @Override
-    public int read(final String path, final ByteBuffer buffer, final long size, final long offset, final StructFuseFileInfo.FileInfoWrapper info)
-    {
+    public int read(final String path, final ByteBuffer buffer, final long size, final long offset, final StructFuseFileInfo.FileInfoWrapper info) {
         // Compute substring that we are being asked to read
-        final byte[] s = controller.readFile(path, size, offset);
+        byte[] s = new byte[0];
+        try {
+            s = controller.readFile(path, size, offset);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NotADirectoryException e) {
+            //TODO return fuse error codes in these catch phrases
+            e.printStackTrace();
+        } catch (NotAFileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchFileOrDirectoryException e) {
+            e.printStackTrace();
+        }
         buffer.put(s);
         return s.length;
     }
@@ -83,7 +96,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NotADirectoryException e) {
-            System.out.println("Tried to treat this file as a directory: "+e.getMessage());
+            System.out.println("Tried to treat this file as a directory: " + e.getMessage());
             return -ErrorCodes.ENOTDIR();
         } catch (NoSuchFileOrDirectoryException e) {
             System.out.println("Tried read this non-existing directory: " + e.getMessage());
@@ -93,9 +106,8 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     }
 
     @Override
-    public int mkdir(final String path, final TypeMode.ModeWrapper mode)
-    {
-        try{
+    public int mkdir(final String path, final TypeMode.ModeWrapper mode) {
+        try {
             controller.createDir(path);
             //mode.setMode(TypeMode.NodeType.DIRECTORY);
         } catch (ClassNotFoundException e) {
@@ -113,55 +125,65 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     }
 
     @Override
-    public int create(final String path, final TypeMode.ModeWrapper mode, final StructFuseFileInfo.FileInfoWrapper info)
-    {
-        try{
+    public int create(final String path, final TypeMode.ModeWrapper mode, final StructFuseFileInfo.FileInfoWrapper info) {
+        try {
             controller.createFile(path);
             //mode.setMode(TypeMode.NodeType.DIRECTORY);
-        }  catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
     }
 
     @Override
-    public int rename(final String path, final String newName)
-    {
-        try{
+    public int rename(final String path, final String newName) {
+        try {
             controller.rename(path, newName);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
     }
 
     @Override
-    public int rmdir(final String path){
-        try{
+    public int rmdir(final String path) {
+        try {
             controller.deleteDirectory(path);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
     }
 
     @Override
-    public int unlink(final String path)
-    {
-        try{
+    public int unlink(final String path) {
+        try {
             controller.deleteFile(path);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
     }
 
-    //check if new branch works
     @Override
     public int write(final String path, final ByteBuffer buf, final long bufSize, final long writeOffset,
-                     final StructFuseFileInfo.FileInfoWrapper wrapper)
-    {
-        return controller.writeFile(path, buf, bufSize, writeOffset);
+                     final StructFuseFileInfo.FileInfoWrapper wrapper) {
+        try {
+            return controller.writeFile(path, buf, bufSize, writeOffset);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NotADirectoryException e) {
+            //TODO return fuse errors
+            e.printStackTrace();
+        } catch (NotAFileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchFileOrDirectoryException e) {
+            e.printStackTrace();
+        }
         //return ((MemoryFile) p).write(buf, bufSize, writeOffset);
+
+        return 0;
     }
 }

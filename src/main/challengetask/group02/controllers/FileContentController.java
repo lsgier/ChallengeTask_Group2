@@ -34,6 +34,9 @@ public class FileContentController {
 		Random random = new Random();
 		
 		byte[] content = new byte[(int) bufSize];
+		long outWriteOffset = writeOffset;
+
+		System.out.println("Writing block of size " + bufSize + " with the offset " + writeOffset);
 
 		
 		int startBlock = (int)(writeOffset/Constants.BLOCK_SIZE);
@@ -98,7 +101,10 @@ public class FileContentController {
 			position += bytesToWrite;			
 		}
 
-		file.setSize(position);
+		System.out.println("position = " + position);
+
+		file.setSize(position + outWriteOffset);
+
 
 		this.putIntoDHT(file.getID(), file);
 		//the size of the content that was written

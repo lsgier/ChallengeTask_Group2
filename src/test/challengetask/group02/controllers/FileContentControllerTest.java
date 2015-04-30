@@ -3,6 +3,7 @@ package challengetask.group02.controllers;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.zip.CRC32;
 
@@ -550,18 +551,21 @@ public class FileContentControllerTest {
 	@Test
 	public void testCreateFile() {
 		
-		file = fcc.createFile("Random name", arr);
+		Random random = new Random();
+		
+		file = new File("Random Filename.txt", arr.length, new Number160(random));
+		
+		ByteBuffer buf = ByteBuffer.allocate(arr.length);		
+		buf.put(arr);
+		buf.position(0);
+		
+		int bytesWritten = fcc.writeFile(file, buf, (long)arr.length, 0);
 		
 		//relevant objects have been created
-		assertNotNull(file.getID());
 		assertNotEquals(file.getBlocks().size(), 0);
-		
+				
 		//number of blocks are corresponding to filesize and blocksize		
-		if(file.getFileSize() % Constants.BLOCK_SIZE == 0) {
-			assertEquals(file.getBlocks().size(), file.getFileSize()/Constants.BLOCK_SIZE);
-		} else {
-			assertEquals(file.getBlocks().size(), file.getFileSize()/Constants.BLOCK_SIZE+1);
-		}	
+		assertEquals(bytesWritten, arr.length);
 	}
 	
 	@Test

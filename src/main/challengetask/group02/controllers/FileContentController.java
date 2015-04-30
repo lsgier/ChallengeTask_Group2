@@ -41,7 +41,7 @@ public class FileContentController {
 				
 		//copy the bytebuffer (data to write) into our content array
 		//assuming we the content has length bufSize, otherwise BufferUnderFlowException will be thrown
-		buffer.get(content, 0, (int) bufSize);
+		buffer.get(content);
 		ArrayList<Number160> blockIDs = file.getBlocks();	
 
 		//first block is special case
@@ -49,20 +49,22 @@ public class FileContentController {
 		//last block is special case
 		int endBytes = 0;
 		//maintains the pointer where to read/write
-		int positon = 0;
+		int position = 0;
 		
 		for(int index = startBlock; index <= endBlock; index++) {
 			
 			//startBytes = Constants.BLOCK_SIZE - (int)offset%Constants.BLOCK_SIZE;
+			CRC32 crc32 = new CRC32();
 			Block block;
-			int bytesToWrite = 0;
-			
+			int bytesToWrite = 0;			
 			
 			//if the block doesn't exist, create a new one
 			if(index > blockIDs.size()-1) {
 				
 				Number160 ID = new Number160(random);				
-				//block = new Block(...);				
+				block = new Block();			
+				block.setChecksum(index);
+				block.setID(ID);
 			} else {
 				//if the block exists, fetch it
 				block = getBlockDHT(blockIDs.get(index)); 
@@ -75,116 +77,31 @@ public class FileContentController {
 			} else {				
 				if(index == startBlock) {		
 					startBytes = Constants.BLOCK_SIZE - (int)writeOffset%Constants.BLOCK_SIZE;
-					bytesToWrite = 0;
-				} else if(index == endBlock) {					
-					
-					
-					
+					bytesToWrite = startBytes;
+				} else if(index == endBlock) {	
+					endBytes = ((int)bufSize - startBytes)%Constants.BLOCK_SIZE;
+					bytesToWrite = endBytes;					
 				} else {					
+					bytesToWrite = Constants.BLOCK_SIZE;					
+				}
+			}
 					
-					
-				}						
-			}
-		}
-		
-		return 0; //the size of the content that was written
-	}
-	
-	/*
-	private int write(final ByteBuffer buffer, final long bufSize, final long writeOffset)
-	{
-		final int maxWriteIndex = (int) (writeOffset + bufSize);
-		final byte[] bytesToWrite = new byte[(int) bufSize];
-		synchronized (this) {
-			if (maxWriteIndex > contents.capacity()) {
-				// Need to create a new, larger buffer
-				final ByteBuffer newContents = ByteBuffer.allocate(maxWriteIndex);
-				newContents.put(contents);
-				contents = newContents;
-			}
-			buffer.get(bytesToWrite, 0, (int) bufSize);
-			contents.position((int) writeOffset);
-			contents.put(bytesToWrite);
-			contents.position(0); // Rewind
-		}
-		return (int) bufSize;
-	}
-	 */
-
-	
-		
-	public File createFile(String fileName, byte[] content) {
-		
-		int dataSize = content.length;
-
-		//used for hashing
-		Random random = new Random();
-		
-		//create a hash for the file itself
-		Number160 fileID = new Number160(random);
-		
-		File file = new File(fileName, dataSize, fileID);
-				
-		int seqNumber = 0;	
-		int position = 0;
-		long crc;
-		
-		//splitting the file apart and create blocks
-		while (dataSize > 0) {
+			System.arraycopy(content, position,  block.getData(),  (int)writeOffset%Constants.BLOCK_SIZE, bytesToWrite);
+			crc32.update(block.getData());
+			block.setChecksum(crc32.getValue());
 			
-			//generate a new Hash for the new Block
-			Number160 ID = new Number160(random);
-						
-			if(dataSize >= Constants.BLOCK_SIZE) {
-				
-				byte[] blockData = new byte[Constants.BLOCK_SIZE];
-				
-				System.arraycopy(content, position, blockData, 0, Constants.BLOCK_SIZE);
-				
-				//this is used for the checksum calculation
-				CRC32 crc32 = new CRC32();
-				
-				crc32.update(blockData);
-				crc = crc32.getValue();
-				
-				Block block = new Block(ID, seqNumber, crc, Constants.BLOCK_SIZE, blockData);				
-				file.addBlock(block.getID());
-				
-				//save the block in the DHT
-				putIntoDHT(block.getID(), block);
-				
-				position +=	Constants.BLOCK_SIZE;
-				dataSize -= Constants.BLOCK_SIZE;
-			} else {
-				//last chunk
-				byte[] blockData = new byte[dataSize];
-				
-				System.arraycopy(content,  position,  blockData, 0, dataSize);
-				//this is used for the checksum calculation
-				CRC32 crc32 = new CRC32();
-				
-				crc32.update(blockData);
-				crc = crc32.getValue();
-				
-				Block block = new Block(ID, seqNumber, crc, dataSize, blockData);
-				file.addBlock(block.getID());
-				
-				//save the block in the DHT
-				putIntoDHT(block.getID(), block);
-				
-				position += dataSize;
-				dataSize = 0;				
-			}
+			putIntoDHT(block.getID(),  block);
+			file.addBlock(block.getID());
 			
-			seqNumber++;			
-		}		
-		
-		//file goes into DHT at last
-		putIntoDHT(file.getID(), file);
-		
-		return file;		
-	}	
-	
+			//offset is only for the first time
+			writeOffset = 0;
+			position += bytesToWrite;			
+		}
+
+		this.putIntoDHT(file.getID(), file);
+		//the size of the content that was written
+		return position;
+	}		
 	
 	public byte[] readFile(File file, long size, long offset) {
 		

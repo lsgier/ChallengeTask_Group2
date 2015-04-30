@@ -34,11 +34,14 @@ public class File extends Entry {
 		this.entryName = entryName;
 
 		this.fileSize = 0;
+		
+		blocks = new ArrayList<Number160>();
 
 	}
 	
 	//empty constructor
 	public File() {
+		blocks = new ArrayList<Number160>();
 
 	}
 	

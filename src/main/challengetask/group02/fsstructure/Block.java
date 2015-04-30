@@ -2,12 +2,11 @@ package challengetask.group02.fsstructure;
 
 import java.io.Serializable;
 
+import challengetask.group02.Constants;
 import net.tomp2p.peers.Number160;
 
 public class Block implements Serializable {
-	
-	public static final int BLOCK_SIZE = 1024;
-	
+		
 	private Number160 ID;
 	//used to identify the position of a block within a file
 	private long seq_number; 
@@ -29,7 +28,7 @@ public class Block implements Serializable {
 	
 	//empty constructor
 	public Block() {
-		
+		data = new byte[Constants.BLOCK_SIZE];
 	}
 	
 	

@@ -36,28 +36,14 @@ public class FileContentController {
 		byte[] content = new byte[(int) bufSize];
 		long outWriteOffset = writeOffset;
 
-		System.out.println("***Writing block of size " + bufSize + " with the offset " + writeOffset);
-
 		
 		int startBlock = (int)(writeOffset/Constants.BLOCK_SIZE);
 		int endBlock = (int)((bufSize+writeOffset-1)/Constants.BLOCK_SIZE);
-				
-		System.out.println("***StartBlock: "+startBlock+" /// EndBlock:"+endBlock);
-		
+						
 		//copy the bytebuffer (data to write) into our content array
 		//assuming we the content has length bufSize, otherwise BufferUnderFlowException will be thrown
 		buffer.get(content);
-		
-		System.out.println("***content length: "+content.length);
-		
-		System.out.print("***");
-		for(int index = 0; index < content.length; index++) {
-			System.out.print((char)content[index]);
-		}
-		System.out.println();
-		
-	
-		
+				
 		ArrayList<Number160> blockIDs = file.getBlocks();	
 
 		//first block is special case
@@ -68,9 +54,7 @@ public class FileContentController {
 		int position = 0;
 		
 		for(int index = startBlock; index <= endBlock; index++) {
-			
-			System.out.println("***Block_now: "+index);
-			
+						
 			//startBytes = Constants.BLOCK_SIZE - (int)offset%Constants.BLOCK_SIZE;
 			CRC32 crc32 = new CRC32();
 			Block block;
@@ -83,7 +67,6 @@ public class FileContentController {
 				block = new Block();			
 				block.setChecksum(index);
 				block.setID(ID);
-				System.out.println("***Created a block with ID"+block.getID());
 			} else {
 				//if the block exists, fetch it
 				block = getBlockDHT(blockIDs.get(index)); 
@@ -93,7 +76,6 @@ public class FileContentController {
 			//we have to make a distinction between which block we are visiting at the moment
 			if(startBlock == endBlock) {
 				bytesToWrite = (int)bufSize;
-				System.out.println("***StartBlock == EndBlock");
 			} else {				
 				if(index == startBlock) {		
 					startBytes = Constants.BLOCK_SIZE - (int)writeOffset%Constants.BLOCK_SIZE;
@@ -106,12 +88,6 @@ public class FileContentController {
 				}
 			}
 			
-			System.out.print("***Writing following data: ");
-			for(int index1 = position; index1 < position+bytesToWrite; index1++) {
-				System.out.print((char)content[index1]);
-			}
-			System.out.println();
-					
 			System.arraycopy(content, position,  block.getData(),  (int)writeOffset%Constants.BLOCK_SIZE, bytesToWrite);
 			crc32.update(block.getData());
 			block.setChecksum(crc32.getValue());
@@ -124,7 +100,6 @@ public class FileContentController {
 			position += bytesToWrite;			
 		}
 
-		System.out.println("position = " + position);
 
 		file.setSize(position + outWriteOffset);
 

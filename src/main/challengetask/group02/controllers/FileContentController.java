@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.zip.CRC32;
+
+
 import net.tomp2p.dht.FutureDHT;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerDHT;
@@ -33,6 +35,7 @@ public class FileContentController {
 		Random random = new Random();
 		
 		byte[] content = new byte[(int) bufSize];
+
 		long outWriteOffset = writeOffset;
 
 		
@@ -41,9 +44,11 @@ public class FileContentController {
 						
 		//copy the bytebuffer (data to write) into our content array
 		//assuming we the content has length bufSize, otherwise BufferUnderFlowException will be thrown
+
 		buffer.get(content);
 				
 		ArrayList<Number160> blockIDs = file.getBlocks();
+
 		//a: when the code checked if there's a need to add the block
 		//it always took blockIDs.size() which never changed even if more blocks were added
 		int blockCount = blockIDs.size();
@@ -55,9 +60,13 @@ public class FileContentController {
 		//maintains the pointer where to read/write
 		int position = 0;
 
+		//had to add this because problems arise when we have a Constants.BLOCK_SIZE bigger than typical write size
+		boolean blockCreated = false;
+
 		for(int index = startBlock; index <= endBlock; index++) {
 						
 			//startBytes = Constants.BLOCK_SIZE - (int)offset%Constants.BLOCK_SIZE;
+
 			CRC32 crc32 = new CRC32();
 			Block block;
 			int bytesToWrite = 0;			
@@ -71,9 +80,11 @@ public class FileContentController {
 				block.setID(ID);
 				//here one thing that was not correct
 				blockCount ++;
+				blockCreated = true;
 			} else {
 				//if the block exists, fetch it
-				block = getBlockDHT(blockIDs.get(index)); 
+				block = getBlockDHT(blockIDs.get(index));
+				blockCreated = false;
 				
 			}			
 			
@@ -89,21 +100,30 @@ public class FileContentController {
 					//was not working correct when needed to write exactly one block at the end
 					//returned 0 (1024%1024 == 0) so had to change this
 					//need to test more, maybe in other cases can work incorrect
+
 					endBytes = (int)((bufSize + outWriteOffset)%Constants.BLOCK_SIZE);
+
+					//endBytes = ((int)bufSize - startBytes)%Constants.BLOCK_SIZE;
+
 					if (endBytes == 0) endBytes = Constants.BLOCK_SIZE;
 					bytesToWrite = endBytes;
 				} else {
 					bytesToWrite = Constants.BLOCK_SIZE;
 				}
 			}
-			
+
 			System.arraycopy(content, position, block.getData(), (int) writeOffset % Constants.BLOCK_SIZE, bytesToWrite);
+
 
 			crc32.update(block.getData());
 			block.setChecksum(crc32.getValue());
-			
-			putIntoDHT(block.getID(),  block);
-			file.addBlock(block.getID());
+
+
+			putIntoDHT(block.getID(), block);
+
+			if (blockCreated){
+				file.addBlock(block.getID());
+			}
 			
 			//offset is only for the first time
 			writeOffset = 0;
@@ -112,7 +132,9 @@ public class FileContentController {
 
 
 		file.setSize(position + outWriteOffset);
+
 		this.putIntoDHT(file.getID(), file);
+
 
 		//the size of the content that was written
 		return position;
@@ -152,6 +174,8 @@ public class FileContentController {
 		//number of bytes read from the last block
 		int endBytes = 0;
 		int position = 0;
+
+
 		
 		for(int index = startBlock; index <= endBlock; index++) {
 						
@@ -184,6 +208,8 @@ public class FileContentController {
 				} else if(index == endBlock) {
 					//a: same as for writeFile()
 					endBytes = (int)((size + outOffset)%Constants.BLOCK_SIZE);
+					//endBytes = ((int)size - startBytes)%Constants.BLOCK_SIZE;
+
 					if (endBytes == 0) endBytes = Constants.BLOCK_SIZE;
 					bytesToRead = endBytes;
 				} else {

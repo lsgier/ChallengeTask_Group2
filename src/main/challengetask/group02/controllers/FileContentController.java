@@ -35,11 +35,12 @@ public class FileContentController {
 		
 		//explanations and concerns are listed on the github wiki, please check it out
 		//lock the file		
-		if(file.getDirtyBit() == false) {
+		
+		/*if(file.getDirtyBit() == false) {
 			throw new BusyException(file.getEntryName()+" is busy");
 		}
 		
-		file.setDirtyBit(false);
+		file.setDirtyBit(false);*/
 		
 		Random random = new Random();
 		
@@ -144,11 +145,10 @@ public class FileContentController {
 
 		this.putIntoDHT(file.getID(), file);
 
-
-		//the size of the content that was written
+		//file.setDirtyBit(true);
 		
-		file.setDirtyBit(true);
 		
+		//the size of the content that was written		
 		return position;
 	}		
 	

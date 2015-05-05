@@ -1,5 +1,6 @@
 package challengetask.group02.fuserunner;
 
+import challengetask.group02.controllers.BusyException;
 import challengetask.group02.controllers.ControllerContext;
 import challengetask.group02.controllers.NoSuchFileOrDirectoryException;
 import challengetask.group02.controllers.NotADirectoryException;
@@ -170,6 +171,8 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
                      final StructFuseFileInfo.FileInfoWrapper wrapper) {
         try {
             return controller.writeFile(path, buf, bufSize, writeOffset);
+        } catch (BusyException e) {
+        	e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NotADirectoryException e) {

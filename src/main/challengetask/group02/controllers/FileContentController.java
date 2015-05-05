@@ -16,6 +16,7 @@ import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.File;
 import challengetask.group02.helpers.DHTPutGetHelper;
 import challengetask.group02.Constants;
+import challengetask.group02.controllers.BusyException;
 
 //This class is used to split up the files and also fetch them
 public class FileContentController {
@@ -30,7 +31,15 @@ public class FileContentController {
 	}
 	
 	
-	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) {
+	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) throws BusyException {
+		
+		//explanations and concerns are listed on the github wiki, please check it out
+		//lock the file		
+		if(file.getDirtyBit() == false) {
+			throw new BusyException(file.getEntryName()+" is busy");
+		}
+		
+		file.setDirtyBit(false);
 		
 		Random random = new Random();
 		
@@ -137,6 +146,9 @@ public class FileContentController {
 
 
 		//the size of the content that was written
+		
+		file.setDirtyBit(true);
+		
 		return position;
 	}		
 	

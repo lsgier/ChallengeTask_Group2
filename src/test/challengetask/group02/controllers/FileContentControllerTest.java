@@ -546,10 +546,14 @@ public class FileContentControllerTest {
 		System.out.println("Filesize: "+arr.length+" Bytes");
 	}
 	
-	
-	
 	@Test
-	public void testCreateFile() {
+	public void doTests() throws BusyException{
+		
+		testCreateFile();
+		testReadFile();		
+	}
+	
+	public void testCreateFile() throws BusyException {
 		
 		Random random = new Random();
 		
@@ -559,7 +563,9 @@ public class FileContentControllerTest {
 		buf.put(arr);
 		buf.position(0);
 		
-		int bytesWritten = fcc.writeFile(file, buf, (long)arr.length, 0);
+		
+		int bytesWritten = fcc.writeFile(file, buf, (long)arr.length, 0);			
+
 		
 		//relevant objects have been created
 		assertNotEquals(file.getBlocks().size(), 0);
@@ -568,14 +574,12 @@ public class FileContentControllerTest {
 		assertEquals(bytesWritten, arr.length);
 	}
 	
-	@Test
+	
 	public void testReadFile() {
 	
 		long testLength = 2000;
 		long testOffset = 3244;
 		
-		if(file == null)
-			testCreateFile();
 		
 		byte[] content = fcc.readFile(file, testLength, testOffset);
 		

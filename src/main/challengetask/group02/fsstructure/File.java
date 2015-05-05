@@ -15,6 +15,10 @@ public class File extends Entry {
 	
 	//Like discussed, calculating and fetching data is done via controller classes	
 	public File(String fileName, long fileSize, Number160 ID) {
+		
+		//this is for the dirtybit
+		super();
+		
 		this.type = TYPE.FILE;
 
 		this.fileSize = fileSize;
@@ -27,6 +31,10 @@ public class File extends Entry {
 	}
 
 	public File(Number160 ID, Number160 parentID, String entryName) {
+		
+		//this is for the dirtybit
+		super();
+		
 		this.type = TYPE.FILE;
 
 		this.ID = ID;

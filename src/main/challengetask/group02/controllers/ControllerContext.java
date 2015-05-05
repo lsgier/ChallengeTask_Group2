@@ -59,7 +59,7 @@ public class ControllerContext {
         return this.fileContentController.readFile(file, size, offset);
     }
 
-    public int writeFile(String path, ByteBuffer buf, long bufSize, long writeOffset) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException {
+    public int writeFile(String path, ByteBuffer buf, long bufSize, long writeOffset) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException, BusyException {
         File file = treeController.getFile(path);
         return this.fileContentController.writeFile(file, buf, bufSize, writeOffset);
     }

@@ -6,21 +6,34 @@ import java.io.Serializable;
 
 public class Entry implements Serializable, Cloneable {
 
-    //not so sure if that's a good idea, Object.getClass() allows to get the class type
-	//then this would be obsolete.
     public enum TYPE {
     	FILE,
     	DIRECTORY, type;
     }
 	
+    //why not private?
+    //subclasses File and Directory execute methods here, anyway
     protected Number160 ID;
     protected Number160 parentID;
     protected String entryName;
     protected Meta meta;
     protected TYPE type;
     protected long size;
+    protected boolean dirtyBit;
+    
+    public Entry() {
+    	setDirtyBit(true);
+    }
 
-    public long getSize() {
+    public boolean getDirtyBit() {
+		return dirtyBit;
+	}
+
+	public void setDirtyBit(boolean dirtyBit) {
+		this.dirtyBit = dirtyBit;
+	}
+
+	public long getSize() {
         return size;
     }
 

@@ -10,16 +10,21 @@ public class File extends Entry {
 	
 	private long fileSize;
 	private Meta meta;
+	
+	private Number160 modifierPeer;
+    
 
 	private ArrayList<Number160> blocks;	
 	
+	private boolean dirtyBit;
+	
+
+
 	//Like discussed, calculating and fetching data is done via controller classes	
 	public File(String fileName, long fileSize, Number160 ID) {
 		
-		//this is for the dirtybit
-		super();
-		
-		this.type = TYPE.FILE;
+		dirtyBit = false;
+		this.type = TYPE.FILE;		
 
 		this.fileSize = fileSize;
 		this.entryName = fileName;
@@ -32,10 +37,8 @@ public class File extends Entry {
 
 	public File(Number160 ID, Number160 parentID, String entryName) {
 		
-		//this is for the dirtybit
-		super();
-		
-		this.type = TYPE.FILE;
+		dirtyBit = false;
+		this.type = TYPE.FILE;		
 
 		this.ID = ID;
 		this.parentID = parentID;
@@ -51,6 +54,22 @@ public class File extends Entry {
 	public File() {
 		blocks = new ArrayList<Number160>();
 
+	}	
+	
+	public boolean getDirtyBit() {
+		return dirtyBit;
+	}
+
+	public void setDirtyBit(boolean dirtyBit) {
+		this.dirtyBit = dirtyBit;
+	}
+	
+	public Number160 getModifierPeer() {
+		return modifierPeer;
+	}
+
+	public void setModifierPeer(Number160 modifierPeer) {
+		this.modifierPeer = modifierPeer;
 	}
 	
 	public void addBlock(Number160 block) {

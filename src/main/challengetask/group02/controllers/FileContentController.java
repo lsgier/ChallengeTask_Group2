@@ -33,22 +33,20 @@ public class FileContentController {
 	
 	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) throws BusyException {
 		
-		//explanations and concerns are listed on the github wiki, please check it out
-		//lock the file		
 		
-		/*if(file.getDirtyBit() == false) {
-			throw new BusyException(file.getEntryName()+" is busy");
+		if(file.getDirtyBit() == true) {
+			
+			if( file.getModifierPeer().compareTo(peer.peerID()) != 0) {
+				throw new BusyException(file.getEntryName()+" is busy and held by peer with ID: "+file.getModifierPeer());								
+			}			
 		}
-		
-		file.setDirtyBit(false);*/
 		
 		Random random = new Random();
 		
 		byte[] content = new byte[(int) bufSize];
 
 		long outWriteOffset = writeOffset;
-
-		
+				
 		int startBlock = (int)(writeOffset/Constants.BLOCK_SIZE);
 		int endBlock = (int)((bufSize+writeOffset-1)/Constants.BLOCK_SIZE);
 						

@@ -135,7 +135,7 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
     public void createFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
 
         Path subPaths = Paths.get(path);
-
+        
         int pathLength = subPaths.getNameCount();
         if (pathLength == 0) {
             throw new NoSuchFileOrDirectoryException("Can not create such file");
@@ -150,6 +150,10 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
         File newFile = new File (newKey, parentEntry.getID(), subPaths.getFileName().toString());
 
+        //this is new locking logic, due to fuse constraints we have to associate a file creation with the respective owner
+        newFile.setDirtyBit(true);
+        newFile.setModifierPeer(peer.peerID());
+        
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
         helper.addNewEntry((Directory) parentEntry, newFile);
     }
@@ -198,6 +202,22 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
             helper.moveEntry(newParent, oldParent, entry, newName);
         }
+    }
+    
+    //used for the locking logic
+    public void whenFileClosed(String path) {
+    	
+    	System.out.println("************IS EXECUTED");
+    	
+    	try {
+			File file = this.getFile(path);
+			file.setDirtyBit(false);
+			file.setModifierPeer(null);
+		} catch (ClassNotFoundException | NotADirectoryException
+				| NoSuchFileOrDirectoryException | IOException
+				| NotAFileException e) {
+			e.printStackTrace();
+		}
     }
 
 

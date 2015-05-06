@@ -7,6 +7,7 @@ import challengetask.group02.controllers.NotADirectoryException;
 import challengetask.group02.controllers.NotAFileException;
 import challengetask.group02.fsstructure.Entry;
 import net.fusejna.*;
+import net.fusejna.StructFuseFileInfo.FileInfoWrapper;
 import net.fusejna.types.TypeMode;
 import net.fusejna.util.FuseFilesystemAdapterAssumeImplemented;
 
@@ -189,4 +190,15 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
 
         return 0;
     }
+    
+	@Override
+	public int flush(final String path, final FileInfoWrapper info) {
+		
+		//introduced for the locking mechanism
+		//flush is only used in context with file
+		System.out.println("###########3asdfölkjaösldfkjaölsfjdöaksfdjöaöfjsdaö");
+		controller.whenFileClosed(path);
+		
+		return 0;		
+	}
 }

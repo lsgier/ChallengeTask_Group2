@@ -19,19 +19,10 @@ public class Entry implements Serializable, Cloneable {
     protected Meta meta;
     protected TYPE type;
     protected long size;
-    protected boolean dirtyBit;
     
     public Entry() {
-    	setDirtyBit(true);
+    	
     }
-
-    public boolean getDirtyBit() {
-		return dirtyBit;
-	}
-
-	public void setDirtyBit(boolean dirtyBit) {
-		this.dirtyBit = dirtyBit;
-	}
 
 	public long getSize() {
         return size;

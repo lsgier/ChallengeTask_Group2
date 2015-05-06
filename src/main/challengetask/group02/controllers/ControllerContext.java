@@ -64,6 +64,11 @@ public class ControllerContext {
         return this.fileContentController.writeFile(file, buf, bufSize, writeOffset);
     }
 
+    //used for the locking logic
+	public void whenFileClosed(String path) {
+		
+	}
+
     //TODO test creating a root directory object "/" and some other directories
 
     //TODO moving the other directories into the root directory

@@ -559,6 +559,9 @@ public class FileContentControllerTest {
 		
 		file = new File("Random Filename.txt", arr.length, new Number160(random));
 		
+        file.setDirtyBit(true);
+        file.setModifierPeer(peer[4].peerID());
+		
 		ByteBuffer buf = ByteBuffer.allocate(arr.length);		
 		buf.put(arr);
 		buf.position(0);

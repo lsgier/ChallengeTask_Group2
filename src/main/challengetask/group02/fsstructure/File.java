@@ -7,10 +7,7 @@ import java.util.ArrayList;
 import net.tomp2p.peers.Number160;
 
 public class File extends Entry {
-	
-	private long fileSize;
-	private Meta meta;
-	
+
 	private Number160 modifierPeer;
     
 
@@ -26,7 +23,7 @@ public class File extends Entry {
 		dirtyBit = false;
 		this.type = TYPE.FILE;		
 
-		this.fileSize = fileSize;
+		this.size = fileSize;
 		this.entryName = fileName;
 		
 		//this are the IDs of the blocks
@@ -44,7 +41,7 @@ public class File extends Entry {
 		this.parentID = parentID;
 		this.entryName = entryName;
 
-		this.fileSize = 0;
+		this.size = 0;
 		
 		blocks = new ArrayList<Number160>();
 
@@ -86,11 +83,5 @@ public class File extends Entry {
 		return blocks;		
 	}
 	
-	public Meta getMeta() {
-		return meta;
-	}
 
-	public void setMeta(Meta meta) {
-		this.meta = meta;
-	}	
 }

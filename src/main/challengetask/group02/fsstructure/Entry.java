@@ -16,7 +16,6 @@ public class Entry implements Serializable, Cloneable {
     protected Number160 ID;
     protected Number160 parentID;
     protected String entryName;
-    protected Meta meta;
     protected TYPE type;
     protected long size;
     

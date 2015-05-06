@@ -206,9 +206,7 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
     
     //used for the locking logic
     public void whenFileClosed(String path) {
-    	
-    	System.out.println("************IS EXECUTED");
-    	
+    	    	
     	try {
 			File file = this.getFile(path);
 			file.setDirtyBit(false);

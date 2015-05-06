@@ -136,15 +136,16 @@ public class FileContentController {
 			//offset is only for the first time
 			writeOffset = 0;
 			position += bytesToWrite;			
+			
 		}
 
 
 		file.setSize(position + outWriteOffset);
 
 		this.putIntoDHT(file.getID(), file);
-
-		//file.setDirtyBit(true);
 		
+		//update meta information
+		file.setCtime(System.currentTimeMillis()/1000);
 		
 		//the size of the content that was written		
 		return position;
@@ -232,6 +233,9 @@ public class FileContentController {
 			position += bytesToRead;
 		}		
 
+		//update meta information
+		file.setAtime(System.currentTimeMillis()/1000);
+				
 		return content;
 	}
 	

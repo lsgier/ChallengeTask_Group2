@@ -2,6 +2,7 @@ package challengetask.group02.controllers;
 
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
+import net.fusejna.StructStat;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 
@@ -66,7 +67,11 @@ public class ControllerContext {
 
     //used for the locking logic
 	public void whenFileClosed(String path) {
-		
+		treeController.whenFileClosed(path);		
+	}
+	
+	public void updateFileMetaData(Entry entry, final StructStat.StatWrapper stat) {
+		treeController.updateFileMetaData(entry, stat);		
 	}
 
     //TODO test creating a root directory object "/" and some other directories

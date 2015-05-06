@@ -9,13 +9,10 @@ import net.tomp2p.peers.Number160;
 public class File extends Entry {
 
 	private Number160 modifierPeer;
-    
-
 	private ArrayList<Number160> blocks;	
-	
 	private boolean dirtyBit;
-	
-
+	private long atime;
+	private long ctime;
 
 	//Like discussed, calculating and fetching data is done via controller classes	
 	public File(String fileName, long fileSize, Number160 ID) {
@@ -83,5 +80,19 @@ public class File extends Entry {
 		return blocks;		
 	}
 	
+	public long getAtime() {
+		return atime;
+	}
 
+	public void setAtime(long atime) {
+		this.atime = atime;
+	}
+
+	public long getCtime() {
+		return ctime;
+	}
+
+	public void setCtime(long ctime) {
+		this.ctime = ctime;
+	}
 }

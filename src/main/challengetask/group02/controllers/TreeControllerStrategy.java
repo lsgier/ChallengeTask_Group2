@@ -3,6 +3,7 @@ package challengetask.group02.controllers;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
+import net.fusejna.StructStat;
 import net.tomp2p.peers.Number160;
 
 import java.io.IOException;
@@ -30,4 +31,8 @@ public interface TreeControllerStrategy {
     void renameEntry(String path, String newName) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
 
     void createFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
+    
+    void updateFileMetaData(Entry entry, final StructStat.StatWrapper stat);
+    
+    void whenFileClosed(String path);
 }

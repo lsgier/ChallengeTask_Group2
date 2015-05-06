@@ -4,6 +4,7 @@ import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
 import challengetask.group02.helpers.DHTPutGetHelper;
+import net.fusejna.StructStat;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
@@ -216,6 +217,15 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 				| NotAFileException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    public void updateFileMetaData(Entry entry, final StructStat.StatWrapper stat) {
+    	
+    	File file = (File)entry;
+    	
+    	
+    	stat.atime(file.getAtime());
+    	stat.ctime(file.getCtime());    	
     }
 
 

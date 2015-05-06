@@ -47,7 +47,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             if (entry.getType() == Entry.TYPE.FILE) {
                 //by far just use default content, but later need something like entry.getSize() or whatever
                 stat.setMode(TypeMode.NodeType.FILE).size(entry.getSize());
-
+                
+                controller.updateFileMetaData(entry, stat);
+                
                 return 0;
             }
         } catch (IOException e) {
@@ -196,7 +198,6 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
 		
 		//introduced for the locking mechanism
 		//flush is only used in context with file
-		System.out.println("###########3asdfölkjaösldfkjaölsfjdöaksfdjöaöfjsdaö");
 		controller.whenFileClosed(path);
 		
 		return 0;		

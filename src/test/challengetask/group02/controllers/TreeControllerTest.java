@@ -3,7 +3,6 @@ package challengetask.group02.controllers;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.FutureDHT;
-import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
@@ -17,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class TreeControllerHashtableChildrenTest {
+public class TreeControllerTest {
     static final Random RND = new Random( 42L );
     static int nr = 10;
     static int port = 7777;
@@ -41,7 +40,7 @@ public class TreeControllerHashtableChildrenTest {
             bootstrap(peers);
 
             //initialize controller with a peer
-            controller = new TreeControllerHashtableChildren(peers[local]);
+            controller = new TreeController(peers[local]);
 
 
             //create a root node

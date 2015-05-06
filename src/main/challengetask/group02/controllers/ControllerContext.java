@@ -20,7 +20,7 @@ public class ControllerContext {
 
 
     public ControllerContext(PeerDHT peer) {
-        this.treeController = new TreeControllerHashtableChildren(peer);
+        this.treeController = new TreeController(peer);
         this.fileContentController = new FileContentController(peer);
     }
 

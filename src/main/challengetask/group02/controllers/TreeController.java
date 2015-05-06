@@ -18,11 +18,11 @@ import java.util.UUID;
 import static challengetask.group02.fsstructure.Entry.TYPE.DIRECTORY;
 import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
 
-public class TreeControllerHashtableChildren implements TreeControllerStrategy {
+public class TreeController implements TreeControllerStrategy {
 
     PeerDHT peer;
 
-    public TreeControllerHashtableChildren(PeerDHT peer) {
+    public TreeController(PeerDHT peer) {
         this.peer = peer;
     }
 

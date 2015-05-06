@@ -35,4 +35,6 @@ public interface TreeControllerStrategy {
     void updateFileMetaData(Entry entry, final StructStat.StatWrapper stat);
     
     void whenFileClosed(String path);
+
+    void removeDirectory(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, DirectoryNotEmptyException;
 }

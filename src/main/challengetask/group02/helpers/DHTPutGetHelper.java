@@ -4,6 +4,7 @@ import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 
 import net.tomp2p.dht.FuturePut;
+import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.dht.PeerDHT;
 
 import net.tomp2p.peers.Number160;
@@ -42,6 +43,11 @@ public class DHTPutGetHelper {
         this.peer = peer;
     }
 
+    private void put(Entry entry) throws IOException {
+        FuturePut futurePut = peer.put(entry.getID()).data(new Data(entry)).start();
+        futurePut.awaitUninterruptibly();
+    }
+
     public int addNewEntry(Directory parentDir, Entry child){
         //first have to update parent
         try {
@@ -73,12 +79,7 @@ public class DHTPutGetHelper {
         return 0;
     }
 
-    private void put(Entry entry) throws IOException {
-        FuturePut futurePut = peer.put(entry.getID()).data(new Data(entry)).start();
-        futurePut.awaitUninterruptibly();
-    }
-
-
+    //TODO QUESTION why does this return an integer?
     public int moveEntry(Directory newParent, Directory oldParent, Entry entry, String newName) {
         newParent.addChild(newName, entry.getID(), entry.getType());
         oldParent.removeChild(entry.getEntryName());
@@ -93,8 +94,39 @@ public class DHTPutGetHelper {
             //if ok, can finally update the entry itself
             put(entry);
         } catch (Exception e){
-
+            //TODO
         }
         return 0;
+    }
+
+    public void removeAndDeleteChild(Directory parent, Entry entry) {
+        try {
+            setDirty(entry);
+
+            parent.removeChild(entry.getEntryName());
+            put(parent);
+
+            removeEntry(entry);
+        } catch (IOException e) {
+            //TODO
+            e.printStackTrace();
+        }
+
+    }
+
+    public void setDirty(Entry entry) {
+        entry.setDirtyBit(true);
+
+        try {
+            put(entry);
+        }
+        catch (Exception e){
+            //TODO
+        }
+    }
+
+    public void removeEntry(Entry entry) {
+        FutureRemove future = peer.remove(entry.getID()).start();
+        future.awaitUninterruptibly();
     }
 }

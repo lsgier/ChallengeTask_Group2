@@ -1,17 +1,12 @@
 package challengetask.group02.fuserunner;
 
-import challengetask.group02.controllers.BusyException;
-import challengetask.group02.controllers.ControllerContext;
-import challengetask.group02.controllers.NoSuchFileOrDirectoryException;
-import challengetask.group02.controllers.NotADirectoryException;
-import challengetask.group02.controllers.NotAFileException;
+import challengetask.group02.controllers.*;
 import challengetask.group02.fsstructure.Entry;
 import net.fusejna.*;
 import net.fusejna.StructFuseFileInfo.FileInfoWrapper;
 import net.fusejna.types.TypeMode;
 import net.fusejna.util.FuseFilesystemAdapterAssumeImplemented;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -153,6 +148,8 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int rmdir(final String path) {
         try {
             controller.deleteDirectory(path);
+        } catch (DirectoryNotEmptyException e) {
+            return -ErrorCodes.ENOTEMPTY();
         } catch (Exception e) {
             e.printStackTrace();
         }

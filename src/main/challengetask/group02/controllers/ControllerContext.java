@@ -21,7 +21,7 @@ public class ControllerContext {
 
 
     public ControllerContext(PeerDHT peer) {
-        this.treeController = new TreeControllerHashtableChildren(peer);
+        this.treeController = new TreeController(peer);
         this.fileContentController = new FileContentController(peer);
     }
 
@@ -49,7 +49,8 @@ public class ControllerContext {
         treeController.renameEntry(path, newName);
     }
 
-    public void deleteDirectory(String path) {
+    public void deleteDirectory(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException, DirectoryNotEmptyException {
+        treeController.removeDirectory(path);
     }
 
     public void deleteFile(String path) {

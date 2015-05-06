@@ -3,7 +3,6 @@ package challengetask.group02.controllers;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.FutureDHT;
-import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
@@ -17,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class TreeControllerHashtableChildrenTest {
+public class TreeControllerTest {
     static final Random RND = new Random( 42L );
     static int nr = 10;
     static int port = 7777;
@@ -41,7 +40,7 @@ public class TreeControllerHashtableChildrenTest {
             bootstrap(peers);
 
             //initialize controller with a peer
-            controller = new TreeControllerHashtableChildren(peers[local]);
+            controller = new TreeController(peers[local]);
 
 
             //create a root node
@@ -118,7 +117,7 @@ public class TreeControllerHashtableChildrenTest {
     @Test
     public void testRenameEntry() throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
         String oldName = "/entryToRename";
-        String newName = "newName";
+        String newName = "/newName";
 
         controller.createDir(oldName);
 
@@ -127,10 +126,10 @@ public class TreeControllerHashtableChildrenTest {
         controller.renameEntry(oldName, newName);
 
         //assert that the entry has the new name
-        assertEquals(newName, controller.getEntryFromID(entryID).getEntryName());
+        assertEquals(newName, "/"+controller.getEntryFromID(entryID).getEntryName());
 
         //assert that the parent also stores the new name
-        assertTrue(controller.readDir("/").contains(newName));
+        assertTrue(controller.readDir("/").contains("newName"));
 
         //TODO test all of the rename functionalities (just rename entry, move entry to new destination, move and rename)
 
@@ -160,5 +159,9 @@ public class TreeControllerHashtableChildrenTest {
 
         }
     }
+
+    //TODO test deletion of directories:
+        //check if it "looks right" from a fuse perspective
+        //check if the entries are actually deleted from the dht
 }
 

@@ -5,10 +5,8 @@ import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
 import challengetask.group02.helpers.DHTPutGetHelper;
 import net.tomp2p.dht.FutureGet;
-import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
-import net.tomp2p.storage.Data;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -96,7 +94,7 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
         }
     }
     @Override
-    public Directory getDirectory(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException, NotAFileException {
+    public Directory getDirectory(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
         Entry entry = findEntry(path);
         if (entry.getType() == DIRECTORY) {
             return (Directory) entry;
@@ -120,15 +118,12 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
         Number160 newKey = Number160.createHash(UUID.randomUUID().hashCode());
 
-        Entry parentEntry = findEntry(subPaths.getParent().toString());
-        if (parentEntry.getType() == FILE) {
-            throw new NotADirectoryException(subPaths.getParent().toString());
-        }
+        Directory parentEntry = getDirectory(subPaths.getParent().toString());
 
         Directory newDir = new Directory(newKey, parentEntry.getID(), subPaths.getFileName().toString());
 
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
-        helper.addNewEntry((Directory) parentEntry, newDir);
+        helper.addNewEntry(parentEntry, newDir);
     }
 
     @Override
@@ -143,25 +138,19 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
         Number160 newKey = Number160.createHash(UUID.randomUUID().hashCode());
 
-        Entry parentEntry = findEntry(subPaths.getParent().toString());
-        if (parentEntry.getType() == FILE) {
-            throw new NotADirectoryException(subPaths.getParent().toString());
-        }
+        Directory parentEntry = getDirectory(subPaths.getParent().toString());
 
         File newFile = new File (newKey, parentEntry.getID(), subPaths.getFileName().toString());
 
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
-        helper.addNewEntry((Directory) parentEntry, newFile);
+        helper.addNewEntry(parentEntry, newFile);
     }
 
     @Override
     public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
 
-        Entry result = findEntry(path);
-        if (result.getType() == FILE) {
-            throw new NotADirectoryException(path);
-        }
-        Directory dir = (Directory) result;
+        Directory dir = getDirectory(path);
+
         Hashtable<String, Number160> children = dir.getChildren(FILE);
         children.putAll(dir.getChildren(DIRECTORY));
 
@@ -170,8 +159,6 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
 
     @Override
     public void renameEntry(String from, String to) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
-        //TODO vDHT
-
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
 
 
@@ -193,12 +180,31 @@ public class TreeControllerHashtableChildren implements TreeControllerStrategy {
             helper.updateEntryName((Directory) parent, entry, newName);
 
         } else {
-            Directory oldParent = (Directory) findEntry(oldPath.getParent().toString());
-            Directory newParent = (Directory) findEntry(newPath.getParent().toString());
+            Directory oldParent = getDirectory(oldPath.getParent().toString());
+            Directory newParent = getDirectory(newPath.getParent().toString());
 
             helper.moveEntry(newParent, oldParent, entry, newName);
         }
+
     }
+
+    @Override
+    public void removeDirectory(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, DirectoryNotEmptyException {
+        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+
+        Path dirPath = Paths.get(path);
+        String dirName = dirPath.getFileName().toString();
+        Directory dirEntry = getDirectory(path);
+        Directory parentEntry = (Directory) getEntryFromID(dirEntry.getParentID());
+
+
+        if (dirEntry.getChildren().isEmpty()) {
+            helper.removeAndDeleteChild(parentEntry, dirEntry);
+        } else {
+            throw new DirectoryNotEmptyException(path);
+        }
+    }
+
 
 
 }

@@ -48,7 +48,8 @@ public class ControllerContext {
         treeController.renameEntry(path, newName);
     }
 
-    public void deleteDirectory(String path) {
+    public void deleteDirectory(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException, DirectoryNotEmptyException {
+        treeController.removeDirectory(path);
     }
 
     public void deleteFile(String path) {

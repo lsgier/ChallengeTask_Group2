@@ -118,7 +118,7 @@ public class TreeControllerHashtableChildrenTest {
     @Test
     public void testRenameEntry() throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
         String oldName = "/entryToRename";
-        String newName = "newName";
+        String newName = "/newName";
 
         controller.createDir(oldName);
 
@@ -127,10 +127,10 @@ public class TreeControllerHashtableChildrenTest {
         controller.renameEntry(oldName, newName);
 
         //assert that the entry has the new name
-        assertEquals(newName, controller.getEntryFromID(entryID).getEntryName());
+        assertEquals(newName, "/"+controller.getEntryFromID(entryID).getEntryName());
 
         //assert that the parent also stores the new name
-        assertTrue(controller.readDir("/").contains(newName));
+        assertTrue(controller.readDir("/").contains("newName"));
 
         //TODO test all of the rename functionalities (just rename entry, move entry to new destination, move and rename)
 
@@ -160,5 +160,9 @@ public class TreeControllerHashtableChildrenTest {
 
         }
     }
+
+    //TODO test deletion of directories:
+        //check if it "looks right" from a fuse perspective
+        //check if the entries are actually deleted from the dht
 }
 

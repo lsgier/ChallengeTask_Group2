@@ -18,9 +18,14 @@ public class Entry implements Serializable, Cloneable {
     protected String entryName;
     protected TYPE type;
     protected long size;
+    protected boolean dirtyBit;
     
     public Entry() {
     	
+    }
+
+    public void setDirtyBit(boolean dirtyBit) {
+        this.dirtyBit = dirtyBit;
     }
 
 	public long getSize() {

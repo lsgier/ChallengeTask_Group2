@@ -17,7 +17,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Random;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Created by riccardo on 23.04.15.
@@ -51,6 +51,15 @@ public class FSPeer {
             }
             startClient(serverIP, port);
         }
+
+        System.out.println("HIER STARTET DER LOG");
+        //Handler handler = new FileHandler( "log.txt" );
+        Handler handler = new ConsoleHandler();
+        handler.setLevel( Level.FINEST );
+        logger.addHandler(handler);
+        logger.setLevel(Level.FINEST);
+        logger.fine("ALLES IST FEIN!");
+
 
         new FuseRunner(new ControllerContext(peerDHT), mountPoint).run();
     }

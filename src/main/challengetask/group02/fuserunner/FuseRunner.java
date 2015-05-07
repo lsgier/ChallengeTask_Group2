@@ -12,10 +12,17 @@ import net.fusejna.util.FuseFilesystemAdapterAssumeImplemented;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
+
+    private static final Logger logger = Logger.getLogger( FuseRunner.class.getName() );
+
     private final String path;
     private ControllerContext controller;
+
+
 
 
     public FuseRunner(ControllerContext controller, String path) {
@@ -24,15 +31,15 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     }
 
     public void run() throws FuseException {
-        try {
+
+        try{
             this.log(true).mount(path);
         } catch (FuseException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            logger.log(Level.FINE, e.toString(), e);
         }
     }
 
-
-    final String contents = "Hello World!\n";
 
     @Override
     public int getattr(final String path, final StructStat.StatWrapper stat) {

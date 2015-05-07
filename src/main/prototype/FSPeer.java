@@ -17,15 +17,23 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Random;
+import java.util.logging.Logger;
 
 /**
  * Created by riccardo on 23.04.15.
  */
 public class FSPeer {
+
+    private static final Logger logger = Logger.getLogger( FSPeer.class.getName() );
+
     private static PeerDHT peerDHT;
+    //private static Logger logger;
+
 
     public static void main(String[] args) throws Exception {
         String mountPoint = args[0];
+
+        //configureLogger();
 
         if (args.length == 1){
             startServer();
@@ -46,6 +54,13 @@ public class FSPeer {
 
         new FuseRunner(new ControllerContext(peerDHT), mountPoint).run();
     }
+
+    /*
+    private static void configureLogger() {
+
+        logger = Logger.getLogger(FSPeer.class.getName());
+    }
+    */
 
     public static void startServer() throws Exception {
 

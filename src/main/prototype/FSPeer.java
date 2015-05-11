@@ -17,17 +17,26 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Random;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Created by riccardo on 23.04.15.
  */
 public class FSPeer {
     private static PeerDHT peerDHT;
+    private static Logger logger = null;
+    private static FileHandler fh;
 
     public static void main(String[] args) throws Exception {
         String mountPoint = args[0];
 
+
         if (args.length == 1){
+            //if we run just server, only create peer.log
+            initLogger("master.");
             startServer();
             createRoot();
         }
@@ -38,13 +47,32 @@ public class FSPeer {
 
             if (args.length == 3){
                 port = Integer.parseInt(args[2]);
+                initLogger(Integer.toString(port)+".");
             } else {
+                initLogger("");
                 port = 4000;
             }
             startClient(serverIP, port);
         }
 
-        new FuseRunner(new ControllerContext(peerDHT), mountPoint).run();
+        new FuseRunner(new ControllerContext(peerDHT), mountPoint).run(logger);
+    }
+
+    private static void initLogger(String prefix) {
+        logger = Logger.getLogger("mainLog");
+        try {
+            fh = new FileHandler(prefix+"peer.log", true);
+            logger.addHandler(fh);
+            logger.setLevel(Level.INFO);
+
+            SimpleFormatter sf = new SimpleFormatter();
+            fh.setFormatter(sf);
+
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void startServer() throws Exception {

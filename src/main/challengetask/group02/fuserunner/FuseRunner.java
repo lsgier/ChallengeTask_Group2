@@ -8,6 +8,7 @@ import net.fusejna.util.FuseFilesystemAdapterAssumeImplemented;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     private final String path;
@@ -34,18 +35,13 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
 
             return 0;
 
-        } catch (IOException e) {
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NotADirectoryException e) {
-            System.out.println("Tried to treat this file as a directory: " + e.getMessage());
-            return -ErrorCodes.ENOTDIR();
-        } catch (NoSuchFileOrDirectoryException e) {
-            System.out.println("Tried get attributes of this non-existing file: " + e.getMessage());
-            return -ErrorCodes.ENOENT();
         }
 
+        //TODO what should this getattr method normally return?
         return -ErrorCodes.ENOENT();
     }
 
@@ -55,16 +51,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         byte[] s = new byte[0];
         try {
             s = controller.readFile(path, size, offset);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NotADirectoryException e) {
-            //TODO return fuse error codes in these catch phrases
-            e.printStackTrace();
-        } catch (NotAFileException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchFileOrDirectoryException e) {
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
         buffer.put(s);
@@ -77,16 +66,10 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             for (String child : controller.readDir(path)) {
                 filler.add(child);
             }
-        } catch (IOException e) {
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NotADirectoryException e) {
-            System.out.println("Tried to treat this file as a directory: " + e.getMessage());
-            return -ErrorCodes.ENOTDIR();
-        } catch (NoSuchFileOrDirectoryException e) {
-            System.out.println("Tried read this non-existing directory: " + e.getMessage());
-            return -ErrorCodes.ENOENT();
         }
         return 0;
     }
@@ -96,15 +79,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         try {
             controller.createDir(path);
             //mode.setMode(TypeMode.NodeType.DIRECTORY);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NotADirectoryException e) {
-            System.out.println("Tried to treat this file as a directory: " + e.getMessage());
-            return -ErrorCodes.ENOTDIR();
-        } catch (NoSuchFileOrDirectoryException e) {
-            System.out.println("Tried read this non-existing directory: " + e.getMessage());
-            return -ErrorCodes.ENOENT();
-        } catch (IOException e) {
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
         return 0;
@@ -115,7 +92,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         try {
             controller.createFile(path);
             //mode.setMode(TypeMode.NodeType.DIRECTORY);
-        } catch (Exception e) {
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
         return 0;
@@ -125,7 +104,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int rename(final String path, final String newName) {
         try {
             controller.rename(path, newName);
-        } catch (Exception e) {
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
         return 0;
@@ -135,9 +116,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int rmdir(final String path) {
         try {
             controller.deleteDirectory(path);
-        } catch (DirectoryNotEmptyException e) {
-            return -ErrorCodes.ENOTEMPTY();
-        } catch (Exception e) {
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
         return 0;
@@ -147,11 +128,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int unlink(final String path) {
         try {
             controller.deleteFile(path);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } catch (NotAFileException e) {
-            //TODO fuse errors
-
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
         return 0;
@@ -162,18 +141,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
                      final StructFuseFileInfo.FileInfoWrapper wrapper) {
         try {
             return controller.writeFile(path, buf, bufSize, writeOffset);
-        } catch (BusyException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NotADirectoryException e) {
-            //TODO return fuse errors
-            e.printStackTrace();
-        } catch (NotAFileException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchFileOrDirectoryException e) {
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
         //return ((MemoryFile) p).write(buf, bufSize, writeOffset);
@@ -188,18 +158,43 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         //flush is only used in context with file
         try {
             controller.whenFileClosed(path);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NotADirectoryException e) {
-            //TODO create method that handle exceptions and returns the right error code
-            e.printStackTrace();
-        } catch (NoSuchFileOrDirectoryException e) {
-            e.printStackTrace();
-        } catch (NotAFileException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (FsException e) {
+            return getErrorCode(e);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
+
+        return 0;
+    }
+
+
+    /**
+     * This method returns the right FUSE error code, depending on what type the FsException is.
+     *
+     * @param e FsException
+     * @return int Fuse Error code
+     */
+    private int getErrorCode(FsException e) {
+        if (Objects.equals(e.getClass().getName(), NotADirectoryException.class.getName())) {
+            return -ErrorCodes.ENOTDIR();
+        }
+        if (Objects.equals(e.getClass().getName(), DirectoryNotEmptyException.class.getName())) {
+            return -ErrorCodes.ENOTEMPTY();
+        }
+        if (Objects.equals(e.getClass().getName(), BusyException.class.getName())) {
+            //TODO is this the right error code?
+            return -ErrorCodes.EBUSY();
+        }
+        if (Objects.equals(e.getClass().getName(), NoSuchFileOrDirectoryException.class.getName())) {
+            System.out.println("Tried read this non-existing directory: " + e.getMessage());
+            return -ErrorCodes.ENOENT();
+        }
+        if (Objects.equals(e.getClass().getName(), NotAFileException.class.getName())) {
+            return -ErrorCodes.EISDIR();
+        } else {
+            //TODO return some generic error code?
+        }
+
 
         return 0;
     }

@@ -146,7 +146,7 @@ public class DHTPutGetHelper {
     }
 
     public void flushFile(File file) {
-        file.setDirtyBit(false);
+        file.setReadOnly(false);
         file.setModifierPeer(null);
 
         try {

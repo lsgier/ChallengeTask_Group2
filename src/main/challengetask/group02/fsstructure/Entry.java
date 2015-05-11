@@ -23,6 +23,10 @@ public class Entry implements Serializable, Cloneable {
     public Entry() {
     	
     }
+    
+    public boolean getDirtyBit() {
+    	return dirtyBit;
+    }
 
     public void setDirtyBit(boolean dirtyBit) {
         this.dirtyBit = dirtyBit;

@@ -34,8 +34,7 @@ public class FileContentController {
 	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) throws BusyException {
 		
 		
-		if(file.getDirtyBit() == true) {
-			
+		if(file.getReadOnly() == true) {			
 			if( file.getModifierPeer().compareTo(peer.peerID()) != 0) {
 				throw new BusyException(file.getEntryName()+" is busy and held by peer with ID: "+file.getModifierPeer());								
 			}			

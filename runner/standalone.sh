@@ -20,4 +20,9 @@ fi
 
 cd "target"
 
-java -cp p2pfs.jar prototype.FSPeer "$mountPoint" "$2"
+if [ -z "$2" ]
+  then
+     java -cp p2pfs.jar prototype.FSPeer "$mountPoint"
+  else
+    java -cp p2pfs.jar prototype.FSPeer "$mountPoint" "$2"
+fi

@@ -2,6 +2,6 @@ package challengetask.group02;
 
 public class Constants {
 	
-	final public static int BLOCK_SIZE =  4096;
+	final public static int BLOCK_SIZE =  16384;
 
 }

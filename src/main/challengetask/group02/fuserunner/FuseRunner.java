@@ -22,7 +22,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
 
     public void run() throws FuseException {
         try {
-            this.log(true).mount(path);
+            this.log(false).mount(path);
         } catch (FuseException e) {
             e.printStackTrace();
         }

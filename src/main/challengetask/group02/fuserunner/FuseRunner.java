@@ -8,6 +8,7 @@ import net.fusejna.util.FuseFilesystemAdapterAssumeImplemented;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.logging.Logger;
 import java.util.Objects;
 
 public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
@@ -20,9 +21,9 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         this.path = path;
     }
 
-    public void run() throws FuseException {
+    public void run(Logger logger) throws FuseException {
         try {
-            this.log(false).mount(path);
+            this.log(logger).mount(path);
         } catch (FuseException e) {
             e.printStackTrace();
         }

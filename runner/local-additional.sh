@@ -27,4 +27,5 @@ if [ ! -d "$mountPoint/peer$2" ]; then
 	mkdir -p "$mountPoint/peer$2"
 fi
 
-java -cp target/p2pfs.jar prototype.FSPeer "$mountPoint/peer$2" "127.0.0.1" "$port"
+cd "target"
+java -cp p2pfs.jar prototype.FSPeer "$mountPoint/peer$2" "127.0.0.1" "$port"

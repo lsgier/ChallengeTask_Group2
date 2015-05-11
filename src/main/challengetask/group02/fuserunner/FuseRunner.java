@@ -1,7 +1,6 @@
 package challengetask.group02.fuserunner;
 
 import challengetask.group02.controllers.*;
-import challengetask.group02.fsstructure.Entry;
 import net.fusejna.*;
 import net.fusejna.StructFuseFileInfo.FileInfoWrapper;
 import net.fusejna.types.TypeMode;
@@ -28,25 +27,13 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         }
     }
 
-
-    final String contents = "Hello World!\n";
-
     @Override
     public int getattr(final String path, final StructStat.StatWrapper stat) {
         try {
-            Entry entry = controller.findEntry(path);
-            if (entry.getType() == Entry.TYPE.DIRECTORY) {
-                stat.setMode(TypeMode.NodeType.DIRECTORY);
-                return 0;
-            }
-            if (entry.getType() == Entry.TYPE.FILE) {
-                //by far just use default content, but later need something like entry.getSize() or whatever
-                stat.setMode(TypeMode.NodeType.FILE).size(entry.getSize());
-                
-                controller.updateFileMetaData(entry, stat);
-                
-                return 0;
-            }
+            controller.updateFileMetaData(path, stat);
+
+            return 0;
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -176,7 +163,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         try {
             return controller.writeFile(path, buf, bufSize, writeOffset);
         } catch (BusyException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NotADirectoryException e) {
@@ -193,14 +180,27 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
 
         return 0;
     }
-    
-	@Override
-	public int flush(final String path, final FileInfoWrapper info) {
-		
-		//introduced for the locking mechanism
-		//flush is only used in context with file
-		controller.whenFileClosed(path);
-		
-		return 0;		
-	}
+
+    @Override
+    public int flush(final String path, final FileInfoWrapper info) {
+
+        //introduced for the locking mechanism
+        //flush is only used in context with file
+        try {
+            controller.whenFileClosed(path);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NotADirectoryException e) {
+            //TODO create method that handle exceptions and returns the right error code
+            e.printStackTrace();
+        } catch (NoSuchFileOrDirectoryException e) {
+            e.printStackTrace();
+        } catch (NotAFileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
 }

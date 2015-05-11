@@ -143,7 +143,16 @@ public class DHTPutGetHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public void flushFile(File file) {
+        file.setDirtyBit(false);
+        file.setModifierPeer(null);
 
+        try {
+            put(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -5,6 +5,7 @@ import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
 import challengetask.group02.helpers.DHTPutGetHelper;
 import net.fusejna.StructStat;
+import net.fusejna.types.TypeMode;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
@@ -94,6 +95,7 @@ public class TreeController implements TreeControllerStrategy {
             throw new NotAFileException(path);
         }
     }
+
     @Override
     public Directory getDirectory(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
         Entry entry = findEntry(path);
@@ -114,7 +116,7 @@ public class TreeController implements TreeControllerStrategy {
         Path subPaths = Paths.get(path);
         int pathLength = subPaths.getNameCount();
         if (pathLength == 0) {
-            throw new NotADirectoryException("Don't create a root node like that! Path: "+path);
+            throw new NotADirectoryException("Don't create a root node like that! Path: " + path);
         }
 
         Number160 newKey = Number160.createHash(UUID.randomUUID().hashCode());
@@ -131,7 +133,7 @@ public class TreeController implements TreeControllerStrategy {
     public void createFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
 
         Path subPaths = Paths.get(path);
-        
+
         int pathLength = subPaths.getNameCount();
         if (pathLength == 0) {
             throw new NoSuchFileOrDirectoryException("Can not create such file");
@@ -141,12 +143,12 @@ public class TreeController implements TreeControllerStrategy {
 
         Directory parentEntry = getDirectory(subPaths.getParent().toString());
 
-        File newFile = new File (newKey, parentEntry.getID(), subPaths.getFileName().toString());
+        File newFile = new File(newKey, parentEntry.getID(), subPaths.getFileName().toString());
 
         //this is new locking logic, due to fuse constraints we have to associate a file creation with the respective owner
         newFile.setDirtyBit(true);
         newFile.setModifierPeer(peer.peerID());
-        
+
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
         helper.addNewEntry(parentEntry, newFile);
     }
@@ -159,7 +161,7 @@ public class TreeController implements TreeControllerStrategy {
         Hashtable<String, Number160> children = dir.getChildren(FILE);
         children.putAll(dir.getChildren(DIRECTORY));
 
-        return new ArrayList<String>(children.keySet());
+        return new ArrayList<>(children.keySet());
     }
 
     @Override
@@ -182,7 +184,7 @@ public class TreeController implements TreeControllerStrategy {
         if (oldPath.getParent().compareTo(newPath.getParent()) == 0) {
 
             Directory parent = (Directory) getEntryFromID(entry.getParentID());
-            helper.updateEntryName((Directory) parent, entry, newName);
+            helper.updateEntryName(parent, entry, newName);
 
         } else {
             Directory oldParent = getDirectory(oldPath.getParent().toString());
@@ -222,37 +224,33 @@ public class TreeController implements TreeControllerStrategy {
         helper.removeAndDeleteChild(parent, file);
 
 
-
     }
 
 
-
-
-
-    
     //used for the locking logic
-    public void whenFileClosed(String path) {
-    	    	
-    	try {
-			File file = this.getFile(path);
-			file.setDirtyBit(false);
-			file.setModifierPeer(null);
-		} catch (ClassNotFoundException | NotADirectoryException
-				| NoSuchFileOrDirectoryException | IOException
-				| NotAFileException e) {
-			e.printStackTrace();
-		}
-    }
-    
-    public void updateFileMetaData(Entry entry, final StructStat.StatWrapper stat) {
-    	
-    	File file = (File)entry;
-    	
-    	
-    	stat.atime(file.getAtime());
-    	stat.ctime(file.getCtime());    	
+    @Override
+    public void whenFileClosed(String path) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException {
+        File file = getFile(path);
+        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+        helper.flushFile(file);
     }
 
+    @Override
+    public void updateFileMetaData(String path, final StructStat.StatWrapper stat) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException {
+
+        Entry entry = findEntry(path);
+        if (entry.getType() == Entry.TYPE.DIRECTORY) {
+            stat.setMode(TypeMode.NodeType.DIRECTORY);
+        }
+        if (entry.getType() == Entry.TYPE.FILE) {
+            stat.setMode(TypeMode.NodeType.FILE);
+            File file = (File) entry;
+
+            stat.setMode(TypeMode.NodeType.FILE).size(entry.getSize());
+            stat.atime(file.getAtime());
+            stat.ctime(file.getCtime());
+        }
+    }
 
 
 }

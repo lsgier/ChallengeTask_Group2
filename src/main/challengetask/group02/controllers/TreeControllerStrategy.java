@@ -31,12 +31,12 @@ public interface TreeControllerStrategy {
     void renameEntry(String path, String newName) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
 
     void createFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
-    
-    void updateFileMetaData(Entry entry, final StructStat.StatWrapper stat);
 
     void deleteFile(String path) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException;
 
-    void whenFileClosed(String path);
+    void whenFileClosed(String path) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException;
 
     void removeDirectory(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, DirectoryNotEmptyException;
+
+    void updateFileMetaData(String path, StructStat.StatWrapper stat) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
 }

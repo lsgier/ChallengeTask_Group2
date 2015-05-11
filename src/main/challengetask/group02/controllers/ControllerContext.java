@@ -77,12 +77,12 @@ public class ControllerContext {
     }
 
     //used for the locking logic
-	public void whenFileClosed(String path) {
-		treeController.whenFileClosed(path);		
+	public void whenFileClosed(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, NotAFileException, IOException {
+		treeController.whenFileClosed(path);
 	}
 	
-	public void updateFileMetaData(Entry entry, final StructStat.StatWrapper stat) {
-		treeController.updateFileMetaData(entry, stat);		
+	public void updateFileMetaData(String path, final StructStat.StatWrapper stat) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+		treeController.updateFileMetaData(path, stat);
 	}
 
     //TODO test creating a root directory object "/" and some other directories

@@ -101,7 +101,8 @@ public class DHTPutGetHelper {
 
     public void removeAndDeleteChild(Directory parent, Entry entry) {
         try {
-            setDirty(entry);
+            entry.setDirtyBit(true);
+            put(entry);
 
             parent.removeChild(entry.getEntryName());
             put(parent);
@@ -112,17 +113,6 @@ public class DHTPutGetHelper {
             e.printStackTrace();
         }
 
-    }
-
-    public void setDirty(Entry entry) {
-        entry.setDirtyBit(true);
-
-        try {
-            put(entry);
-        }
-        catch (Exception e){
-            //TODO
-        }
     }
 
     public void removeEntry(Entry entry) {

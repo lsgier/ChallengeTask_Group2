@@ -209,6 +209,26 @@ public class TreeController implements TreeControllerStrategy {
             throw new DirectoryNotEmptyException(path);
         }
     }
+
+    @Override
+    public void deleteFile(String path) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException {
+        Path dirPath = Paths.get(path);
+        File file = getFile(path);
+        Directory parent = getDirectory(dirPath.getParent().toString());
+
+        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+
+        helper.clearAndDeleteFile(file);
+        helper.removeAndDeleteChild(parent, file);
+
+
+
+    }
+
+
+
+
+
     
     //used for the locking logic
     public void whenFileClosed(String path) {

@@ -3,6 +3,7 @@ package challengetask.group02.helpers;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 
+import challengetask.group02.fsstructure.File;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.dht.PeerDHT;
@@ -116,7 +117,33 @@ public class DHTPutGetHelper {
     }
 
     public void removeEntry(Entry entry) {
+        //TODO asynchronous
         FutureRemove future = peer.remove(entry.getID()).start();
         future.awaitUninterruptibly();
+    }
+
+    /**
+     * This method deletes (removes from DHT) all the blocks of the file, so that the file object can be safely deleted.
+     * @param file The file to be cleared.
+     */
+    public void clearAndDeleteFile(File file) {
+        file.setDirtyBit(true);
+        try {
+            put(file);
+
+            for (Number160 number160 : file.getBlocks()) {
+                //TODO asynchronous: callbacks are counted, after all deletions called back, resume with deleting the file
+                FutureRemove future = peer.remove(number160).start();
+                future.awaitUninterruptibly();
+            }
+
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 }

@@ -162,6 +162,10 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             controller.deleteFile(path);
         } catch (Exception e) {
             e.printStackTrace();
+        } catch (NotAFileException e) {
+            //TODO fuse errors
+
+            e.printStackTrace();
         }
         return 0;
     }

@@ -53,7 +53,17 @@ public class ControllerContext {
         treeController.removeDirectory(path);
     }
 
-    public void deleteFile(String path) {
+    /**
+     * This method first clears the file (deletes all blocks) and then unlinks and deletes the file object.
+     * @param path
+     * @throws ClassNotFoundException
+     * @throws NotADirectoryException
+     * @throws NoSuchFileOrDirectoryException
+     * @throws NotAFileException
+     * @throws IOException
+     */
+    public void deleteFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, NotAFileException, IOException {
+        treeController.deleteFile(path);
     }
 
     public byte[] readFile(String path, long size, long offset) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException {

@@ -18,8 +18,6 @@ if [ "$(ls -A $1)" ]; then
    exit 1
 fi
 
-cd "target"
-
 if [ -z "$2" ]
   then
      java -cp p2pfs.jar prototype.FSPeer "$mountPoint"

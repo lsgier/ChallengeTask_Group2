@@ -2,7 +2,16 @@
 
 mountPoint="$1"
 
-rm -rf "$mountPoint/"*
+if [ -z "$1" ]
+  then
+    echo "Mount point is not specified"
+    exit 1
+fi
+
+if [ "$(ls -A $1)" ]; then
+   echo "Mount point is not empty"
+   exit 1
+fi
 
 if [ ! -d "$mountPoint/master" ]; then
 	mkdir -p "$mountPoint/master"

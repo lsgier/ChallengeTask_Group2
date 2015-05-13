@@ -19,6 +19,8 @@ public class Entry implements Serializable, Cloneable {
     protected TYPE type;
     protected long size;
     protected boolean dirtyBit;
+
+    private static final long serialVersionUID = 1L;
     
     public Entry() {
     	

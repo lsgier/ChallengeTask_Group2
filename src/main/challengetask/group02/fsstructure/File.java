@@ -14,6 +14,8 @@ public class File extends Entry {
 	private long ctime;
 	private boolean readOnly;
 
+	private static final long serialVersionUID = 1L;
+
 	//Like discussed, calculating and fetching data is done via controller classes	
 	public File(String fileName, long fileSize, Number160 ID) {
 		

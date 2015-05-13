@@ -8,6 +8,8 @@ public class Directory extends Entry{
 
     private Hashtable<String, Number160> fileChildren;
     private Hashtable<String, Number160> dirChildren;
+
+    private static final long serialVersionUID = 1L;
     
     public Directory(Number160 ID, Number160 parentID, String entryName) {
         this.type = TYPE.DIRECTORY;

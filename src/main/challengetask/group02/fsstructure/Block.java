@@ -14,7 +14,9 @@ public class Block implements Serializable {
 	private long checksum; 
 	private int size;
 	private byte[] data;
-	
+
+	private static final long serialVersionUID = 1L;
+
 	public Block(Number160 ID, long seq_number, long checksum, int size, byte[] data) {
 		
 		//the data is probably going to be assigned via copy-by-reference, no need to allocate memory

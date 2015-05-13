@@ -5,6 +5,8 @@ public class Meta {
 	private long atime;
 	private long ctime;
 	private long size;
+
+	private static final long seriaionUID = 1L;
 	
 	public Meta() {
 		

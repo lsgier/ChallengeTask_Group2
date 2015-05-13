@@ -81,6 +81,7 @@ public class FSPeer {
 
         Bindings b = new Bindings().addProtocol(StandardProtocolFamily.INET).addAddress(InetAddress.getByName("127.0.0.1"));
 
+
         peerDHT = new PeerBuilderDHT(new PeerBuilder(new Number160(rnd)).ports(4000).start()).start();
 
         System.out.println("Server started Listening to: " + DiscoverNetworks.discoverInterfaces(b));
@@ -90,7 +91,7 @@ public class FSPeer {
     }
     private static void createRoot() throws IOException {
         //create a root node
-        Directory rootDir = new Directory(Number160.ZERO, null, "rootNodeName");
+        Directory rootDir = new Directory(Number160.ZERO, null, "root");
         //upload root into DHT
         Data data = new Data(rootDir);
         FutureDHT futureDHT = peerDHT.put(Number160.ZERO).data(data).start();

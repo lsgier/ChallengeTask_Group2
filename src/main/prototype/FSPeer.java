@@ -10,6 +10,7 @@ import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
+import net.tomp2p.replication.IndirectReplication;
 import net.tomp2p.storage.Data;
 
 import java.io.IOException;
@@ -84,6 +85,8 @@ public class FSPeer {
 
         peerDHT = new PeerBuilderDHT(new PeerBuilder(new Number160(rnd)).ports(4000).start()).start();
 
+        new IndirectReplication(peerDHT).start();
+
         System.out.println("Server started Listening to: " + DiscoverNetworks.discoverInterfaces(b));
         System.out.println("address visible to outside is " + peerDHT.peerAddress());
 
@@ -103,6 +106,7 @@ public class FSPeer {
         Bindings b = new Bindings().addProtocol(StandardProtocolFamily.INET).addAddress(InetAddress.getByName("127.0.0.1"));
 
         peerDHT = new PeerBuilderDHT(new PeerBuilder(new Number160(rnd)).ports(port).start()).start();
+        new IndirectReplication(peerDHT).start();
         System.out.println("Client started and Listening to: " + DiscoverNetworks.discoverInterfaces(b));
         System.out.println("address visible to outside is " + peerDHT.peerAddress());
 

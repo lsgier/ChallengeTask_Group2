@@ -146,7 +146,7 @@ public class TreeController implements TreeControllerStrategy {
         File newFile = new File(newKey, parentEntry.getID(), subPaths.getFileName().toString());
 
         //this is new locking logic, due to fuse constraints we have to associate a file creation with the respective owner
-        newFile.setDirtyBit(true);
+        newFile.setReadOnly(true);
         newFile.setModifierPeer(peer.peerID());
 
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
@@ -247,6 +247,9 @@ public class TreeController implements TreeControllerStrategy {
             File file = (File) entry;
 
             stat.setMode(TypeMode.NodeType.FILE).size(entry.getSize());
+            
+            System.out.println("***atime: "+file.getAtime());
+            System.out.println("***ctime: "+file.getCtime());
             stat.atime(file.getAtime());
             stat.ctime(file.getCtime());
         }

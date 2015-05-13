@@ -10,14 +10,14 @@ public class File extends Entry {
 
 	private Number160 modifierPeer;
 	private ArrayList<Number160> blocks;	
-	private boolean dirtyBit;
 	private long atime;
 	private long ctime;
+	private boolean readOnly;
 
 	//Like discussed, calculating and fetching data is done via controller classes	
 	public File(String fileName, long fileSize, Number160 ID) {
 		
-		dirtyBit = false;
+		readOnly = false;
 		this.type = TYPE.FILE;		
 
 		this.size = fileSize;
@@ -31,7 +31,7 @@ public class File extends Entry {
 
 	public File(Number160 ID, Number160 parentID, String entryName) {
 		
-		dirtyBit = false;
+		readOnly = false;
 		this.type = TYPE.FILE;		
 
 		this.ID = ID;
@@ -48,14 +48,14 @@ public class File extends Entry {
 	public File() {
 		blocks = new ArrayList<Number160>();
 
-	}	
+	}
 	
-	public boolean getDirtyBit() {
-		return dirtyBit;
+	public boolean getReadOnly() {
+		return readOnly;
 	}
 
-	public void setDirtyBit(boolean dirtyBit) {
-		this.dirtyBit = dirtyBit;
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 	
 	public Number160 getModifierPeer() {

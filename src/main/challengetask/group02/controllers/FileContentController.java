@@ -34,8 +34,7 @@ public class FileContentController {
 	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) throws BusyException {
 		
 		
-		if(file.getDirtyBit() == true) {
-			
+		if(file.getReadOnly() == true) {			
 			if( file.getModifierPeer().compareTo(peer.peerID()) != 0) {
 				throw new BusyException(file.getEntryName()+" is busy and held by peer with ID: "+file.getModifierPeer());								
 			}			
@@ -142,10 +141,10 @@ public class FileContentController {
 
 		file.setSize(position + outWriteOffset);
 
-		this.putIntoDHT(file.getID(), file);
-		
 		//update meta information
 		file.setCtime(System.currentTimeMillis()/1000);
+		this.putIntoDHT(file.getID(), file);
+		
 		
 		//the size of the content that was written		
 		return position;
@@ -235,6 +234,7 @@ public class FileContentController {
 
 		//update meta information
 		file.setAtime(System.currentTimeMillis()/1000);
+		this.putIntoDHT(file.getID(), file);
 				
 		return content;
 	}

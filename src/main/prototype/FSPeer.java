@@ -3,6 +3,7 @@ package prototype;
 import challengetask.group02.controllers.ControllerContext;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fuserunner.FuseRunner;
+import challengetask.group02.helpers.IndirectReplication;
 import net.tomp2p.connection.*;
 import net.tomp2p.dht.*;
 import net.tomp2p.futures.FutureBootstrap;
@@ -10,7 +11,7 @@ import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.replication.IndirectReplication;
+
 import net.tomp2p.storage.Data;
 
 import java.io.IOException;
@@ -84,6 +85,7 @@ public class FSPeer {
 
 
         peerDHT = new PeerBuilderDHT(new PeerBuilder(new Number160(rnd)).ports(4000).start()).start();
+
 
         new IndirectReplication(peerDHT).start();
 

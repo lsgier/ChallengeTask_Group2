@@ -41,6 +41,7 @@ public class TreeController implements TreeControllerStrategy {
 
         if (ID == null) {
             System.err.println("BUG: trying to get Entry with ID null!");
+            //TODO this is crap
             return new Directory(null, null, "dummy");
         }
         FutureGet futureGet = peer.get(ID).start();

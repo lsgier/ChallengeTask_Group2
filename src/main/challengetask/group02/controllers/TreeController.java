@@ -225,17 +225,11 @@ public class TreeController implements TreeControllerStrategy {
     }
 
     //used for the locking logic
-    public void whenFileClosed(String path) {
-    	    	
-    	try {
-			File file = this.getFile(path);
-			file.setDirtyBit(false);
-			file.setModifierPeer(null);
-		} catch (ClassNotFoundException | NotADirectoryException
-				| NoSuchFileOrDirectoryException | IOException
-				| NotAFileException e) {
-			e.printStackTrace();
-		}
+    @Override
+    public void whenFileClosed(String path) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException {
+        File file = getFile(path);
+        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+        helper.flushFile(file);
     }
 
     @Override

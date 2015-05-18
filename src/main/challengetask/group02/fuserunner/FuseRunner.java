@@ -57,6 +57,8 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
+        } catch (CRCException e) {
+        	e.printStackTrace();
         }
         buffer.put(s);
         return s.length;

@@ -66,7 +66,7 @@ public class ControllerContext {
         treeController.deleteFile(path);
     }
 
-    public byte[] readFile(String path, long size, long offset) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException {
+    public byte[] readFile(String path, long size, long offset) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException, CRCException {
         File file = treeController.getFile(path);
         return this.fileContentController.readFile(file, size, offset);
     }

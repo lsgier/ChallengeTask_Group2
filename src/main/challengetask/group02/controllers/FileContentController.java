@@ -1,17 +1,12 @@
 package challengetask.group02.controllers;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.zip.CRC32;
 
-
-import net.tomp2p.dht.FutureDHT;
-import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
-import net.tomp2p.storage.Data;
 import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.File;
 import challengetask.group02.helpers.DHTPutGetHelper;
@@ -28,11 +23,9 @@ public class FileContentController {
 		
 		this.peer = peer;
 		dhtPutGetHelper = new DHTPutGetHelper(this.peer);
-	}
+	}	
 	
-	
-	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) throws BusyException {
-		
+	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) throws BusyException {		
 		
 		if(file.getReadOnly() == true) {			
 			if( file.getModifierPeer().compareTo(peer.peerID()) != 0) {
@@ -51,13 +44,10 @@ public class FileContentController {
 						
 		//copy the bytebuffer (data to write) into our content array
 		//assuming we the content has length bufSize, otherwise BufferUnderFlowException will be thrown
-
 		buffer.get(content);
 				
 		ArrayList<Number160> blockIDs = file.getBlocks();
 
-		//a: when the code checked if there's a need to add the block
-		//it always took blockIDs.size() which never changed even if more blocks were added
 		int blockCount = blockIDs.size();
 
 		//first block is special case
@@ -72,8 +62,6 @@ public class FileContentController {
 
 		for(int index = startBlock; index <= endBlock; index++) {
 						
-			//startBytes = Constants.BLOCK_SIZE - (int)offset%Constants.BLOCK_SIZE;
-
 			CRC32 crc32 = new CRC32();
 			Block block;
 			int bytesToWrite = 0;			
@@ -85,14 +73,12 @@ public class FileContentController {
 				block = new Block();			
 				block.setChecksum(index);
 				block.setID(ID);
-				//here one thing that was not correct
 				blockCount ++;
 				blockCreated = true;
 			} else {
 				//if the block exists, fetch it
-				block = getBlockDHT(blockIDs.get(index));
-				blockCreated = false;
-				
+				block = dhtPutGetHelper.getBlockDHT(blockIDs.get(index));
+				blockCreated = false;				
 			}			
 			
 			//we have to make a distinction between which block we are visiting at the moment
@@ -103,14 +89,8 @@ public class FileContentController {
 					startBytes = Constants.BLOCK_SIZE - (int)writeOffset%Constants.BLOCK_SIZE;
 					bytesToWrite = startBytes;
 				} else if(index == endBlock) {
-					//a: the second thing I found here, the previuos version
-					//was not working correct when needed to write exactly one block at the end
-					//returned 0 (1024%1024 == 0) so had to change this
-					//need to test more, maybe in other cases can work incorrect
 
 					endBytes = (int)((bufSize + outWriteOffset)%Constants.BLOCK_SIZE);
-
-					//endBytes = ((int)bufSize - startBytes)%Constants.BLOCK_SIZE;
 
 					if (endBytes == 0) endBytes = Constants.BLOCK_SIZE;
 					bytesToWrite = endBytes;
@@ -121,12 +101,10 @@ public class FileContentController {
 
 			System.arraycopy(content, position, block.getData(), (int) writeOffset % Constants.BLOCK_SIZE, bytesToWrite);
 
-
 			crc32.update(block.getData());
 			block.setChecksum(crc32.getValue());
 
-
-			putIntoDHT(block.getID(), block);
+			dhtPutGetHelper.putBlock(block.getID(), block);
 
 			if (blockCreated){
 				file.addBlock(block.getID());
@@ -135,26 +113,20 @@ public class FileContentController {
 			//offset is only for the first time
 			writeOffset = 0;
 			position += bytesToWrite;			
-			
 		}
-
 
 		file.setSize(position + outWriteOffset);
 
 		//update meta information
 		file.setCtime(System.currentTimeMillis()/1000);
-		this.putIntoDHT(file.getID(), file);
-		
+		//this.putIntoDHT(file.getID(), file);
+		dhtPutGetHelper.putFile(file.getID(), file);		
 		
 		//the size of the content that was written		
 		return position;
 	}		
 	
-	public byte[] readFile(File file, long size, long offset) {
-		
-		//The following is the function definition by FUSE, instead of the String Path
-		//we take as an argument the file, which is being determined by the TreeController
-		//readFile(String path, long size, long offset)
+	public byte[] readFile(File file, long size, long offset) throws CRCException {
 		
 		//We don't need to read the whole file, but only "size" bytes, starting from "offset"
 		byte[] content = new byte[(int)size];
@@ -172,7 +144,6 @@ public class FileContentController {
 		//the -1 because the byte where the offset points to is read as well
 		//example offset "abcdefgh" with offset = 3 and length = 3 is "def"
 		int endBlock = (int)((size+offset-1)/Constants.BLOCK_SIZE);
-
 		
 		if(endBlock > blocks.size()-1) {
 			endBlock = blocks.size()-1;
@@ -184,26 +155,21 @@ public class FileContentController {
 		//number of bytes read from the last block
 		int endBytes = 0;
 		int position = 0;
-
-
 		
 		for(int index = startBlock; index <= endBlock; index++) {
 						
 			Number160 ID = blocks.get(index);
-			Block block = getBlockDHT(ID);
-			//System.out.println(new String(block.getData()));
+			Block block = dhtPutGetHelper.getBlockDHT(ID);
 			CRC32 crc32 = new CRC32();
 			int bytesToRead = 0;
 			
-			//first check if crc is correct
+			//first check if CRC is correct
 			crc32.update(block.getData());
 			if(! (crc32.getValue() == block.getChecksum()) ) {
-				//this needs to be checked or an appropriate excpetion needs to be thrown
-				return null;
+				throw new CRCException(file.getEntryName());
 			}
 			
-			//since we read sequential, sequence number checking doesn't make sense in this case
-			
+			//since we read sequential, sequence number checking doesn't make sense in this case			
 			//we have to do case distinction, if we only have one block to read, it's easily done.
 			if(startBlock == endBlock) {
 				bytesToRead = (int)size;
@@ -216,9 +182,7 @@ public class FileContentController {
 					startBytes = Constants.BLOCK_SIZE - (int)offset%Constants.BLOCK_SIZE;
 					bytesToRead = startBytes;
 				} else if(index == endBlock) {
-					//a: same as for writeFile()
 					endBytes = (int)((size + outOffset)%Constants.BLOCK_SIZE);
-					//endBytes = ((int)size - startBytes)%Constants.BLOCK_SIZE;
 
 					if (endBytes == 0) endBytes = Constants.BLOCK_SIZE;
 					bytesToRead = endBytes;
@@ -234,67 +198,9 @@ public class FileContentController {
 
 		//update meta information
 		file.setAtime(System.currentTimeMillis()/1000);
-		this.putIntoDHT(file.getID(), file);
+		//this.putIntoDHT(file.getID(), file);
+		dhtPutGetHelper.putFile(file.getID(), file);
 				
 		return content;
 	}
-	
-	//DHT FUNCTIONALITY --------------------------------------------------------
-	
-	//overloaded methods, invoked differently depending on File or Block argument
-	public void putIntoDHT(Number160 ID, File file) {
-		
-		Data data;
-		
-		try {
-			data = new Data(file);
-			FutureDHT futureDHT = peer.put(ID).data(data).start();
-	        futureDHT.awaitUninterruptibly();	
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-	}
-	
-	public void putIntoDHT(Number160 ID, Block block) {
-		
-		Data data;
-		
-		try {
-			data = new Data(block);
-			FutureDHT futureDHT = peer.put(ID).data(data).start();
-			futureDHT.awaitUninterruptibly();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-	}
-	
-	public Block getBlockDHT(Number160 ID) {
-		
-		Block block;
-		
-		try {			
-			FutureGet futureGet = peer.get(ID).start();
-			futureGet.awaitUninterruptibly();
-			
-			block = (Block)futureGet.data().object();
-			
-			return block;
-			
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}  
-		
-		return null;
-	}	
-	
-	public PeerDHT getPeer() {
-		return peer;
-	}
-
-	public void setPeer(PeerDHT peer) {
-		this.peer = peer;
-	}
-
 }

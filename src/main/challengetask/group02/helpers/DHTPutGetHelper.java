@@ -1,13 +1,14 @@
 package challengetask.group02.helpers;
 
+import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
-
 import challengetask.group02.fsstructure.File;
+import net.tomp2p.dht.FutureDHT;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.dht.PeerDHT;
-
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
@@ -46,9 +47,14 @@ public class DHTPutGetHelper {
 
     private void put(Entry entry) throws IOException {
         FuturePut futurePut = peer.put(entry.getID()).data(new Data(entry)).start();
-        futurePut.awaitUninterruptibly();
+        futurePut.awaitUninterruptibly();        
     }
-
+    
+    private void put(Block block) throws IOException {
+    	FuturePut futurePut = peer.put(block.getID()).data(new Data(block)).start();
+    	futurePut.awaitUninterruptibly();
+    }
+    
     public int addNewEntry(Directory parentDir, Entry child){
         //first have to update parent
         try {
@@ -79,8 +85,39 @@ public class DHTPutGetHelper {
 
         return 0;
     }
-
-    //TODO QUESTION why does this return an integer?
+    
+	public void putFile(Number160 ID, File file) {		
+		try {
+			put(file);	
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+	}
+	
+	public void putBlock(Number160 ID, Block block) {
+		try {
+			put(block);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+	}
+	
+	public Block getBlockDHT(Number160 ID) {
+		
+		Block block;		
+		try {			
+			FutureGet futureGet = peer.get(ID).start();
+			futureGet.awaitUninterruptibly();			
+			block = (Block)futureGet.data().object();			
+			return block;			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}  		
+		return null;
+	}
+	
     public int moveEntry(Directory newParent, Directory oldParent, Entry entry, String newName) {
         newParent.addChild(newName, entry.getID(), entry.getType());
         oldParent.removeChild(entry.getEntryName());
@@ -136,9 +173,6 @@ public class DHTPutGetHelper {
                 FutureRemove future = peer.remove(number160).start();
                 future.awaitUninterruptibly();
             }
-
-
-
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -4,7 +4,6 @@ public class Meta {
 	
 	private long atime;
 	private long ctime;
-	private long size;
 
 	private static final long seriaionUID = 1L;
 	
@@ -23,11 +22,5 @@ public class Meta {
 	}
 	public void setCtime(long ctime) {
 		this.ctime = ctime;
-	}
-	public long getSize() {
-		return size;
-	}
-	public void setSize(long size) {
-		this.size = size;
 	}
 }

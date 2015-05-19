@@ -57,6 +57,8 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
+        } catch (CRCException e) {
+        	e.printStackTrace();
         }
         buffer.put(s);
         return s.length;
@@ -194,10 +196,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         if (Objects.equals(e.getClass().getName(), NotAFileException.class.getName())) {
             return -ErrorCodes.EISDIR();
         } else {
-            //TODO return some generic error code?
+        	return -1;
         }
-
-
-        return 0;
     }
 }

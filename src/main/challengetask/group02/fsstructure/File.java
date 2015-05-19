@@ -16,7 +16,6 @@ public class File extends Entry {
 
 	private static final long serialVersionUID = 1L;
 
-	//Like discussed, calculating and fetching data is done via controller classes	
 	public File(String fileName, long fileSize, Number160 ID) {
 		
 		readOnly = false;
@@ -43,13 +42,11 @@ public class File extends Entry {
 		this.size = 0;
 		
 		blocks = new ArrayList<Number160>();
-
 	}
 	
 	//empty constructor
 	public File() {
 		blocks = new ArrayList<Number160>();
-
 	}
 	
 	public boolean getReadOnly() {

@@ -24,9 +24,7 @@ public class TreeControllerTest {
 
     static String rootName = "/";
 
-
     public static TreeControllerStrategy controller;
-
 
     @BeforeClass
     public static void setup() {
@@ -98,9 +96,6 @@ public class TreeControllerTest {
         Directory newSubDir = (Directory) controller.findEntry(testSubPath);
         assertEquals(Entry.TYPE.DIRECTORY, newSubDir.getType());
         assertEquals(testSubPath, testPath+"/"+newSubDir.getEntryName());
-
-
-
     }
 
     @Test
@@ -160,8 +155,5 @@ public class TreeControllerTest {
         }
     }
 
-    //TODO test deletion of directories:
-        //check if it "looks right" from a fuse perspective
-        //check if the entries are actually deleted from the dht
 }
 

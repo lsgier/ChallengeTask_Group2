@@ -11,8 +11,6 @@ public class Entry implements Serializable, Cloneable {
     	DIRECTORY, type;
     }
 	
-    //why not private?
-    //subclasses File and Directory execute methods here, anyway
     protected Number160 ID;
     protected Number160 parentID;
     protected String entryName;
@@ -63,21 +61,16 @@ public class Entry implements Serializable, Cloneable {
         if(this.parentID ==null) {
             //TODO throw exception?
             return;
-        }
-
-        else {
+        } else {
             this.parentID = parentID;
         }
     }
 
     public void setEntryName(String entryName) {
-        //TODO implement DHT request (or use challengetask.group02.controllers) to change the name of this object in the parent objects children list.
         this.entryName = entryName;
     }
 
     public String getEntryName() {
-        //TODO implement DHT request (or use challengetask.group02.controllers) to find out name
         return entryName;
     }
-
 }

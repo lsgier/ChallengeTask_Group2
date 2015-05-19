@@ -196,10 +196,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         if (Objects.equals(e.getClass().getName(), NotAFileException.class.getName())) {
             return -ErrorCodes.EISDIR();
         } else {
-            //TODO return some generic error code?
+        	return -1;
         }
-
-
-        return 0;
     }
 }

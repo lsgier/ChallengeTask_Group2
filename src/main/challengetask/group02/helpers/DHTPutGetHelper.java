@@ -86,7 +86,6 @@ public class DHTPutGetHelper {
         return 0;
     }
     
-    //this is the logic after refactoring the FileContentController
 	public void putFile(Number160 ID, File file) {		
 		try {
 			put(file);	
@@ -103,7 +102,6 @@ public class DHTPutGetHelper {
 		}		
 	}
 	
-	//I didn't seperate this in a special get() command, since TreeController because of the return value	
 	public Block getBlockDHT(Number160 ID) {
 		
 		Block block;		
@@ -119,10 +117,7 @@ public class DHTPutGetHelper {
 		}  		
 		return null;
 	}
-	//end of FileContentController
 	
-
-    //TODO QUESTION why does this return an integer?
     public int moveEntry(Directory newParent, Directory oldParent, Entry entry, String newName) {
         newParent.addChild(newName, entry.getID(), entry.getType());
         oldParent.removeChild(entry.getEntryName());
@@ -178,9 +173,6 @@ public class DHTPutGetHelper {
                 FutureRemove future = peer.remove(number160).start();
                 future.awaitUninterruptibly();
             }
-
-
-
 
         } catch (IOException e) {
             e.printStackTrace();

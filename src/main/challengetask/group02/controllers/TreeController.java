@@ -242,8 +242,6 @@ public class TreeController implements TreeControllerStrategy {
             stat.setMode(TypeMode.NodeType.FILE);
             File file = (File) entry;
             stat.setMode(TypeMode.NodeType.FILE).size(entry.getSize());
-            System.out.println("***atime: "+file.getAtime());
-            System.out.println("***ctime: "+file.getCtime());
             stat.atime(file.getAtime());
             stat.ctime(file.getCtime());
         }

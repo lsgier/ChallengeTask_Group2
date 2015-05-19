@@ -47,6 +47,8 @@ import net.tomp2p.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//Had to be included to set the default replication factor
+
 /**
  * This implements the default indirect replication.
  * 

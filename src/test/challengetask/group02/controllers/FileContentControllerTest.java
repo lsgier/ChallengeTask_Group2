@@ -584,7 +584,13 @@ public class FileContentControllerTest {
 		long testOffset = 3244;
 		
 		
-		byte[] content = fcc.readFile(file, testLength, testOffset);
+		byte[] content = null;
+		try {
+			content = fcc.readFile(file, testLength, testOffset);
+		} catch (CRCException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		assertEquals(content.length, testLength);
 	}

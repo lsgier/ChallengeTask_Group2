@@ -118,8 +118,8 @@ public class FileContentController {
 		file.setSize(position + outWriteOffset);
 
 		//update meta information
-		file.setCtime(System.currentTimeMillis()/1000);
-		//this.putIntoDHT(file.getID(), file);
+		file.setCtime(System.currentTimeMillis()/1000L);
+		file.setAtime(System.currentTimeMillis()/1000L);
 		dhtPutGetHelper.putFile(file.getID(), file);		
 		
 		//the size of the content that was written		
@@ -197,8 +197,7 @@ public class FileContentController {
 		}		
 
 		//update meta information
-		file.setAtime(System.currentTimeMillis()/1000);
-		//this.putIntoDHT(file.getID(), file);
+		file.setAtime(System.currentTimeMillis()/1000L);
 		dhtPutGetHelper.putFile(file.getID(), file);
 				
 		return content;

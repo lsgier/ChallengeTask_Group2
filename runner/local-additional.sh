@@ -28,4 +28,4 @@ if [ ! -d "$mountPoint/peer$2" ]; then
 fi
 
 cd "target"
-java -cp p2pfs.jar prototype.FSPeer "$mountPoint/peer$2" "127.0.0.1" "$port"
+java -cp p2pfs.jar -Xmx512M -XX:MaxDirectMemorySize=512M prototype.FSPeer "$mountPoint/peer$2" "127.0.0.1" "$port"

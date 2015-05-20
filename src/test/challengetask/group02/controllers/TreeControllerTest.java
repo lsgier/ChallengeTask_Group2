@@ -78,6 +78,24 @@ public class TreeControllerTest {
     }
 
     @Test
+    public void testRemoveDirectory() throws IOException, FsException, ClassNotFoundException {
+        controller.createDir("/toRemove");
+        assertTrue(controller.readDir("/").contains("toRemove"));
+
+        controller.removeDirectory("/toRemove");
+        assertTrue(!controller.readDir("/").contains("toRemove"));
+    }
+
+    @Test
+    public void testRemoveFile() throws IOException, FsException, ClassNotFoundException {
+        controller.createFile("/FileToRemove");
+        assertTrue(controller.readDir("/").contains("FileToRemove"));
+
+        controller.deleteFile("/FileToRemove");
+        assertTrue(!controller.readDir("/").contains("FileToRemove"));
+    }
+
+    @Test
     public void testCreateDir() throws Exception {
         String testPath = "/newTestDir";
         controller.createDir(testPath);
@@ -113,7 +131,7 @@ public class TreeControllerTest {
     }
 
     @Test
-    public void testRenameEntry() throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+    public void testRenameEntry() throws ClassNotFoundException, FsException, IOException {
         String oldName = "/entryToRename";
         String newName = "/newName";
 

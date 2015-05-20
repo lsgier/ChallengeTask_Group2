@@ -21,27 +21,27 @@ public class ControllerContext {
         this.fileContentController = new FileContentController(peer);
     }
 
-    public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
+    public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, FsException {
         return treeController.readDir(path);
     }
 
-    public Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
+    public Entry findEntry(String path) throws IOException, ClassNotFoundException, FsException {
         return treeController.findEntry(path);
     }
 
-    public void createDir(String path) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+    public void createDir(String path) throws ClassNotFoundException, FsException, IOException {
         treeController.createDir(path);
     }
 
-    public void createFile(String path) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+    public void createFile(String path) throws ClassNotFoundException, FsException, IOException {
         this.treeController.createFile(path);
     }
 
-    public void rename(String path, String newName) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+    public void rename(String path, String newName) throws ClassNotFoundException, FsException, IOException {
         treeController.renameEntry(path, newName);
     }
 
-    public void deleteDirectory(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException, DirectoryNotEmptyException {
+    public void deleteDirectory(String path) throws ClassNotFoundException, FsException, IOException {
         treeController.removeDirectory(path);
     }
 
@@ -54,26 +54,26 @@ public class ControllerContext {
      * @throws NotAFileException
      * @throws IOException
      */
-    public void deleteFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, NotAFileException, IOException {
+    public void deleteFile(String path) throws ClassNotFoundException, FsException, IOException {
         treeController.deleteFile(path);
     }
 
-    public byte[] readFile(String path, long size, long offset) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException, CRCException {
+    public byte[] readFile(String path, long size, long offset) throws ClassNotFoundException, FsException, IOException, CRCException {
         File file = treeController.getFile(path);
         return this.fileContentController.readFile(file, size, offset);
     }
 
-    public int writeFile(String path, ByteBuffer buf, long bufSize, long writeOffset) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException, BusyException {
+    public int writeFile(String path, ByteBuffer buf, long bufSize, long writeOffset) throws ClassNotFoundException, FsException, IOException {
         File file = treeController.getFile(path);
         return this.fileContentController.writeFile(file, buf, bufSize, writeOffset);
     }
 
     //used for the locking logic
-	public void whenFileClosed(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, NotAFileException, IOException {
+	public void whenFileClosed(String path) throws ClassNotFoundException, FsException, IOException {
 		treeController.whenFileClosed(path);
 	}
 	
-	public void updateFileMetaData(String path, final StructStat.StatWrapper stat) throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+	public void updateFileMetaData(String path, final StructStat.StatWrapper stat) throws ClassNotFoundException, FsException, IOException {
 		treeController.updateFileMetaData(path, stat);
 	}
 }

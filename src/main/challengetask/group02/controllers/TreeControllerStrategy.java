@@ -12,29 +12,29 @@ import java.util.ArrayList;
 public interface TreeControllerStrategy {
 
     //traverses the given path to get to the leaf-object of the path
-    Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException;
+    Entry findEntry(String path) throws IOException, ClassNotFoundException, FsException;
 
-    File getFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException, NotAFileException;
+    File getFile(String path) throws ClassNotFoundException, FsException, IOException;
 
-    Directory getDirectory(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException, NotAFileException;
+    Directory getDirectory(String path) throws ClassNotFoundException, FsException, IOException;
 
     //the reverse of findEntry
     String getPath(Number160 EntryID);
 
-    void createDir(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
+    void createDir(String path) throws ClassNotFoundException, FsException, IOException;
 
     //returns just the list with the names of the files and directories in that path
-    ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException;
+    ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, FsException;
 
-    void renameEntry(String path, String newName) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
+    void renameEntry(String path, String newName) throws ClassNotFoundException, FsException, IOException;
 
-    void createFile(String path) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
+    void createFile(String path) throws ClassNotFoundException, FsException, IOException;
 
-    void deleteFile(String path) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException;
+    void deleteFile(String path) throws ClassNotFoundException, FsException, IOException;
 
-    void whenFileClosed(String path) throws ClassNotFoundException, NotADirectoryException, NotAFileException, IOException, NoSuchFileOrDirectoryException;
+    void whenFileClosed(String path) throws ClassNotFoundException, FsException, IOException;
 
-    void removeDirectory(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, DirectoryNotEmptyException;
+    void removeDirectory(String path) throws IOException, ClassNotFoundException, FsException;
 
-    void updateFileMetaData(String path, StructStat.StatWrapper stat) throws ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException, IOException;
+    void updateFileMetaData(String path, StructStat.StatWrapper stat) throws ClassNotFoundException, FsException, IOException;
 }

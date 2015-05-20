@@ -3,6 +3,7 @@ package challengetask.group02.controllers;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.FutureDHT;
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
@@ -21,6 +22,8 @@ public class TreeControllerTest {
     static int nr = 10;
     static int port = 7777;
     static int local = 3;
+    static PeerDHT[] peers;
+
 
     static String rootName = "/";
 
@@ -34,7 +37,7 @@ public class TreeControllerTest {
 
         try {
             //initialize network
-            PeerDHT[] peers = createAndAttachPeersDHT(nr, port);
+            peers = createAndAttachPeersDHT(nr, port);
             bootstrap(peers);
 
             //initialize controller with a peer
@@ -121,13 +124,20 @@ public class TreeControllerTest {
         controller.renameEntry(oldName, newName);
 
         //assert that the entry has the new name
-        assertEquals(newName, "/"+controller.getEntryFromID(entryID).getEntryName());
+        assertEquals(newName, "/" + getEntryFromID(entryID).getEntryName());
 
         //assert that the parent also stores the new name
         assertTrue(controller.readDir("/").contains("newName"));
 
         //TODO test all of the rename functionalities (just rename entry, move entry to new destination, move and rename)
 
+    }
+
+    private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
+        FutureGet futureGet = peers[3].get(ID).start();
+        futureGet.awaitUninterruptibly();
+
+        return (Entry) futureGet.data().object();
     }
 
 
@@ -154,6 +164,8 @@ public class TreeControllerTest {
 
         }
     }
+
+
 
 }
 

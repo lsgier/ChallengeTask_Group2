@@ -21,10 +21,6 @@ public class ControllerContext {
         this.fileContentController = new FileContentController(peer);
     }
 
-    public Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
-        return treeController.getEntryFromID(ID);
-    }
-
     public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
         return treeController.readDir(path);
     }

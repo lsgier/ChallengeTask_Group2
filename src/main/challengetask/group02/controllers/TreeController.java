@@ -28,7 +28,7 @@ public class TreeController implements TreeControllerStrategy {
         this.peer = peer;
     }
 
-    public Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
+    private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException, NoSuchFileOrDirectoryException {
 
         if (ID == null) {
             System.err.println("BUG: trying to get Entry with ID null!");
@@ -38,6 +38,10 @@ public class TreeController implements TreeControllerStrategy {
 
         FutureGet futureGet = peer.get(ID).start();
         futureGet.awaitUninterruptibly();
+        if (futureGet.isEmpty()) {
+            System.out.print("getEntryFromID did not get a result -> faulty fs");
+            throw new NoSuchFileOrDirectoryException("");
+        }
         return (Entry) futureGet.data().object();
     }
 
@@ -49,6 +53,10 @@ public class TreeController implements TreeControllerStrategy {
 
         //first, get the root directory
         Directory currentDirectory = (Directory) getEntryFromID(Number160.ZERO);
+        if (currentDirectory == null) {
+            System.out.print("result from seeking root was null!");
+        }
+
 
         Number160 currentChildFile;
         Number160 currentChildDir;

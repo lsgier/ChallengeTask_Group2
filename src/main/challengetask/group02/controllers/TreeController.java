@@ -29,21 +29,13 @@ public class TreeController implements TreeControllerStrategy {
     }
 
     public Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
-        //TODO vDHT
-        /*TODO things that can go wrong here
-        * (basic DHT stuff; put and get)
-        * fs errors:
-        * - no result->why was this referenced
-        * - child name not found
-        *
-        *
-        * */
 
         if (ID == null) {
             System.err.println("BUG: trying to get Entry with ID null!");
             //TODO this is crap
             return new Directory(null, null, "dummy");
         }
+
         FutureGet futureGet = peer.get(ID).start();
         futureGet.awaitUninterruptibly();
         return (Entry) futureGet.data().object();
@@ -53,15 +45,9 @@ public class TreeController implements TreeControllerStrategy {
     public Entry findEntry(String path) throws IOException, ClassNotFoundException, NotADirectoryException, NoSuchFileOrDirectoryException {
         Path subPaths = Paths.get(path);
 
-        //TODO IDEA could another controller implementation use a cache or something? it could remember the last used path.
-        //->typically multiple operations happen in the same directory.
+        //TODO IDEA the cache should be implemented here
 
         //first, get the root directory
-
-        //TODO QUESTION ask user to create root node if no root is found? this way the system stays usable if the root gets broken.
-        //RESOLVED? QUESTION create root if root is not found?
-        //->no; root node is created during the first bootstrap
-
         Directory currentDirectory = (Directory) getEntryFromID(Number160.ZERO);
 
         Number160 currentChildFile;
@@ -161,7 +147,7 @@ public class TreeController implements TreeControllerStrategy {
         Hashtable<String, Number160> children = dir.getChildren(FILE);
         children.putAll(dir.getChildren(DIRECTORY));
 
-        return new ArrayList<String>(children.keySet());
+        return new ArrayList<>(children.keySet());
     }
 
     @Override
@@ -184,7 +170,7 @@ public class TreeController implements TreeControllerStrategy {
         if (oldPath.getParent().compareTo(newPath.getParent()) == 0) {
 
             Directory parent = (Directory) getEntryFromID(entry.getParentID());
-            helper.updateEntryName((Directory) parent, entry, newName);
+            helper.updateEntryName(parent, entry, newName);
 
         } else {
             Directory oldParent = getDirectory(oldPath.getParent().toString());

@@ -34,7 +34,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int getattr(final String path, final StructStat.StatWrapper stat) {
         try {
             controller.updateFileMetaData(path, stat);
-
+            System.out.println("(getattr: "+path+") Number of GETs: " + controller.getGetCount() + "\n");
             return 0;
 
         } catch (FsException e) {
@@ -53,6 +53,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         byte[] s = new byte[0];
         try {
             s = controller.readFile(path, size, offset);
+            System.out.println("(read: "+path+") Number of GETs: " + controller.getGetCount()+"\n");
         } catch (FsException e) {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {
@@ -70,6 +71,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             for (String child : controller.readDir(path)) {
                 filler.add(child);
             }
+            System.out.println("(readdir: "+path+") Number of GETs: " + controller.getGetCount()+"\n");
         } catch (FsException e) {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {
@@ -82,6 +84,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int mkdir(final String path, final TypeMode.ModeWrapper mode) {
         try {
             controller.createDir(path);
+            System.out.println("(mkdir: "+path+") Number of GETs: " + controller.getGetCount() + "\n");
             //mode.setMode(TypeMode.NodeType.DIRECTORY);
         } catch (FsException e) {
             return getErrorCode(e);
@@ -95,7 +98,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int create(final String path, final TypeMode.ModeWrapper mode, final StructFuseFileInfo.FileInfoWrapper info) {
         try {
             controller.createFile(path);
-            System.out.println("(create)Number of GETs: " + controller.getGetCount()+"\n");
+            System.out.println("(create: "+path+") Number of GETs: " + controller.getGetCount()+"\n");
             //mode.setMode(TypeMode.NodeType.DIRECTORY);
         } catch (FsException e) {
             return getErrorCode(e);
@@ -109,6 +112,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int rename(final String path, final String newName) {
         try {
             controller.rename(path, newName);
+            System.out.println("(rename: "+path+") Number of GETs: " + controller.getGetCount() + "\n");
         } catch (FsException e) {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {
@@ -121,6 +125,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int rmdir(final String path) {
         try {
             controller.deleteDirectory(path);
+            System.out.println("(rmdir: "+path+") Number of GETs: " + controller.getGetCount() + "\n");
         } catch (FsException e) {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {
@@ -133,6 +138,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int unlink(final String path) {
         try {
             controller.deleteFile(path);
+            System.out.println("(unlink: "+path+") Number of GETs: " + controller.getGetCount() + "\n");
         } catch (FsException e) {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {
@@ -145,7 +151,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
     public int write(final String path, final ByteBuffer buf, final long bufSize, final long writeOffset,
                      final StructFuseFileInfo.FileInfoWrapper wrapper) {
         try {
-            System.out.println("(write)Number of GETs: " + controller.getGetCount()+"\n");
+            System.out.println("(write: "+path+") Number of GETs: " + controller.getGetCount()+"\n");
             return controller.writeFile(path, buf, bufSize, writeOffset);
         } catch (FsException e) {
             return getErrorCode(e);
@@ -164,7 +170,7 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
         //flush is only used in context with file
         try {
             controller.whenFileClosed(path);
-            System.out.println("(flush)Number of GETs: " + controller.getGetCount()+"\n");
+            System.out.println("(flush: "+path+") Number of GETs: " + controller.getGetCount()+"\n");
         } catch (FsException e) {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {
@@ -193,7 +199,6 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             return -ErrorCodes.EBUSY();
         }
         if (Objects.equals(e.getClass().getName(), NoSuchFileOrDirectoryException.class.getName())) {
-            System.out.println("Tried read this non-existing directory: " + e.getMessage());
             return -ErrorCodes.ENOENT();
         }
         if (Objects.equals(e.getClass().getName(), NotAFileException.class.getName())) {

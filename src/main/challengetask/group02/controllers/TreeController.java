@@ -30,6 +30,7 @@ public class TreeController implements TreeControllerStrategy {
     }
 
     private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException, NoSuchFileOrDirectoryException {
+        //TODO IDEA implement a cache with a hashmap (ID -> entry)
 
         if (ID == null) {
             System.err.println("BUG: trying to get Entry with ID null!");
@@ -57,8 +58,6 @@ public class TreeController implements TreeControllerStrategy {
     @Override
     public Entry findEntry(String path) throws IOException, ClassNotFoundException, FsException {
         Path subPaths = Paths.get(path);
-
-        //TODO IDEA the cache should be implemented here
 
         //first, get the root directory
         Directory currentDirectory;

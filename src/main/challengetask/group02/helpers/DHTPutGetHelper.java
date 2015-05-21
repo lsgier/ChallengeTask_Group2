@@ -122,7 +122,6 @@ public class DHTPutGetHelper {
         newParent.addChild(newName, entry.getID(), entry.getType());
         oldParent.removeChild(entry.getEntryName());
         entry.setEntryName(newName);
-        entry.setParentID(newParent.getID());
 
         try{
             //trying to update new parent first

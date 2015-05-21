@@ -62,10 +62,6 @@ public class TreeControllerTest {
     public void testFindEntryGetRoot() throws Exception {
         Directory root = (Directory) controller.findEntry("/");
         assertEquals(rootName, root.getEntryName());
-
-        System.out.println("Found a root node named: " + root.getEntryName());
-
-
     }
 
     public void testFindEntry() throws Exception {
@@ -75,6 +71,34 @@ public class TreeControllerTest {
 
     public void testGetPath() throws Exception {
 
+    }
+
+    @Test
+    public void testRemoveDirectory() throws IOException, FsException, ClassNotFoundException {
+        controller.createDir("/toRemove");
+        assertTrue(controller.readDir("/").contains("toRemove"));
+
+        Entry newEntry = controller.findEntry("toRemove");
+
+        controller.removeDirectory("/toRemove");
+        //test if the directory is not visible anymore in the parent
+        assertTrue(!controller.readDir("/").contains("toRemove"));
+        //test if the entry object is really gone from the DHT
+        assertTrue(getEntryFromID(newEntry.getID()) == null);
+    }
+
+    @Test
+    public void testRemoveFile() throws IOException, FsException, ClassNotFoundException {
+        controller.createFile("/FileToRemove");
+        assertTrue(controller.readDir("/").contains("FileToRemove"));
+
+        Entry newEntry = controller.findEntry("toRemove");
+
+        controller.deleteFile("/FileToRemove");
+        //test if the file is not visible anymore in the parent
+        assertTrue(!controller.readDir("/").contains("FileToRemove"));
+        //test if the entry object is really gone from the DHT
+        assertTrue(getEntryFromID(newEntry.getID()) == null);
     }
 
     @Test
@@ -98,7 +122,7 @@ public class TreeControllerTest {
 
         Directory newSubDir = (Directory) controller.findEntry(testSubPath);
         assertEquals(Entry.TYPE.DIRECTORY, newSubDir.getType());
-        assertEquals(testSubPath, testPath+"/"+newSubDir.getEntryName());
+        assertEquals(testSubPath, testPath + "/" + newSubDir.getEntryName());
     }
 
     @Test
@@ -113,7 +137,7 @@ public class TreeControllerTest {
     }
 
     @Test
-    public void testRenameEntry() throws ClassNotFoundException, NotADirectoryException, IOException, NoSuchFileOrDirectoryException {
+    public void testRenameEntry() throws ClassNotFoundException, FsException, IOException {
         String oldName = "/entryToRename";
         String newName = "/newName";
 
@@ -133,9 +157,29 @@ public class TreeControllerTest {
 
     }
 
+    @Test
+    public void testMoveDirectory() throws IOException, FsException, ClassNotFoundException {
+        controller.createDir("/movingTestFrom");
+        controller.createDir("/movingTestTo");
+        controller.createDir("/movingTestFrom/dirToMove");
+
+        controller.renameEntry("/movingTestFrom/dirToMove", "/movingTestTo");
+
+        //test if the directory is gone in the old place
+        assertTrue(!controller.readDir("/movingTestFrom").contains("dirToMove"));
+
+        //test if the directory is present in the new place
+        assertTrue(!controller.readDir("/movingTestFrom").contains("dirToMove"));
+
+    }
+
     private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
         FutureGet futureGet = peers[3].get(ID).start();
         futureGet.awaitUninterruptibly();
+
+        if (futureGet.isEmpty()) {
+            return null;
+        }
 
         return (Entry) futureGet.data().object();
     }

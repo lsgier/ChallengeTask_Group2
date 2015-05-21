@@ -52,20 +52,6 @@ public class Entry implements Serializable, Cloneable {
         return ID;
     }
 
-    public Number160 getParentID() {
-        return parentID;
-    }
-
-    public void setParentID(Number160 parentID) {
-        //avoid that the root directory (has no parent) can be moved to a subdirectory which would mean that the entry-point to the fs is lost.
-        if(this.parentID ==null) {
-            //TODO throw exception?
-            return;
-        } else {
-            this.parentID = parentID;
-        }
-    }
-
     public void setEntryName(String entryName) {
         this.entryName = entryName;
     }

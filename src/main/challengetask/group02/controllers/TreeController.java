@@ -23,6 +23,7 @@ import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
 public class TreeController implements TreeControllerStrategy {
 
     PeerDHT peer;
+    public int numberOfGetRequests=0;
 
     public TreeController(PeerDHT peer) {
         this.peer = peer;
@@ -41,7 +42,16 @@ public class TreeController implements TreeControllerStrategy {
             System.out.println("getEntryFromID did not get a result -> faulty fs");
             throw new NoSuchFileOrDirectoryException("");
         }
+
+        numberOfGetRequests++;
         return (Entry) futureGet.data().object();
+    }
+
+    @Override
+    public int getNumberOfGetRequests() {
+        int number = numberOfGetRequests;
+        numberOfGetRequests=0;
+        return number;
     }
 
     @Override
@@ -51,9 +61,7 @@ public class TreeController implements TreeControllerStrategy {
         //TODO IDEA the cache should be implemented here
 
         //first, get the root directory
-
         Directory currentDirectory;
-
         try {
             currentDirectory = (Directory) getEntryFromID(Number160.ZERO);
         } catch (NoSuchFileOrDirectoryException e) {

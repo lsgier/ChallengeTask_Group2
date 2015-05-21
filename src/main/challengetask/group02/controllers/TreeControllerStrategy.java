@@ -37,4 +37,7 @@ public interface TreeControllerStrategy {
     void removeDirectory(String path) throws IOException, ClassNotFoundException, FsException;
 
     void updateFileMetaData(String path, StructStat.StatWrapper stat) throws ClassNotFoundException, FsException, IOException;
+
+    //TODO for testing
+    int getNumberOfGetRequests();
 }

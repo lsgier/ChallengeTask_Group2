@@ -1,11 +1,15 @@
-Short Description here, link to uni page
-# ChallengeTask_Group2http://www.csg.uzh.ch/teaching/fs15/p2p/challenge.html
+P2P FILE SYSTEM
+===============
+[Challenge task](http://www.csg.uzh.ch/teaching/fs15/p2p/challenge.html) for the course Overlay Networks, Decentralized Systems and Their Applications (UZH, Sptring 2015).
 
-Link to the board
-https://trello.com/b/ylcjsnyd/challenge-task trello board
+## Description ##
+What it is.
+## System requirements ##
+Hardware and software
 
-System requirements
+## Installation info ##
 
-Installation info
+## How it works ##
 
-Quick overview of wiki pages
+## Development Workflow ##
+[Link to the board](https://trello.com/b/ylcjsnyd/challenge-task)

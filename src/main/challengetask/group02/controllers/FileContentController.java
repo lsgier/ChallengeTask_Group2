@@ -68,7 +68,7 @@ public class FileContentController {
 			
 			//if the block doesn't exist, create a new one
 			if(index > blockCount - 1) {
-				
+				//TODO use UUID class to generate IDs (check for example "createDir" in the treeController).
 				Number160 ID = new Number160(random);				
 				block = new Block();			
 				block.setChecksum(index);

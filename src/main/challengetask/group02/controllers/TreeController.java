@@ -164,24 +164,20 @@ public class TreeController implements TreeControllerStrategy {
 
     @Override
     public void renameEntry(String from, String to) throws ClassNotFoundException, FsException, IOException {
-        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
-
-
         Path oldPath = Paths.get(from);
         Path newPath = Paths.get(to);
 
         Entry entry = findEntry(from);
 
-        String oldName = oldPath.getFileName().toString();
         String newName = newPath.getFileName().toString();
 
         //if path different
         //add new link to new parent
         //remove link from old parent
-
+        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
         if (oldPath.getParent().compareTo(newPath.getParent()) == 0) {
 
-            Directory parent = (Directory) getEntryFromID(entry.getParentID());
+            Directory parent = getDirectory(oldPath.getParent().toString());
             helper.updateEntryName(parent, entry, newName);
 
         } else {
@@ -198,8 +194,6 @@ public class TreeController implements TreeControllerStrategy {
         Path dirPath = Paths.get(path);
         Directory dirEntry = getDirectory(path);
         Directory parentEntry = getDirectory(dirPath.getParent().toString());
-                //(Directory) getEntryFromID(dirEntry.getParentID());
-
 
         if (dirEntry.getChildren().isEmpty()) {
             DHTPutGetHelper helper = new DHTPutGetHelper(peer);

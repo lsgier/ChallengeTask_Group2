@@ -36,7 +36,6 @@ public class File extends Entry {
 		this.type = TYPE.FILE;		
 
 		this.ID = ID;
-		this.parentID = parentID;
 		this.entryName = entryName;
 
 		this.size = 0;

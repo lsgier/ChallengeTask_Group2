@@ -30,8 +30,6 @@ public class TreeController implements TreeControllerStrategy {
     }
 
     private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException, NoSuchFileOrDirectoryException {
-        //TODO IDEA implement a cache with a hashmap (ID -> entry)
-
         if (ID == null) {
             System.err.println("BUG: trying to get Entry with ID null!");
             throw new NoSuchFileOrDirectoryException("Tried to get entry with ID null.");
@@ -128,7 +126,7 @@ public class TreeController implements TreeControllerStrategy {
 
         Directory parentEntry = getDirectory(subPaths.getParent().toString());
 
-        Directory newDir = new Directory(newKey, parentEntry.getID(), subPaths.getFileName().toString());
+        Directory newDir = new Directory(newKey, subPaths.getFileName().toString());
 
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
         helper.addNewEntry(parentEntry, newDir);

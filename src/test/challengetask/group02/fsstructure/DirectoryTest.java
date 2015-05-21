@@ -16,7 +16,7 @@ public class DirectoryTest {
 
 
 
-    Directory root = new Directory(Number160.createHash(0), null, "");
+    Directory root = new Directory(Number160.createHash(0), "");
 
     @Test
     public void testAddingChildren() {
@@ -55,7 +55,7 @@ public class DirectoryTest {
         String newName = "childWithNewName";
         Number160 childID = Number160.createHash(37829);
 
-        Directory child = new Directory(childID, Number160.ZERO, oldName);
+        Directory child = new Directory(childID, oldName);
         root.addChild(child.getEntryName(), child.getID(), child.getType());
 
         root.renameChild(oldName, newName);

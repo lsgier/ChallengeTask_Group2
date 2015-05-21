@@ -11,11 +11,10 @@ public class Directory extends Entry{
 
     private static final long serialVersionUID = 1L;
     
-    public Directory(Number160 ID, Number160 parentID, String entryName) {
+    public Directory(Number160 ID, String entryName) {
         this.type = TYPE.DIRECTORY;
 
         this.ID = ID;
-        this.parentID = parentID;
         this.entryName = entryName;
 
         fileChildren = new Hashtable<>();

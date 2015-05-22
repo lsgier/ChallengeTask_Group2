@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Random;
+import java.util.UUID;
 import java.util.zip.CRC32;
 
 import net.tomp2p.dht.PeerBuilderDHT;
@@ -514,7 +515,6 @@ public class FileContentControllerTest {
 			+ "123456789012345678901234567890");
 	
 	private static PeerDHT[] peer;
-	private static FileContentController fcc;
 	public static File file;
 	private static byte[] arr;
 	
@@ -539,11 +539,10 @@ public class FileContentControllerTest {
 			e.printStackTrace();
 		}
         
-        fcc = new FileContentController(peer[4]);
+        
         
         arr = new byte[str.length()];
 		copyStringToByteArray(str,arr);		
-		System.out.println("Filesize: "+arr.length+" Bytes");
 	}
 	
 	@Test
@@ -557,18 +556,21 @@ public class FileContentControllerTest {
 		
 		Random random = new Random();
 		
+		FileContentController fcc;
+		fcc = new FileContentController(peer[4]);
+		
 		file = new File("Random Filename.txt", arr.length, new Number160(random));
 		
         file.setDirtyBit(true);
         file.setModifierPeer(peer[4].peerID());
 		
+        
 		ByteBuffer buf = ByteBuffer.allocate(arr.length);		
 		buf.put(arr);
 		buf.position(0);
 		
-		
+		System.out.println("Peer 5 is writing "+(long)arr.length+" Bytes of data into the DHT");
 		int bytesWritten = fcc.writeFile(file, buf, (long)arr.length, 0);			
-
 		
 		//relevant objects have been created
 		assertNotEquals(file.getBlocks().size(), 0);
@@ -580,10 +582,14 @@ public class FileContentControllerTest {
 	
 	public void testReadFile() {
 	
+		FileContentController fcc;
+		fcc = new FileContentController(peer[6]);
+		
 		long testLength = 2000;
 		long testOffset = 3244;
 		
 		
+		System.out.println("Peer 7 tries to read "+testLength+" Bytes of data, starting at offset "+testOffset);
 		byte[] content = null;
 		try {
 			content = fcc.readFile(file, testLength, testOffset);

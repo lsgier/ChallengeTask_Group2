@@ -10,10 +10,14 @@ import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
+import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.storage.Data;
+import net.tomp2p.utils.Pair;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by anvar on 25/04/15.
@@ -41,6 +45,7 @@ import java.util.Map;
 public class DHTPutGetHelper {
     PeerDHT peer;
 
+
     public DHTPutGetHelper(PeerDHT peer) {
         this.peer = peer;
     }
@@ -58,15 +63,25 @@ public class DHTPutGetHelper {
     public int addNewEntry(Directory parentDir, Entry child){
         //first have to update parent
         try {
-            parentDir.addChild(child.getEntryName(), child.getID(), child.getType());
-            put(parentDir);
-            //if previous was successfull, can put the child itself
+
             put(child);
+
+            //parentDir.addChild(child.getEntryName(), child.getID(), child.getType());
+            //put(parentDir);
+
+            vPut(parentDir, child);
             //if this was successful either, then all is ok.
         } catch (Exception e){
 
         }
         return 0;
+    }
+
+    private void vPut(Directory parentDir, Entry child) throws InterruptedException, IOException, ClassNotFoundException {
+
+        store(peer, parentDir, child);
+
+        //parentDir.addChild(child.getEntryName(), child.getID(), child.getType());
     }
 
     public int updateEntryName(Directory parent, Entry entry, String newName) {
@@ -188,4 +203,103 @@ public class DHTPutGetHelper {
             e.printStackTrace();
         }
     }
+
+    private static void store(PeerDHT peerDHT, Directory parentDir, Entry child)
+            throws ClassNotFoundException, InterruptedException, IOException {
+
+        Random RND = new Random(42L);
+
+        Pair<Number640, Byte> pair2 = null;
+        for (int i = 0; i < 5; i++) {
+            Pair<Number160, Data> pair = getAndUpdate(peerDHT, parentDir, child);
+            if (pair == null) {
+                System.out
+                        .println("we cannot handle this kind of inconsistency automatically, handing over the the API dev");
+                return;
+            }
+            FuturePut fp = peerDHT
+                    .put(parentDir.getID())
+                    .data(Number160.ZERO, pair.element1().prepareFlag(), pair.element0()).start().awaitUninterruptibly();
+            pair2 = checkVersions(fp.rawResult());
+            // 1 is PutStatus.OK_PREPARED
+            if (pair2 != null && pair2.element1() == 1) {
+                break;
+            }
+            System.out.println("get delay or fork - put");
+            // if not removed, a low ttl will eventually get rid of it
+            peerDHT.remove(parentDir.getID()).versionKey(pair.element0()).start()
+                    .awaitUninterruptibly();
+            Thread.sleep(RND.nextInt(500));
+        }
+        if (pair2 != null && pair2.element1() == 1) {
+            FuturePut fp = peerDHT.put(parentDir.getID())
+                    .versionKey(pair2.element0().versionKey()).putConfirm()
+                    .data(new Data()).start().awaitUninterruptibly();
+            System.out.println("stored!: " + fp.failedReason());
+        } else {
+            System.out
+                    .println("we cannot handle this kind of inconsistency automatically, handing over the the API dev");
+        }
+    }
+
+
+
+    private static Pair<Number160, Data> getAndUpdate(PeerDHT peerDHT, Directory parentDir, Entry child) throws InterruptedException, ClassNotFoundException,
+            IOException {
+
+        Random RND = new Random(42L);
+
+        Pair<Number640, Data> pair = null;
+        for (int i = 0; i < 5; i++) {
+            FutureGet fg = peerDHT.get(parentDir.getID()).getLatest().start()
+                    .awaitUninterruptibly();
+            // check if all the peers agree on the same latest version, if not
+            // wait a little and try again
+            pair = checkVersions(fg.rawData());
+            if (pair != null) {
+                break;
+            }
+            System.out.println("get delay or fork - get");
+            Thread.sleep(RND.nextInt(500));
+        }
+        // we got the latest data
+        if (pair != null) {
+            // update operation is append
+
+            parentDir.addChild(child.getEntryName(), child.getID(), child.getType());
+            Data newData = new Data(parentDir);
+
+            Number160 v = pair.element0().versionKey();
+            long version = v.timestamp() + 1;
+            newData.addBasedOn(v);
+
+            //since we create a new version, we can access old versions as well
+            return new Pair<Number160, Data>(new Number160(version,
+                    newData.hash()), newData);
+        }
+        return null;
+    }
+
+
+    private static <K> Pair<Number640, K> checkVersions(
+            Map<PeerAddress, Map<Number640, K>> rawData) {
+        Number640 latestKey = null;
+        K latestData = null;
+        for (Map.Entry<PeerAddress, Map<Number640, K>> entry : rawData
+                .entrySet()) {
+            if (latestData == null && latestKey == null) {
+                latestData = entry.getValue().values().iterator().next();
+                latestKey = entry.getValue().keySet().iterator().next();
+            } else {
+                if (!latestKey.equals(entry.getValue().keySet().iterator()
+                        .next())
+                        || !latestData.equals(entry.getValue().values()
+                        .iterator().next())) {
+                    return null;
+                }
+            }
+        }
+        return new Pair<Number640, K>(latestKey, latestData);
+    }
+
 }

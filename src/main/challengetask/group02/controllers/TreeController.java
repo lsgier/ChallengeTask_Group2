@@ -35,12 +35,13 @@ public class TreeController implements TreeControllerStrategy {
             throw new NoSuchFileOrDirectoryException("Tried to get entry with ID null.");
         }
 
-        FutureGet futureGet = peer.get(ID).start();
+        FutureGet futureGet = peer.get(ID).getLatest().start();
         futureGet.awaitUninterruptibly();
         if (futureGet.isEmpty()) {
             System.out.println("getEntryFromID did not get a result -> faulty fs");
             throw new NoSuchFileOrDirectoryException("");
         }
+
         return (Entry) futureGet.data().object();
     }
 

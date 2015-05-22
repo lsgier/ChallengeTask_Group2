@@ -3,6 +3,7 @@ package challengetask.group02.controllers;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.UUID;
 import java.util.zip.CRC32;
 
 import net.tomp2p.dht.PeerDHT;
@@ -68,8 +69,7 @@ public class FileContentController {
 			
 			//if the block doesn't exist, create a new one
 			if(index > blockCount - 1) {
-				//TODO use UUID class to generate IDs (check for example "createDir" in the treeController).
-				Number160 ID = new Number160(random);				
+				Number160 ID = Number160.createHash(UUID.randomUUID().hashCode());
 				block = new Block();			
 				block.setChecksum(index);
 				block.setID(ID);

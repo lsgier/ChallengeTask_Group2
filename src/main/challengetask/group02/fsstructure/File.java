@@ -17,7 +17,9 @@ public class File extends Entry {
 
 	public File(String fileName, long fileSize, Number160 ID) {
 
-		super();
+		blocks = new ArrayList<Number160>();
+		meta = new Meta();
+		
 		readOnly = false;
 		this.type = TYPE.FILE;		
 
@@ -30,7 +32,9 @@ public class File extends Entry {
 
 	public File(Number160 ID, Number160 parentID, String entryName) {
 		
-		super();
+		blocks = new ArrayList<Number160>();
+		meta = new Meta();
+		
 		readOnly = false;
 		this.type = TYPE.FILE;		
 
@@ -43,8 +47,7 @@ public class File extends Entry {
 	
 	//empty constructor
 	public File() {
-		blocks = new ArrayList<Number160>();
-		meta = new Meta();
+		
 	}
 	
 	public boolean getReadOnly() {

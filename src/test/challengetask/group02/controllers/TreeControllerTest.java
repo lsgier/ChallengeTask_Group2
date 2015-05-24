@@ -92,7 +92,7 @@ public class TreeControllerTest {
         controller.createFile("/FileToRemove");
         assertTrue(controller.readDir("/").contains("FileToRemove"));
 
-        Entry newEntry = controller.findEntry("toRemove");
+        Entry newEntry = controller.findEntry("/FileToRemove");
 
         controller.deleteFile("/FileToRemove");
         //test if the file is not visible anymore in the parent

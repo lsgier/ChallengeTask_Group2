@@ -24,7 +24,6 @@ public class TreeController implements TreeControllerStrategy {
 
     PeerDHT peer;
     SimpleCache<Entry> cache = new SimpleCache<>(1);
-    public int numberOfGetRequests=0;
 
     public TreeController(PeerDHT peer) {
         this.peer = peer;
@@ -43,15 +42,7 @@ public class TreeController implements TreeControllerStrategy {
             throw new NoSuchFileOrDirectoryException("");
         }
 
-        numberOfGetRequests++;
         return (Entry) futureGet.data().object();
-    }
-
-    @Override
-    public int getNumberOfGetRequests() {
-        int number = numberOfGetRequests;
-        numberOfGetRequests=0;
-        return number;
     }
 
     @Override

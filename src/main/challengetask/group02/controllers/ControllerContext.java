@@ -15,11 +15,6 @@ public class ControllerContext {
     private final FileContentController fileContentController;
     private final TreeControllerStrategy treeController;
 
-    public int getGetCount() {
-        return treeController.getNumberOfGetRequests();
-    }
-
-
     public ControllerContext(PeerDHT peer) {
         this.treeController = new TreeController(peer);
         this.fileContentController = new FileContentController(peer);

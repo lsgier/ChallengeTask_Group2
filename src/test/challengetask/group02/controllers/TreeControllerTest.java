@@ -45,7 +45,7 @@ public class TreeControllerTest {
 
 
             //create a root node
-            Directory rootDir = new Directory(Number160.ZERO, null, rootName);
+            Directory rootDir = new Directory(Number160.ZERO, rootName);
             //upload root into DHT
             Data data = new Data(rootDir);
             FutureDHT futureDHT = peers[3].put(Number160.ZERO).data(data).start();

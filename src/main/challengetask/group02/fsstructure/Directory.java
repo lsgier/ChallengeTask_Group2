@@ -24,7 +24,6 @@ public class Directory extends Entry{
 
     //Distinguishing between files and directories    
     public void addChild(String name, Number160 ID, TYPE type) {
-    	//TODO check that there cannot be a file and a directory with the same name
     	if(type.equals(TYPE.FILE)) {
     		fileChildren.put(name, ID);
     	} else if (type.equals(TYPE.DIRECTORY)) {
@@ -49,7 +48,7 @@ public class Directory extends Entry{
     }
 
     public Hashtable<String, Number160> getChildren() {
-        Hashtable<String, Number160> allChildren = new Hashtable<String, Number160>();
+        Hashtable<String, Number160> allChildren = new Hashtable<>();
         allChildren.putAll(fileChildren);
         allChildren.putAll(dirChildren);
         return allChildren;

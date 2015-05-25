@@ -12,6 +12,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class TreeControllerTest {
-    static final Random RND = new Random( 42L );
+    static final Random RND = new Random(42L);
     static int nr = 10;
     static int port = 7777;
     static int local = 3;
@@ -51,9 +52,7 @@ public class TreeControllerTest {
             Data data = new Data(rootDir);
             FutureDHT futureDHT = peers[3].put(Number160.ZERO).data(data).start();
             futureDHT.awaitUninterruptibly();
-        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -74,9 +73,18 @@ public class TreeControllerTest {
 
         controller.removeDirectory("/toRemove");
         //test if the directory is not visible anymore in the parent
-        assertTrue(!controller.readDir("/").contains("toRemove"));
+        assertFalse(controller.readDir("/").contains("toRemove"));
         //test if the entry object is really gone from the DHT
         assertTrue(getEntryFromID(newEntry.getID()) == null);
+
+        //test if creating a directory with the same name is possible.
+        try {
+            controller.createDir("/toRemove");
+            controller.readDir("/toRemove");
+        } catch (FsException e) {
+            System.err.println("Testing remove failed: " + e.getClass().getName() + " " + e.getMessage());
+            fail();
+        }
     }
 
     @Test
@@ -88,9 +96,20 @@ public class TreeControllerTest {
 
         controller.deleteFile("/FileToRemove");
         //test if the file is not visible anymore in the parent
-        assertTrue(!controller.readDir("/").contains("FileToRemove"));
+        System.out.println(controller.readDir("/"));
+        assertFalse(controller.readDir("/").contains("FileToRemove"));
         //test if the entry object is really gone from the DHT
         assertTrue(getEntryFromID(newEntry.getID()) == null);
+
+        //test if it is possible to again create a dir with the same name
+        try {
+            controller.createDir("/FileToRemove");
+            controller.readDir("/FileToRemove");
+        } catch (FsException e) {
+            System.err.println("Testing remove failed: " + e.getClass().getName() + " " + e.getMessage());
+            fail();
+        }
+        assertTrue(controller.readDir("/").contains("FileToRemove"));
     }
 
     @Test
@@ -106,7 +125,7 @@ public class TreeControllerTest {
         assertEquals(Entry.TYPE.DIRECTORY, newDir.getType());
         assertEquals(testPath, "/" + newDir.getEntryName());
 
-        String testSubPath = testPath+"/subTest";
+        String testSubPath = testPath + "/subTest";
         controller.createDir(testSubPath);
 
         System.out.println("testCreateDir-- children of \"/newTestDir/\" after creating /newTestDir/subTest \n" + controller.readDir(testPath) + "\n\n");
@@ -177,30 +196,30 @@ public class TreeControllerTest {
     }
 
 
-    public static PeerDHT[] createAndAttachPeersDHT( int nr, int port ) throws IOException {
+    public static PeerDHT[] createAndAttachPeersDHT(int nr, int port) throws IOException {
         PeerDHT[] peers = new PeerDHT[nr];
-        for ( int i = 0; i < nr; i++ ) {
-            if ( i == 0 ) {
-                peers[0] = new PeerBuilderDHT(new PeerBuilder( new Number160( RND ) ).ports( port ).start()).start();
+        for (int i = 0; i < nr; i++) {
+            if (i == 0) {
+                peers[0] = new PeerBuilderDHT(new PeerBuilder(new Number160(RND)).ports(port).start()).start();
 
             } else {
-                peers[i] = new PeerBuilderDHT(new PeerBuilder( new Number160( RND ) ).masterPeer( peers[0].peer() ).start()).start();
+                peers[i] = new PeerBuilderDHT(new PeerBuilder(new Number160(RND)).masterPeer(peers[0].peer()).start()).start();
 
             }
         }
         return peers;
     }
-    public static void bootstrap( PeerDHT[] peers ) {
+
+    public static void bootstrap(PeerDHT[] peers) {
         //make perfect bootstrap, the regular can take a while
-        for(int i=0;i<peers.length;i++) {
-            for(int j=0;j<peers.length;j++) {
+        for (int i = 0; i < peers.length; i++) {
+            for (int j = 0; j < peers.length; j++) {
                 peers[i].peerBean().peerMap().peerFound(peers[j].peerAddress(), null, null, null);
 
             }
 
         }
     }
-
 
 
 }

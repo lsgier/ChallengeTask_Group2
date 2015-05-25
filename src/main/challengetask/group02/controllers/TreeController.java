@@ -122,7 +122,8 @@ public class TreeController implements ITreeController {
 
         String newName = newPath.getFileName().toString();
 
-        //if path different
+        //if the path is the same, just rename the entry
+        //if the path is different
         //add new link to new parent
         //remove link from old parent
 

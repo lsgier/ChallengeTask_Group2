@@ -24,8 +24,8 @@ public class Fuse extends FuseFilesystemAdapterAssumeImplemented {
 
     public void run(Logger logger) throws FuseException {
         try {
-            this.log(false).mount(path);
-            //this.log(logger).mount(path);
+            //this.log(false).mount(path);
+            this.log(logger).mount(path);
         } catch (FuseException e) {
             e.printStackTrace();
         }

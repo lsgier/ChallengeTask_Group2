@@ -4,11 +4,12 @@ import challengetask.group02.controllers.exceptions.*;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
-import challengetask.group02.helpers.DHTPutGetHelper;
-import challengetask.group02.helpers.SimpleCache;
+import challengetask.group02.helpers.FSModifyHelper;
+import challengetask.group02.helpers.PathResolver;
+
 import net.fusejna.StructStat;
 import net.fusejna.types.TypeMode;
-import net.tomp2p.dht.FutureGet;
+
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 
@@ -24,75 +25,25 @@ import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
 
 public class TreeController implements ITreeController {
 
+    private final FSModifyHelper helper;
+    private final PathResolver pathResolver;
+
     PeerDHT peer;
-    SimpleCache<Entry> cache = new SimpleCache<>(1);
 
     public TreeController(PeerDHT peer) {
         this.peer = peer;
-    }
-
-    private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException, NoSuchFileOrDirectoryException {
-        if (ID == null) {
-            System.err.println("BUG: trying to get Entry with ID null!");
-            throw new NoSuchFileOrDirectoryException("Tried to get entry with ID null.");
-        }
-
-        FutureGet futureGet = peer.get(ID).getLatest().start();
-        futureGet.awaitUninterruptibly();
-        if (futureGet.isEmpty()) {
-            System.out.println("getEntryFromID did not get a result -> faulty fs");
-            throw new NoSuchFileOrDirectoryException("");
-        }
-        return (Entry) futureGet.data().object();
+        helper = new FSModifyHelper(peer);
+        pathResolver = new PathResolver(peer);
     }
 
     @Override
-    public Entry findEntry(String path) throws IOException, ClassNotFoundException, FsException {
-        Path subPaths = Paths.get(path);
-
-        Entry resultEntry = cache.get(path);
-        if (resultEntry != null) {
-            return resultEntry;
-        }
-
-        //first, get the root directory
-        Directory currentDirectory;
-        try {
-            currentDirectory = (Directory) getEntryFromID(Number160.ZERO);
-        } catch (NoSuchFileOrDirectoryException e) {
-            throw new FsException("No root node was found. Probably not connected to a P2P network with a running file system.");
-        }
-
-        Number160 currentChildFileID;
-        Number160 currentChildDirID;
-
-        for (Path dir : subPaths) {
-            //try to get the next child ID from the current directory. If the path is correct one will assigned with an ID and one with null.
-            currentChildFileID = currentDirectory.getChild(dir.toString(), FILE);
-            currentChildDirID = currentDirectory.getChild(dir.toString(), DIRECTORY);
-
-            if (currentChildFileID != null && subPaths.endsWith(dir)) {
-                resultEntry = getEntryFromID(currentChildFileID);
-                cache.put(path, resultEntry);
-                return resultEntry;
-            }
-            else if (currentChildFileID != null && !subPaths.endsWith(dir)) {
-                throw new NotADirectoryException("");
-            }
-            else if (currentChildDirID == null) {
-                throw new NoSuchFileOrDirectoryException(dir.toString());
-            } else {
-                currentDirectory = (Directory) getEntryFromID(currentChildDirID);
-            }
-        }
-        resultEntry = currentDirectory;
-        cache.put(path, resultEntry);
-        return resultEntry;
+    public Entry resolvePath(String path) throws IOException, ClassNotFoundException, FsException {
+        return pathResolver.resolvePath(path);
     }
 
     @Override
     public File getFile(String path) throws ClassNotFoundException, FsException, IOException {
-        Entry entry = findEntry(path);
+        Entry entry = resolvePath(path);
         if (entry.getType() == FILE) {
             return (File) entry;
         } else {
@@ -101,7 +52,7 @@ public class TreeController implements ITreeController {
     }
     @Override
     public Directory getDirectory(String path) throws ClassNotFoundException, FsException, IOException {
-        Entry entry = findEntry(path);
+        Entry entry = resolvePath(path);
         if (entry.getType() == DIRECTORY) {
             return (Directory) entry;
         } else {
@@ -128,7 +79,7 @@ public class TreeController implements ITreeController {
 
         Directory newDir = new Directory(newKey, subPaths.getFileName().toString());
 
-        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+
         helper.addNewEntry(parentEntry, newDir);
     }
 
@@ -152,7 +103,7 @@ public class TreeController implements ITreeController {
         newFile.setDirtyBit(true);
         newFile.setModifierPeer(peer.peerID());
         
-        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+
         helper.addNewEntry(parentEntry, newFile);
     }
 
@@ -172,14 +123,14 @@ public class TreeController implements ITreeController {
         Path oldPath = Paths.get(from);
         Path newPath = Paths.get(to);
 
-        Entry entry = findEntry(from);
+        Entry entry = resolvePath(from);
 
         String newName = newPath.getFileName().toString();
 
         //if path different
         //add new link to new parent
         //remove link from old parent
-        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+
         if (oldPath.getParent().compareTo(newPath.getParent()) == 0) {
 
             Directory parent = getDirectory(oldPath.getParent().toString());
@@ -201,7 +152,7 @@ public class TreeController implements ITreeController {
         Directory parentEntry = getDirectory(dirPath.getParent().toString());
 
         if (dirEntry.getChildren().isEmpty()) {
-            DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+
             helper.removeEntry(parentEntry, dirEntry);
         } else {
             throw new DirectoryNotEmptyException(path);
@@ -214,7 +165,7 @@ public class TreeController implements ITreeController {
         File file = getFile(path);
         Directory parent = getDirectory(dirPath.getParent().toString());
 
-        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+
         helper.clearAndDeleteFile(file);
         helper.removeEntry(parent, file);
     }
@@ -223,13 +174,13 @@ public class TreeController implements ITreeController {
     @Override
     public void whenFileClosed(String path) throws ClassNotFoundException, FsException, IOException {
         File file = getFile(path);
-        DHTPutGetHelper helper = new DHTPutGetHelper(peer);
+
         helper.flushFile(file);
     }
 
     @Override
     public void updateFileMetaData(String path, final StructStat.StatWrapper stat) throws ClassNotFoundException, FsException, IOException {
-        Entry entry = findEntry(path);
+        Entry entry = resolvePath(path);
         if (entry.getType() == Entry.TYPE.DIRECTORY) {
             stat.setMode(TypeMode.NodeType.DIRECTORY);
         }

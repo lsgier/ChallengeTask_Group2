@@ -1,5 +1,6 @@
 package challengetask.group02.helpers;
 
+import challengetask.group02.controllers.exceptions.NoSuchFileOrDirectoryException;
 import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
@@ -40,11 +41,11 @@ import java.util.Random;
  * code, but later. Maybe instead will have ConsistentPutHelper and ConsistentGetHelper
  * or something like it.
  */
-public class DHTPutGetHelper {
+public class FSModifyHelper {
     PeerDHT peer;
     private Random RND = new Random(42L);
 
-    public DHTPutGetHelper(PeerDHT peer) {
+    public FSModifyHelper(PeerDHT peer) {
         this.peer = peer;
     }
 
@@ -346,4 +347,6 @@ public class DHTPutGetHelper {
         }
         return new Pair<Number640, K>(latestKey, latestData);
     }
+
+
 }

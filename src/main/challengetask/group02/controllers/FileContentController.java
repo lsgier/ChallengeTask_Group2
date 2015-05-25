@@ -11,19 +11,19 @@ import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.File;
-import challengetask.group02.helpers.DHTPutGetHelper;
+import challengetask.group02.helpers.FSModifyHelper;
 import challengetask.group02.controllers.exceptions.BusyException;
 
 //This class is used to split up the files and also fetch them
 public class FileContentController implements IFileContentController {
 	
 	private PeerDHT peer;
-	private DHTPutGetHelper dhtPutGetHelper;
+	private FSModifyHelper dhtPutGetHelper;
 	
 	public FileContentController(PeerDHT peer) {
 		
 		this.peer = peer;
-		dhtPutGetHelper = new DHTPutGetHelper(this.peer);
+		dhtPutGetHelper = new FSModifyHelper(this.peer);
 	}	
 	
 	@Override

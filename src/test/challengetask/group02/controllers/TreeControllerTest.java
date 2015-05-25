@@ -65,15 +65,6 @@ public class TreeControllerTest {
         assertEquals(rootName, root.getEntryName());
     }
 
-    public void testFindEntry() throws Exception {
-        //Number160 key = new Number160(12345);
-
-    }
-
-    public void testGetPath() throws Exception {
-
-    }
-
     @Test
     public void testRemoveDirectory() throws IOException, FsException, ClassNotFoundException {
         controller.createDir("/toRemove");
@@ -153,9 +144,6 @@ public class TreeControllerTest {
 
         //assert that the parent also stores the new name
         assertTrue(controller.readDir("/").contains("newName"));
-
-        //TODO test all of the rename functionalities (just rename entry, move entry to new destination, move and rename)
-
     }
 
     @Test
@@ -173,6 +161,9 @@ public class TreeControllerTest {
         assertTrue(!controller.readDir("/movingTestFrom").contains("dirToMove"));
 
     }
+
+
+    //helper methods
 
     private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException {
         FutureGet futureGet = peers[3].get(ID).start();

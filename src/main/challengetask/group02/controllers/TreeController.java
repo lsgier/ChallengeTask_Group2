@@ -61,11 +61,6 @@ public class TreeController implements ITreeController {
     }
 
     @Override
-    public String getPath(Number160 EntryID) {
-        return null;
-    }
-
-    @Override
     public void createDir(String path) throws ClassNotFoundException, FsException, IOException {
         Path subPaths = Paths.get(path);
         int pathLength = subPaths.getNameCount();
@@ -87,7 +82,7 @@ public class TreeController implements ITreeController {
     public void createFile(String path) throws ClassNotFoundException, FsException, IOException {
 
         Path subPaths = Paths.get(path);
-        
+
         int pathLength = subPaths.getNameCount();
         if (pathLength == 0) {
             throw new NoSuchFileOrDirectoryException("Can not create such file");
@@ -97,12 +92,12 @@ public class TreeController implements ITreeController {
 
         Directory parentEntry = getDirectory(subPaths.getParent().toString());
 
-        File newFile = new File (newKey, parentEntry.getID(), subPaths.getFileName().toString());
+        File newFile = new File (newKey, subPaths.getFileName().toString());
 
         //this is new locking logic, due to fuse constraints we have to associate a file creation with the respective owner
         newFile.setDirtyBit(true);
         newFile.setModifierPeer(peer.peerID());
-        
+
 
         helper.addNewEntry(parentEntry, newFile);
     }

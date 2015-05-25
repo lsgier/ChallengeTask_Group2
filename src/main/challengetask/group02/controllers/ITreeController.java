@@ -19,9 +19,6 @@ public interface ITreeController {
 
     Directory getDirectory(String path) throws ClassNotFoundException, FsException, IOException;
 
-    //the reverse of resolvePath
-    String getPath(Number160 EntryID);
-
     void createDir(String path) throws ClassNotFoundException, FsException, IOException;
 
     //returns just the list with the names of the files and directories in that path

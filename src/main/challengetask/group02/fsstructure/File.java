@@ -1,7 +1,5 @@
 package challengetask.group02.fsstructure;
 
-import challengetask.group02.fsstructure.Entry;
-
 import java.util.ArrayList;
 
 import net.tomp2p.peers.Number160;
@@ -18,7 +16,7 @@ public class File extends Entry {
 
 	public File(String fileName, long fileSize, Number160 ID) {
 
-		blocks = new ArrayList<Number160>();
+		blocks = new ArrayList<>();
 		meta = new Meta();
 		
 		readOnly = false;
@@ -31,9 +29,9 @@ public class File extends Entry {
 		this.ID = ID;
 	}
 
-	public File(Number160 ID, Number160 parentID, String entryName) {
+	public File(Number160 ID, String entryName) {
 		
-		blocks = new ArrayList<Number160>();
+		blocks = new ArrayList<>();
 		meta = new Meta();
 		
 		readOnly = false;

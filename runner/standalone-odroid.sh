@@ -20,7 +20,7 @@ fi
 
 if [ -z "$2" ]
   then
-     nohup java -cp p2pfs.jar -Xmx512M -XX:MaxDirectMemorySize=512M challengetask.group02.peer.FSPeer "$mountPoint" >peer.log &
+     nohup java -jar p2pfs.jar -Xmx512M -XX:MaxDirectMemorySize=512M "$mountPoint" >peer.log &
   else
-     nohup java -cp p2pfs.jar -Xmx512M -XX:MaxDirectMemorySize=512M challengetask.group02.peer.FSPeer "$mountPoint" "$2" >peer-additional.log &
+     nohup java -jar p2pfs.jar -Xmx512M -XX:MaxDirectMemorySize=512M "$mountPoint" "$2" >peer-additional.log &
 fi

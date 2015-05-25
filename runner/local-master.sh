@@ -19,4 +19,4 @@ fi
 
 cd "target"
 
-java -cp p2pfs.jar -Xmx512M -XX:MaxDirectMemorySize=512M challengetask.group02.peer.FSPeer "$mountPoint/master"
+java -jar -Xmx512M -XX:MaxDirectMemorySize=512M ../target/p2pfs.jar  "$mountPoint/master"

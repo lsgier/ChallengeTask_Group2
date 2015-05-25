@@ -80,6 +80,7 @@
                 <version>2.6</version>
                 <configuration>
                     <finalName>p2pfs</finalName>
+
                 </configuration>
             </plugin>
 
@@ -92,6 +93,11 @@
                     </descriptorRefs>
                     <finalName>p2pfs</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
+                    <archive>
+                        <manifest>
+                            <mainClass>challengetask.group02.peer.FSPeer</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
             <!--</pluginManagement>-->

@@ -12,6 +12,14 @@ import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 import java.util.Objects;
 
+/*
+Fuse interface implementation
+requires the mount point and the controller for the constructor.
+
+Information about FUSE can be found in the project wiki,
+to know more about fuse-jna go to https://github.com/EtiennePerot/fuse-jna
+ */
+
 public class Fuse extends FuseFilesystemAdapterAssumeImplemented {
 
     private final String path;
@@ -36,7 +44,6 @@ public class Fuse extends FuseFilesystemAdapterAssumeImplemented {
         try {
             controller.updateFileMetaData(path, stat);
             return 0;
-
         } catch (FsException e) {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {
@@ -81,7 +88,6 @@ public class Fuse extends FuseFilesystemAdapterAssumeImplemented {
     public int mkdir(final String path, final TypeMode.ModeWrapper mode) {
         try {
             controller.createDir(path);
-            //mode.setMode(TypeMode.NodeType.DIRECTORY);
         } catch (FsException e) {
             return getErrorCode(e);
         } catch (ClassNotFoundException | IOException e) {

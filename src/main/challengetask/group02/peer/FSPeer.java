@@ -24,6 +24,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+/*
+Main class
+responsible for starting peers as a server or as a "slave" peer which will bootstrap to master
+and after runs the fuse-related routine.
+
+Arguments:
+1. mount point, obligatory, a path to an empty directory
+2. bootstrap-ip, optional, required for bootsrapping
+3. peer-number, optional, needed for local testing
+ */
+
 public class FSPeer {
     private static PeerDHT peerDHT;
     private static Logger logger = null;
@@ -31,7 +42,6 @@ public class FSPeer {
 
     public static void main(String[] args) throws Exception {
         String mountPoint = args[0];
-
 
         if (args.length == 1){
             //if we run just server, only create peer.log
@@ -86,6 +96,10 @@ public class FSPeer {
         System.out.println("address visible to outside is " + peerDHT.peerAddress());
 
     }
+    /*
+    Every time server starts it creates the root directory with a key ZERO,
+    this method guarantees that root always exists in the file system.
+     */
     private static void createRoot() throws IOException {
         //create a root node
         Directory rootDir = new Directory(Number160.ZERO, "root");

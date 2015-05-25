@@ -20,7 +20,7 @@ fi
 
 if [ -z "$2" ]
   then
-     java -cp p2pfs.jar -Xmx512M -XX:MaxDirectMemorySize=512M challengetask.group02.peer.FSPeer "$mountPoint"
+     java -jar -Xmx512M -XX:MaxDirectMemorySize=512M p2pfs.jar "$mountPoint"
   else
-    java -cp p2pfs.jar -Xmx512M -XX:MaxDirectMemorySize=512M challengetask.group02.peer.FSPeer "$mountPoint" "$2"
+    java -jar -Xmx512M -XX:MaxDirectMemorySize=512M p2pfs.jar  "$mountPoint" "$2"
 fi

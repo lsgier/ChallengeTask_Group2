@@ -17,6 +17,12 @@ import java.nio.file.Paths;
 import static challengetask.group02.fsstructure.Entry.TYPE.DIRECTORY;
 import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
 
+/*
+ * Path resolution routine:
+ * the path (relative to the mount point) is given as an input,
+ * filesystem Entry is produced as an output.
+ */
+
 public class PathResolver {
 
     PeerDHT peer;

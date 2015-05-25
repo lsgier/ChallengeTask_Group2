@@ -1,11 +1,9 @@
 package challengetask.group02.helpers;
 
-import challengetask.group02.controllers.exceptions.NoSuchFileOrDirectoryException;
 import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
-import net.tomp2p.dht.FutureDHT;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
@@ -25,23 +23,16 @@ import java.util.Random;
  */
 
 /**
- * This is the end-point class to work with the tree
- * just right now it does things the same way as before (no checks, direct put)
- * further will be expanded with vDHT mechanisms
- * <p>
- * The general guideline is: if there's a need to use peer.put() at some point,
- * utilize this class.
- * <p>
- * As input the class accepts entries plus the things that have to be changed, but not
- * the entries that already updated. That will allow to use vDHT and frees us
- * from writing the Entry -> Action mechanism classes.
- * <p>
- * The "get" part of the Helper will probably be also written -- every time we
- * get something from DHT, consistency also have to be checked. For that need
- * code, but later. Maybe instead will have ConsistentPutHelper and ConsistentGetHelper
- * or something like it.
- */
-public class FSModifyHelper {
+ * This is the class to modify the tree,
+ * some methods use simple put, others like addNewEntry and removeEntry
+ * utilize vDHT mechanisms.
+ *
+ * The code for vDHT is mostly copied from ExampleVDHT class from tomp2p examples.
+ *
+ * Requires further refactoring.
+ * */
+
+ public class FSModifyHelper {
     PeerDHT peer;
     private Random RND = new Random(42L);
 
@@ -50,12 +41,11 @@ public class FSModifyHelper {
     }
 
     public int addNewEntry(Directory parentDir, Entry child) {
-//first have to update parent
+
         try {
             put(child);
             vUpdateParentAddChild(parentDir, child);
-//here have to check if everything went fine,
-//otherwise have to remove child
+
         } catch (Exception e) {
         }
         return 0;
@@ -67,10 +57,9 @@ public class FSModifyHelper {
             put(entry);
             removeEntry(entry);
             vUpdateParentRemoveChild(parent, entry);
-//parent.removeChild(entry.getEntryName());
-//put(parent);
+
         } catch (IOException e) {
-//TODO
+
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -89,13 +78,13 @@ public class FSModifyHelper {
 
     public int updateEntryName(Directory parent, Entry entry, String newName) {
         try {
-//Modify parent
+
             parent.renameChild(entry.getEntryName(), newName);
             xPut(parent);
-//if previous was successfull, can put the child itself
+
             entry.setEntryName(newName);
             put(entry);
-//if this was successful either, then all is ok.
+
         } catch (Exception e) {
         }
         return 0;

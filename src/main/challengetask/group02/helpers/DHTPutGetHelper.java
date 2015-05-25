@@ -1,14 +1,14 @@
+/**
+ * Created by anvar on 25/04/15.
+ */
+
 package challengetask.group02.helpers;
 
 import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
-import net.tomp2p.dht.FutureDHT;
-import net.tomp2p.dht.FutureGet;
-import net.tomp2p.dht.FuturePut;
-import net.tomp2p.dht.FutureRemove;
-import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.dht.*;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.peers.PeerAddress;
@@ -16,12 +16,12 @@ import net.tomp2p.storage.Data;
 import net.tomp2p.utils.Pair;
 
 import java.io.IOException;
+
+import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 
-/**
- * Created by anvar on 25/04/15.
- */
+
 
 /**
  *
@@ -44,11 +44,43 @@ import java.util.Random;
  */
 public class DHTPutGetHelper {
     PeerDHT peer;
-
+    private Random RND = new Random(42L);
 
     public DHTPutGetHelper(PeerDHT peer) {
         this.peer = peer;
     }
+
+    public int addNewEntry(Directory parentDir, Entry child){
+        //first have to update parent
+        try {
+            put(child);
+            vUpdateParentAddChild(parentDir, child);
+            //here have to check if everything went fine,
+            //otherwise have to remove child
+        } catch (Exception e){
+
+        }
+        return 0;
+    }
+
+
+    public void removeEntry(Directory parent, Entry entry) throws ClassNotFoundException {
+        try {
+            entry.setDirtyBit(true);
+            put(entry);
+            removeEntry(entry);
+            vUpdateParentRemoveChild(parent, entry);
+            //parent.removeChild(entry.getEntryName());
+            //put(parent);
+
+        } catch (IOException e) {
+            //TODO
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void put(Entry entry) throws IOException {
         FuturePut futurePut = peer.put(entry.getID()).data(new Data(entry)).start();
@@ -59,37 +91,15 @@ public class DHTPutGetHelper {
     	FuturePut futurePut = peer.put(block.getID()).data(new Data(block)).start();
     	futurePut.awaitUninterruptibly();
     }
-    
-    public int addNewEntry(Directory parentDir, Entry child){
-        //first have to update parent
-        try {
 
-            put(child);
 
-            //parentDir.addChild(child.getEntryName(), child.getID(), child.getType());
-            //put(parentDir);
-
-            vPut(parentDir, child);
-            //if this was successful either, then all is ok.
-        } catch (Exception e){
-
-        }
-        return 0;
-    }
-
-    private void vPut(Directory parentDir, Entry child) throws InterruptedException, IOException, ClassNotFoundException {
-
-        store(peer, parentDir, child);
-
-        //parentDir.addChild(child.getEntryName(), child.getID(), child.getType());
-    }
 
     public int updateEntryName(Directory parent, Entry entry, String newName) {
 
         try{
             //Modify parent
             parent.renameChild(entry.getEntryName(), newName);
-            put(parent);
+            xPut(parent);
             //if previous was successfull, can put the child itself
             entry.setEntryName(newName);
             put(entry);
@@ -99,6 +109,32 @@ public class DHTPutGetHelper {
         }
 
         return 0;
+    }
+
+    private void xPut(Entry entry) throws IOException {
+
+        FutureGet fg = peer.get(entry.getID()).getLatest().start()
+                .awaitUninterruptibly();
+
+        Pair<Number640, Data> pair = checkVersions(fg.rawData());
+
+        Data newData = new Data(entry);
+
+        Number160 v = pair.element0().versionKey();
+        long version = v.timestamp() + 1;
+        newData.addBasedOn(v);
+
+        Pair<Number160, Data> pair3 = new Pair<Number160, Data>(new Number160(version,
+                newData.hash()), newData);
+        
+        FuturePut fp1 = peer.put(entry.getID()).data(Number160.ZERO, pair3.element1().prepareFlag(), pair3.element0()).start().awaitUninterruptibly();
+
+        Pair<Number640, Byte> pair2 = checkVersions(fp1.rawResult());
+
+        FuturePut fp = peer.put(entry.getID())
+                    .versionKey(pair2.element0().versionKey()).putConfirm()
+                    .data(new Data()).start().awaitUninterruptibly();
+
     }
     
 	public void putFile(Number160 ID, File file) {		
@@ -134,38 +170,18 @@ public class DHTPutGetHelper {
 	}
 	
     public int moveEntry(Directory newParent, Directory oldParent, Entry entry, String newName) {
-        newParent.addChild(newName, entry.getID(), entry.getType());
-        oldParent.removeChild(entry.getEntryName());
-        entry.setEntryName(newName);
 
-        try{
-            //trying to update new parent first
-            put(newParent);
-            //if ok, have to modify the old parent
-            put(oldParent);
-            //if ok, can finally update the entry itself
-            put(entry);
-        } catch (Exception e){
-            //TODO
-        }
-        return 0;
-    }
-
-    public void removeAndDeleteChild(Directory parent, Entry entry) {
+        addNewEntry(newParent, entry);
         try {
-            entry.setDirtyBit(true);
-            put(entry);
-
-            parent.removeChild(entry.getEntryName());
-            put(parent);
-
-            removeEntry(entry);
-        } catch (IOException e) {
-            //TODO
+            removeEntry(oldParent, entry);
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
+
+        return 0;
     }
+
 
     public void removeEntry(Entry entry) {
         //TODO asynchronous
@@ -204,20 +220,18 @@ public class DHTPutGetHelper {
         }
     }
 
-    private static void store(PeerDHT peerDHT, Directory parentDir, Entry child)
+    private void vUpdateParentAddChild(Directory parentDir, Entry child)
             throws ClassNotFoundException, InterruptedException, IOException {
-
-        Random RND = new Random(42L);
 
         Pair<Number640, Byte> pair2 = null;
         for (int i = 0; i < 5; i++) {
-            Pair<Number160, Data> pair = getAndUpdate(peerDHT, parentDir, child);
+            Pair<Number160, Data> pair = getAndUpdate(parentDir, child);
             if (pair == null) {
                 System.out
                         .println("we cannot handle this kind of inconsistency automatically, handing over the the API dev");
                 return;
             }
-            FuturePut fp = peerDHT
+            FuturePut fp = peer
                     .put(parentDir.getID())
                     .data(Number160.ZERO, pair.element1().prepareFlag(), pair.element0()).start().awaitUninterruptibly();
             pair2 = checkVersions(fp.rawResult());
@@ -227,15 +241,16 @@ public class DHTPutGetHelper {
             }
             System.out.println("get delay or fork - put");
             // if not removed, a low ttl will eventually get rid of it
-            peerDHT.remove(parentDir.getID()).versionKey(pair.element0()).start()
+            peer.remove(parentDir.getID()).versionKey(pair.element0()).start()
                     .awaitUninterruptibly();
             Thread.sleep(RND.nextInt(500));
         }
         if (pair2 != null && pair2.element1() == 1) {
-            FuturePut fp = peerDHT.put(parentDir.getID())
+            //stored
+            FuturePut fp = peer.put(parentDir.getID())
                     .versionKey(pair2.element0().versionKey()).putConfirm()
                     .data(new Data()).start().awaitUninterruptibly();
-            System.out.println("stored!: " + fp.failedReason());
+
         } else {
             System.out
                     .println("we cannot handle this kind of inconsistency automatically, handing over the the API dev");
@@ -244,24 +259,13 @@ public class DHTPutGetHelper {
 
 
 
-    private static Pair<Number160, Data> getAndUpdate(PeerDHT peerDHT, Directory parentDir, Entry child) throws InterruptedException, ClassNotFoundException,
+    private Pair<Number160, Data> getAndUpdate(Directory parentDir, Entry child) throws InterruptedException, ClassNotFoundException,
             IOException {
 
         Random RND = new Random(42L);
 
-        Pair<Number640, Data> pair = null;
-        for (int i = 0; i < 5; i++) {
-            FutureGet fg = peerDHT.get(parentDir.getID()).getLatest().start()
-                    .awaitUninterruptibly();
-            // check if all the peers agree on the same latest version, if not
-            // wait a little and try again
-            pair = checkVersions(fg.rawData());
-            if (pair != null) {
-                break;
-            }
-            System.out.println("get delay or fork - get");
-            Thread.sleep(RND.nextInt(500));
-        }
+        Pair<Number640, Data> pair = tryToGet(parentDir.getID());
+
         // we got the latest data
         if (pair != null) {
             // update operation is append
@@ -278,6 +282,94 @@ public class DHTPutGetHelper {
                     newData.hash()), newData);
         }
         return null;
+    }
+
+    private void vUpdateParentRemoveChild(Directory parentDir, Entry child) throws InterruptedException, IOException, ClassNotFoundException {
+        Pair<Number640, Byte> pair2 = null;
+        for (int i = 0; i < 5; i++) {
+            Pair<Number160, Data> pair = getAndUpdate_remove(parentDir, child);
+            if (pair == null) {
+                System.out
+                        .println("we cannot handle this kind of inconsistency automatically, handing over the the API dev");
+                return;
+            }
+            FuturePut fp = peer
+                    .put(parentDir.getID())
+                    .data(Number160.ZERO, pair.element1().prepareFlag(), pair.element0()).start().awaitUninterruptibly();
+            pair2 = checkVersions(fp.rawResult());
+            // 1 is PutStatus.OK_PREPARED
+            if (pair2 != null && pair2.element1() == 1) {
+                break;
+            }
+            System.out.println("get delay or fork - put");
+            // if not removed, a low ttl will eventually get rid of it
+            peer.remove(parentDir.getID()).versionKey(pair.element0()).start()
+                    .awaitUninterruptibly();
+            try {
+                Thread.sleep(RND.nextInt(500));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (pair2 != null && pair2.element1() == 1) {
+            //stored
+            FuturePut fp = peer.put(parentDir.getID())
+                    .versionKey(pair2.element0().versionKey()).putConfirm()
+                    .data(new Data()).start().awaitUninterruptibly();
+
+        } else {
+            System.out
+                    .println("we cannot handle this kind of inconsistency automatically, handing over the the API dev");
+        }
+    }
+
+    private Pair<Number160, Data> getAndUpdate_remove(Directory parentDir, Entry child) throws InterruptedException, ClassNotFoundException,
+            IOException {
+
+        Random RND = new Random(42L);
+
+        Pair<Number640, Data> pair = tryToGet(parentDir.getID());
+
+        // we got the latest data
+        if (pair != null) {
+            // update operation is append
+
+            parentDir.removeChild(child.getEntryName());
+            Data newData = new Data(parentDir);
+
+            Number160 v = pair.element0().versionKey();
+            long version = v.timestamp() + 1;
+            newData.addBasedOn(v);
+
+            //since we create a new version, we can access old versions as well
+            return new Pair<Number160, Data>(new Number160(version,
+                    newData.hash()), newData);
+        }
+        return null;
+    }
+
+    private Pair<Number640, Data> tryToGet(Number160 key){
+        Pair<Number640, Data> pair = null;
+        for (int i = 0; i < 5; i++) {
+            FutureGet fg = peer.get(key).getLatest().start()
+                    .awaitUninterruptibly();
+
+            // check if all the peers agree on the same latest version, if not
+            // wait a little and try again
+            pair = checkVersions(fg.rawData());
+            if (pair != null) {
+                break;
+            }
+
+            // something went wrong, have to wait
+            try {
+                Thread.sleep(RND.nextInt(500));
+            } catch (InterruptedException e) {
+                //TODO find out what is it
+                e.printStackTrace();
+            }
+        }
+        return pair;
     }
 
 

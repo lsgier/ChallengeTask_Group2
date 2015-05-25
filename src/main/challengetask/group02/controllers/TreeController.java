@@ -160,6 +160,8 @@ public class TreeController implements TreeControllerStrategy {
         Hashtable<String, Number160> children = dir.getChildren(FILE);
         children.putAll(dir.getChildren(DIRECTORY));
 
+        System.out.println(peer.storageLayer().get());
+
         return new ArrayList<>(children.keySet());
     }
 
@@ -177,7 +179,6 @@ public class TreeController implements TreeControllerStrategy {
         //remove link from old parent
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
         if (oldPath.getParent().compareTo(newPath.getParent()) == 0) {
-
             Directory parent = getDirectory(oldPath.getParent().toString());
             helper.updateEntryName(parent, entry, newName);
 
@@ -198,7 +199,7 @@ public class TreeController implements TreeControllerStrategy {
 
         if (dirEntry.getChildren().isEmpty()) {
             DHTPutGetHelper helper = new DHTPutGetHelper(peer);
-            helper.removeAndDeleteChild(parentEntry, dirEntry);
+            helper.removeEntry(parentEntry, dirEntry);
         } else {
             throw new DirectoryNotEmptyException(path);
         }
@@ -212,7 +213,7 @@ public class TreeController implements TreeControllerStrategy {
 
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
         helper.clearAndDeleteFile(file);
-        helper.removeAndDeleteChild(parent, file);
+        helper.removeEntry(parent, file);
     }
 
     //used for the locking logic

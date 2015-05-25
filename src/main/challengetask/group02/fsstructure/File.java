@@ -15,6 +15,7 @@ public class File extends Entry {
 	private boolean readOnly;
 
 	private static final long serialVersionUID = 1L;
+	final public static int BLOCK_SIZE =  16384;
 
 	public File(String fileName, long fileSize, Number160 ID) {
 		

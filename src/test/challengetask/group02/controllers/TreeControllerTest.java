@@ -1,5 +1,6 @@
 package challengetask.group02.controllers;
 
+import challengetask.group02.controllers.exceptions.FsException;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.FutureDHT;
@@ -27,7 +28,7 @@ public class TreeControllerTest {
 
     static String rootName = "/";
 
-    public static TreeControllerStrategy controller;
+    public static ITreeController controller;
 
     @BeforeClass
     public static void setup() {

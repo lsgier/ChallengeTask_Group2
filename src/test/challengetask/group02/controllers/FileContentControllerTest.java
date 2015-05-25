@@ -5,22 +5,19 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Random;
-import java.util.UUID;
-import java.util.zip.CRC32;
 
+import challengetask.group02.controllers.exceptions.BusyException;
+import challengetask.group02.controllers.exceptions.CRCException;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import challengetask.group02.Constants;
+
 import challengetask.group02.fsstructure.File;
-import challengetask.group02.controllers.FileContentController;
-import challengetask.group02.fsstructure.Block;
 
 public class FileContentControllerTest {
 	
@@ -546,7 +543,7 @@ public class FileContentControllerTest {
 	}
 	
 	@Test
-	public void doTests() throws BusyException{
+	public void doTests() throws BusyException {
 		
 		testCreateFile();
 		testReadFile();		
@@ -556,7 +553,7 @@ public class FileContentControllerTest {
 		
 		Random random = new Random();
 		
-		FileContentController fcc;
+		IFileContentController fcc;
 		fcc = new FileContentController(peer[4]);
 		
 		file = new File("Random Filename.txt", arr.length, new Number160(random));
@@ -582,7 +579,7 @@ public class FileContentControllerTest {
 	
 	public void testReadFile() {
 	
-		FileContentController fcc;
+		IFileContentController fcc;
 		fcc = new FileContentController(peer[6]);
 		
 		long testLength = 2000;

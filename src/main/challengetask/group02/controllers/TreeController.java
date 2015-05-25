@@ -1,5 +1,6 @@
 package challengetask.group02.controllers;
 
+import challengetask.group02.controllers.exceptions.*;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
@@ -20,7 +21,7 @@ import java.util.UUID;
 import static challengetask.group02.fsstructure.Entry.TYPE.DIRECTORY;
 import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
 
-public class TreeController implements TreeControllerStrategy {
+public class TreeController implements ITreeController {
 
     PeerDHT peer;
 

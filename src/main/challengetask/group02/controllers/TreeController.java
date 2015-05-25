@@ -5,6 +5,7 @@ import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
 import challengetask.group02.helpers.DHTPutGetHelper;
+import challengetask.group02.helpers.SimpleCache;
 import net.fusejna.StructStat;
 import net.fusejna.types.TypeMode;
 import net.tomp2p.dht.FutureGet;

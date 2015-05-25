@@ -2,6 +2,7 @@ package challengetask.group02.controllers;
 
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
+import challengetask.group02.helpers.SimpleCache;
 import net.tomp2p.peers.Number160;
 import org.junit.Test;
 

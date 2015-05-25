@@ -1,10 +1,10 @@
 package challengetask.group02.controllers;
 
+import challengetask.group02.controllers.exceptions.*;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
 import net.fusejna.StructStat;
 import net.tomp2p.dht.PeerDHT;
-import net.tomp2p.peers.Number160;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 public class ControllerContext {
 
-    private final FileContentController fileContentController;
-    private final TreeControllerStrategy treeController;
+    private final IFileContentController fileContentController;
+    private final ITreeController treeController;
 
     public ControllerContext(PeerDHT peer) {
         this.treeController = new TreeController(peer);
@@ -22,10 +22,6 @@ public class ControllerContext {
 
     public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, FsException {
         return treeController.readDir(path);
-    }
-
-    public Entry findEntry(String path) throws IOException, ClassNotFoundException, FsException {
-        return treeController.findEntry(path);
     }
 
     public void createDir(String path) throws ClassNotFoundException, FsException, IOException {

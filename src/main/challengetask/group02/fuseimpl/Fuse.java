@@ -1,6 +1,7 @@
-package challengetask.group02.fuserunner;
+package challengetask.group02.fuseimpl;
 
 import challengetask.group02.controllers.*;
+import challengetask.group02.controllers.exceptions.*;
 import net.fusejna.*;
 import net.fusejna.StructFuseFileInfo.FileInfoWrapper;
 import net.fusejna.types.TypeMode;
@@ -11,20 +12,20 @@ import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 import java.util.Objects;
 
-public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
+public class Fuse extends FuseFilesystemAdapterAssumeImplemented {
+
     private final String path;
     private ControllerContext controller;
 
-
-    public FuseRunner(ControllerContext controller, String path) {
+    public Fuse(ControllerContext controller, String path) {
         this.controller = controller;
         this.path = path;
     }
 
     public void run(Logger logger) throws FuseException {
         try {
-            this.log(false).mount(path);
-            //this.log(logger).mount(path);
+            //this.log(false).mount(path);
+            this.log(logger).mount(path);
         } catch (FuseException e) {
             e.printStackTrace();
         }
@@ -42,7 +43,6 @@ public class FuseRunner extends FuseFilesystemAdapterAssumeImplemented {
             e.printStackTrace();
         }
 
-        //TODO what should this getattr method normally return?
         return -ErrorCodes.ENOENT();
     }
 

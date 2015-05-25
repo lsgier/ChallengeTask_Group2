@@ -1,5 +1,6 @@
 package challengetask.group02.controllers;
 
+import challengetask.group02.controllers.exceptions.FsException;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
@@ -9,16 +10,16 @@ import net.tomp2p.peers.Number160;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public interface TreeControllerStrategy {
+public interface ITreeController {
 
     //traverses the given path to get to the leaf-object of the path
-    Entry findEntry(String path) throws IOException, ClassNotFoundException, FsException;
+    Entry resolvePath(String path) throws IOException, ClassNotFoundException, FsException;
 
     File getFile(String path) throws ClassNotFoundException, FsException, IOException;
 
     Directory getDirectory(String path) throws ClassNotFoundException, FsException, IOException;
 
-    //the reverse of findEntry
+    //the reverse of resolvePath
     String getPath(Number160 EntryID);
 
     void createDir(String path) throws ClassNotFoundException, FsException, IOException;

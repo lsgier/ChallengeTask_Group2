@@ -1,5 +1,6 @@
 package challengetask.group02.controllers;
 
+import challengetask.group02.controllers.exceptions.FsException;
 import challengetask.group02.fsstructure.Directory;
 import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.FutureDHT;
@@ -27,7 +28,7 @@ public class TreeControllerTest {
 
     static String rootName = "/";
 
-    public static TreeControllerStrategy controller;
+    public static ITreeController controller;
 
     @BeforeClass
     public static void setup() {
@@ -60,7 +61,7 @@ public class TreeControllerTest {
 
     @Test
     public void testFindEntryGetRoot() throws Exception {
-        Directory root = (Directory) controller.findEntry("/");
+        Directory root = (Directory) controller.resolvePath("/");
         assertEquals(rootName, root.getEntryName());
     }
 
@@ -78,7 +79,7 @@ public class TreeControllerTest {
         controller.createDir("/toRemove");
         assertTrue(controller.readDir("/").contains("toRemove"));
 
-        Entry newEntry = controller.findEntry("toRemove");
+        Entry newEntry = controller.resolvePath("toRemove");
 
         controller.removeDirectory("/toRemove");
         //test if the directory is not visible anymore in the parent
@@ -92,7 +93,7 @@ public class TreeControllerTest {
         controller.createFile("/FileToRemove");
         assertTrue(controller.readDir("/").contains("FileToRemove"));
 
-        Entry newEntry = controller.findEntry("/FileToRemove");
+        Entry newEntry = controller.resolvePath("/FileToRemove");
 
         controller.deleteFile("/FileToRemove");
         //test if the file is not visible anymore in the parent
@@ -110,7 +111,7 @@ public class TreeControllerTest {
         System.out.println("testCreateDir-- children of \"/\" after creating /newTestDir \n" + controller.readDir("/") + "\n");
         assertTrue(controller.readDir("/").contains("newTestDir"));
 
-        Directory newDir = (Directory) controller.findEntry(testPath);
+        Directory newDir = (Directory) controller.resolvePath(testPath);
         assertEquals(Entry.TYPE.DIRECTORY, newDir.getType());
         assertEquals(testPath, "/" + newDir.getEntryName());
 
@@ -120,7 +121,7 @@ public class TreeControllerTest {
         System.out.println("testCreateDir-- children of \"/newTestDir/\" after creating /newTestDir/subTest \n" + controller.readDir(testPath) + "\n\n");
         assertTrue(controller.readDir(testPath).contains("subTest"));
 
-        Directory newSubDir = (Directory) controller.findEntry(testSubPath);
+        Directory newSubDir = (Directory) controller.resolvePath(testSubPath);
         assertEquals(Entry.TYPE.DIRECTORY, newSubDir.getType());
         assertEquals(testSubPath, testPath + "/" + newSubDir.getEntryName());
     }
@@ -143,7 +144,7 @@ public class TreeControllerTest {
 
         controller.createDir(oldName);
 
-        Number160 entryID = controller.findEntry(oldName).getID();
+        Number160 entryID = controller.resolvePath(oldName).getID();
 
         controller.renameEntry(oldName, newName);
 

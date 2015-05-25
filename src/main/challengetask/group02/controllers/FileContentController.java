@@ -6,27 +6,28 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.zip.CRC32;
 
+import challengetask.group02.controllers.exceptions.CRCException;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.File;
-import challengetask.group02.helpers.DHTPutGetHelper;
-import challengetask.group02.Constants;
-import challengetask.group02.controllers.BusyException;
+import challengetask.group02.helpers.FSModifyHelper;
+import challengetask.group02.controllers.exceptions.BusyException;
 
 //This class is used to split up the files and also fetch them
-public class FileContentController {
+public class FileContentController implements IFileContentController {
 	
 	private PeerDHT peer;
-	private DHTPutGetHelper dhtPutGetHelper;
+	private FSModifyHelper dhtPutGetHelper;
 	
 	public FileContentController(PeerDHT peer) {
 		
 		this.peer = peer;
-		dhtPutGetHelper = new DHTPutGetHelper(this.peer);
+		dhtPutGetHelper = new FSModifyHelper(this.peer);
 	}	
 	
-	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) throws BusyException {		
+	@Override
+	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) throws BusyException {
 		
 		if(file.getReadOnly() == true) {			
 			if( file.getModifierPeer().compareTo(peer.peerID()) != 0) {
@@ -40,8 +41,8 @@ public class FileContentController {
 
 		long outWriteOffset = writeOffset;
 				
-		int startBlock = (int)(writeOffset/Constants.BLOCK_SIZE);
-		int endBlock = (int)((bufSize+writeOffset-1)/Constants.BLOCK_SIZE);
+		int startBlock = (int)(writeOffset/File.BLOCK_SIZE);
+		int endBlock = (int)((bufSize+writeOffset-1)/File.BLOCK_SIZE);
 						
 		//copy the bytebuffer (data to write) into our content array
 		//assuming we the content has length bufSize, otherwise BufferUnderFlowException will be thrown
@@ -58,7 +59,7 @@ public class FileContentController {
 		//maintains the pointer where to read/write
 		int position = 0;
 
-		//had to add this because problems arise when we have a Constants.BLOCK_SIZE bigger than typical write size
+		//had to add this because problems arise when we have a File.BLOCK_SIZE bigger than typical write size
 		boolean blockCreated = false;
 
 		for(int index = startBlock; index <= endBlock; index++) {
@@ -86,20 +87,20 @@ public class FileContentController {
 				bytesToWrite = (int)bufSize;
 			} else {				
 				if(index == startBlock) {
-					startBytes = Constants.BLOCK_SIZE - (int)writeOffset%Constants.BLOCK_SIZE;
+					startBytes = File.BLOCK_SIZE - (int)writeOffset%File.BLOCK_SIZE;
 					bytesToWrite = startBytes;
 				} else if(index == endBlock) {
 
-					endBytes = (int)((bufSize + outWriteOffset)%Constants.BLOCK_SIZE);
+					endBytes = (int)((bufSize + outWriteOffset)%File.BLOCK_SIZE);
 
-					if (endBytes == 0) endBytes = Constants.BLOCK_SIZE;
+					if (endBytes == 0) endBytes = File.BLOCK_SIZE;
 					bytesToWrite = endBytes;
 				} else {
-					bytesToWrite = Constants.BLOCK_SIZE;
+					bytesToWrite = File.BLOCK_SIZE;
 				}
 			}
 
-			System.arraycopy(content, position, block.getData(), (int) writeOffset % Constants.BLOCK_SIZE, bytesToWrite);
+			System.arraycopy(content, position, block.getData(), (int) writeOffset % File.BLOCK_SIZE, bytesToWrite);
 
 			crc32.update(block.getData());
 			block.setChecksum(crc32.getValue());
@@ -126,6 +127,7 @@ public class FileContentController {
 		return position;
 	}		
 	
+	@Override
 	public byte[] readFile(File file, long size, long offset) throws CRCException {
 		
 		//We don't need to read the whole file, but only "size" bytes, starting from "offset"
@@ -136,18 +138,18 @@ public class FileContentController {
 		//evaulate which block offset points to we assume the first block has index 0
 		//the first block spans from 0 - BLOCK_SIZE-1
 		//the second block from BLOCK_SIZE - 2*BLOCK_SIZE-1 etc.
-		int startBlock = (int)(offset/Constants.BLOCK_SIZE);
+		int startBlock = (int)(offset/File.BLOCK_SIZE);
 
 		long outOffset = offset;
 		
 		//how many blocks to read? depends on the position of the offset
 		//the -1 because the byte where the offset points to is read as well
 		//example offset "abcdefgh" with offset = 3 and length = 3 is "def"
-		int endBlock = (int)((size+offset-1)/Constants.BLOCK_SIZE);
+		int endBlock = (int)((size+offset-1)/File.BLOCK_SIZE);
 		
 		if(endBlock > blocks.size()-1) {
 			endBlock = blocks.size()-1;
-			size = blocks.size()*Constants.BLOCK_SIZE;
+			size = blocks.size()*File.BLOCK_SIZE;
 		}
 				
 		//number of bytes read from the first block
@@ -179,19 +181,19 @@ public class FileContentController {
 				//last block is also special
 				if(index == startBlock) {
 				
-					startBytes = Constants.BLOCK_SIZE - (int)offset%Constants.BLOCK_SIZE;
+					startBytes = File.BLOCK_SIZE - (int)offset%File.BLOCK_SIZE;
 					bytesToRead = startBytes;
 				} else if(index == endBlock) {
-					endBytes = (int)((size + outOffset)%Constants.BLOCK_SIZE);
+					endBytes = (int)((size + outOffset)%File.BLOCK_SIZE);
 
-					if (endBytes == 0) endBytes = Constants.BLOCK_SIZE;
+					if (endBytes == 0) endBytes = File.BLOCK_SIZE;
 					bytesToRead = endBytes;
 				} else {
-					bytesToRead = Constants.BLOCK_SIZE;
+					bytesToRead = File.BLOCK_SIZE;
 				}
 			}
 			
-			System.arraycopy(block.getData(), (int)offset%Constants.BLOCK_SIZE, content,  position,  bytesToRead);
+			System.arraycopy(block.getData(), (int)offset%File.BLOCK_SIZE, content,  position,  bytesToRead);
 			offset = 0;
 			position += bytesToRead;
 		}		

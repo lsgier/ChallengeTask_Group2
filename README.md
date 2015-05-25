@@ -16,6 +16,22 @@ Further the jar can be executed as follows:
 
 `java -jar p2pfs.jar mount-point [bootstrap-ip] [peer-number]`
 
+`mount-point` have to be an empty directory,
+
+`[bootstrap-ip]` is the ip of a master peer, if not defined then peer will start as a server
+
+`[peer-number]` is used for local testing, when all peers share the same ip but listen to different ports.
+
+Also, runner scripts can be used (located in `runner` directory):
+
+`runner/standalone.sh mount-point [bootstrap-ip]` standard mode,
+
+`runner/local-master.sh mount-point` to start a "server" and to run several additional peers:
+
+`runner/local-additional.sh mount-point peer-number`.
+
+In all scripts inside `runner` it is assumed that commands are run from the project root directory and that jar file is inside `target` directory. Simply removing `cd target` from runner scripts and copying them with the jar in the same directory will do the trick.
+
 ## How it works ##
 
 ## Development Workflow ##

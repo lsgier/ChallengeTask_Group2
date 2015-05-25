@@ -13,6 +13,7 @@ Also works on osX via [osxfuse](https://osxfuse.github.io/)
 ## How to run ##
 Simply check out the code from repository and run `runner/mkjar.sh`. That will create the `p2pfs.jar` in `target` directory.
 Further the jar can be executed as follows:
+
 `java -jar p2pfs.jar mount-point [bootstrap-ip] [peer-number]`
 
 ## How it works ##

@@ -10,6 +10,7 @@ import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -31,8 +32,8 @@ public class TreeControllerTest {
 
     public static ITreeController controller;
 
-    @BeforeClass
-    public static void setup() {
+    @Before
+    public void setup() {
         //setup logging to console
         //org.apache.log4j.BasicConfigurator.configure();
 
@@ -77,6 +78,10 @@ public class TreeControllerTest {
         //test if the entry object is really gone from the DHT
         assertTrue(getEntryFromID(newEntry.getID()) == null);
 
+        Directory root = controller.getDirectory("/");
+        assertTrue(root.getChildren().isEmpty());
+
+
         //test if creating a directory with the same name is possible.
         try {
             controller.createDir("/toRemove");
@@ -106,8 +111,7 @@ public class TreeControllerTest {
             controller.createDir("/FileToRemove");
             controller.readDir("/FileToRemove");
         } catch (FsException e) {
-            System.err.println("Testing remove failed: " + e.getClass().getName() + " " + e.getMessage());
-            fail();
+            fail("Testing REMOVE FILE failed: " + e.getClass().getName() + " " + e.getMessage());
         }
         assertTrue(controller.readDir("/").contains("FileToRemove"));
     }
@@ -171,13 +175,38 @@ public class TreeControllerTest {
         controller.createDir("/movingTestTo");
         controller.createDir("/movingTestFrom/dirToMove");
 
-        controller.renameEntry("/movingTestFrom/dirToMove", "/movingTestTo");
+        try {
+            controller.renameEntry("/movingTestFrom/dirToMove", "/movingTestTo");
+        } catch (FsException e) {
+            fail("Testing MOVE DIR failed: " + e.getClass().getName() + " " + e.getMessage());
+        }
 
         //test if the directory is gone in the old place
-        assertTrue(!controller.readDir("/movingTestFrom").contains("dirToMove"));
+        assertFalse(controller.readDir("/movingTestFrom").contains("dirToMove"));
 
         //test if the directory is present in the new place
-        assertTrue(!controller.readDir("/movingTestFrom").contains("dirToMove"));
+        assertTrue(controller.readDir("/movingTestTo").contains("dirToMove"));
+
+    }
+
+    @Test
+    public void testMoveFiles() throws IOException, FsException, ClassNotFoundException {
+        try {
+            controller.createDir("/movingTestFrom");
+            controller.createDir("/movingTestTo");
+            controller.createFile("/movingTestFrom/fileToMove");
+
+            //move the file
+            controller.renameEntry("/movingTestFrom/fileToMove", "/movingTestTo/");
+        } catch (FsException e) {
+            fail("Testing MOVE FILE failed: "+e.getClass().getName() + " " + e.getMessage());
+        }
+
+        //test if the file is gone in the old place
+        assertFalse(controller.readDir("/movingTestFrom").contains("fileToMove"));
+
+        //test if the file is present in the new place
+        assertTrue(controller.readDir("/movingTestTo").contains("fileToMove"));
 
     }
 
@@ -196,7 +225,7 @@ public class TreeControllerTest {
     }
 
 
-    public static PeerDHT[] createAndAttachPeersDHT(int nr, int port) throws IOException {
+    private PeerDHT[] createAndAttachPeersDHT(int nr, int port) throws IOException {
         PeerDHT[] peers = new PeerDHT[nr];
         for (int i = 0; i < nr; i++) {
             if (i == 0) {
@@ -210,7 +239,7 @@ public class TreeControllerTest {
         return peers;
     }
 
-    public static void bootstrap(PeerDHT[] peers) {
+    private void bootstrap(PeerDHT[] peers) {
         //make perfect bootstrap, the regular can take a while
         for (int i = 0; i < peers.length; i++) {
             for (int j = 0; j < peers.length; j++) {

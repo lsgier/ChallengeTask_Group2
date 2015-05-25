@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.UUID;
 
 import static challengetask.group02.fsstructure.Entry.TYPE.DIRECTORY;
@@ -67,13 +66,14 @@ public class TreeController implements ITreeController {
         if (pathLength == 0) {
             throw new NotADirectoryException("Don't create a root node like that! Path: "+path);
         }
-
-        Number160 newKey = Number160.createHash(UUID.randomUUID().hashCode());
-
         Directory parentEntry = getDirectory(subPaths.getParent().toString());
 
-        Directory newDir = new Directory(newKey, subPaths.getFileName().toString());
+        if (parentEntry.getChild(subPaths.getFileName().toString()) != null) {
+            throw new FileExistsException(path);
+        }
 
+        Number160 newKey = Number160.createHash(UUID.randomUUID().hashCode());
+        Directory newDir = new Directory(newKey, subPaths.getFileName().toString());
 
         helper.addNewEntry(parentEntry, newDir);
     }
@@ -88,10 +88,13 @@ public class TreeController implements ITreeController {
             throw new NoSuchFileOrDirectoryException("Can not create such file");
         }
 
-        Number160 newKey = Number160.createHash(UUID.randomUUID().hashCode());
-
         Directory parentEntry = getDirectory(subPaths.getParent().toString());
+        if (parentEntry.getChild(subPaths.getFileName().toString()) != null) {
+            throw new FileExistsException(path);
+        }
 
+
+        Number160 newKey = Number160.createHash(UUID.randomUUID().hashCode());
         File newFile = new File (newKey, subPaths.getFileName().toString());
 
         //this is new locking logic, due to fuse constraints we have to associate a file creation with the respective owner
@@ -107,10 +110,12 @@ public class TreeController implements ITreeController {
 
         Directory dir = getDirectory(path);
 
-        Hashtable<String, Number160> children = dir.getChildren(FILE);
-        children.putAll(dir.getChildren(DIRECTORY));
+        return new ArrayList<>(dir.getChildren().keySet());
 
-        return new ArrayList<>(children.keySet());
+       // Hashtable<String, Number160> children = dir.getChildren(FILE);
+        //children.putAll(dir.getChildren(DIRECTORY));
+
+        //return new ArrayList<>(children.keySet());
     }
 
     @Override
@@ -148,7 +153,6 @@ public class TreeController implements ITreeController {
         Directory parentEntry = getDirectory(dirPath.getParent().toString());
 
         if (dirEntry.getChildren().isEmpty()) {
-
             helper.removeEntry(parentEntry, dirEntry);
         } else {
             throw new DirectoryNotEmptyException(path);

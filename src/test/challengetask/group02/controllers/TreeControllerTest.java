@@ -46,7 +46,7 @@ public class TreeControllerTest {
 
 
             //create a root node
-            Directory rootDir = new Directory(Number160.ZERO, null, rootName);
+            Directory rootDir = new Directory(Number160.ZERO, rootName);
             //upload root into DHT
             Data data = new Data(rootDir);
             FutureDHT futureDHT = peers[3].put(Number160.ZERO).data(data).start();
@@ -93,7 +93,7 @@ public class TreeControllerTest {
         controller.createFile("/FileToRemove");
         assertTrue(controller.readDir("/").contains("FileToRemove"));
 
-        Entry newEntry = controller.findEntry("toRemove");
+        Entry newEntry = controller.findEntry("/FileToRemove");
 
         controller.deleteFile("/FileToRemove");
         //test if the file is not visible anymore in the parent

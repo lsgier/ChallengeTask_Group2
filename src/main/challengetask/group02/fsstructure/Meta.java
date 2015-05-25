@@ -1,14 +1,17 @@
 package challengetask.group02.fsstructure;
 
-public class Meta {
+import java.io.Serializable;
+
+public class Meta implements Serializable {
 	
 	private long atime;
 	private long ctime;
 
-	private static final long seriaionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	
 	public Meta() {
-		
+		atime = 0;
+		ctime = 0;		
 	}
 	
 	public long getAtime() {

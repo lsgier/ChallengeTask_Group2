@@ -189,7 +189,6 @@ public class Fuse extends FuseFilesystemAdapterAssumeImplemented {
             return -ErrorCodes.EBUSY();
         }
         if (Objects.equals(e.getClass().getName(), NoSuchFileOrDirectoryException.class.getName())) {
-            System.out.println("Tried read this non-existing directory: " + e.getMessage());
             return -ErrorCodes.ENOENT();
         }
         if (Objects.equals(e.getClass().getName(), NotAFileException.class.getName())) {

@@ -24,13 +24,13 @@ import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
 public class TreeController implements ITreeController {
 
     PeerDHT peer;
+    SimpleCache<Entry> cache = new SimpleCache<>(1);
 
     public TreeController(PeerDHT peer) {
         this.peer = peer;
     }
 
     private Entry getEntryFromID(Number160 ID) throws IOException, ClassNotFoundException, NoSuchFileOrDirectoryException {
-
         if (ID == null) {
             System.err.println("BUG: trying to get Entry with ID null!");
             throw new NoSuchFileOrDirectoryException("Tried to get entry with ID null.");
@@ -42,6 +42,7 @@ public class TreeController implements ITreeController {
             System.out.println("getEntryFromID did not get a result -> faulty fs");
             throw new NoSuchFileOrDirectoryException("");
         }
+
         return (Entry) futureGet.data().object();
     }
 
@@ -49,18 +50,18 @@ public class TreeController implements ITreeController {
     public Entry findEntry(String path) throws IOException, ClassNotFoundException, FsException {
         Path subPaths = Paths.get(path);
 
-        //TODO IDEA the cache should be implemented here
+        Entry resultEntry = cache.get(path);
+        if (resultEntry != null) {
+            return resultEntry;
+        }
 
         //first, get the root directory
-
         Directory currentDirectory;
-
         try {
             currentDirectory = (Directory) getEntryFromID(Number160.ZERO);
         } catch (NoSuchFileOrDirectoryException e) {
             throw new FsException("No root node was found. Probably not connected to a P2P network with a running file system.");
         }
-
 
         Number160 currentChildFileID;
         Number160 currentChildDirID;
@@ -71,7 +72,9 @@ public class TreeController implements ITreeController {
             currentChildDirID = currentDirectory.getChild(dir.toString(), DIRECTORY);
 
             if (currentChildFileID != null && subPaths.endsWith(dir)) {
-                return getEntryFromID(currentChildFileID);
+                resultEntry = getEntryFromID(currentChildFileID);
+                cache.put(path, resultEntry);
+                return resultEntry;
             }
             else if (currentChildFileID != null && !subPaths.endsWith(dir)) {
                 throw new NotADirectoryException("");
@@ -82,8 +85,9 @@ public class TreeController implements ITreeController {
                 currentDirectory = (Directory) getEntryFromID(currentChildDirID);
             }
         }
-
-        return currentDirectory;
+        resultEntry = currentDirectory;
+        cache.put(path, resultEntry);
+        return resultEntry;
     }
 
     @Override
@@ -122,7 +126,7 @@ public class TreeController implements ITreeController {
 
         Directory parentEntry = getDirectory(subPaths.getParent().toString());
 
-        Directory newDir = new Directory(newKey, parentEntry.getID(), subPaths.getFileName().toString());
+        Directory newDir = new Directory(newKey, subPaths.getFileName().toString());
 
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
         helper.addNewEntry(parentEntry, newDir);

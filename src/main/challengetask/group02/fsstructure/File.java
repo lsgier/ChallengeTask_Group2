@@ -10,14 +10,16 @@ public class File extends Entry {
 
 	private Number160 modifierPeer;
 	private ArrayList<Number160> blocks;	
-	private long atime;
-	private long ctime;
+	private Meta meta;
 	private boolean readOnly;
 
 	private static final long serialVersionUID = 1L;
 	final public static int BLOCK_SIZE =  16384;
 
 	public File(String fileName, long fileSize, Number160 ID) {
+
+		blocks = new ArrayList<Number160>();
+		meta = new Meta();
 		
 		readOnly = false;
 		this.type = TYPE.FILE;		
@@ -25,29 +27,28 @@ public class File extends Entry {
 		this.size = fileSize;
 		this.entryName = fileName;
 		
-		//this are the IDs of the blocks
-		blocks = new ArrayList<Number160>();
 		
 		this.ID = ID;
 	}
 
 	public File(Number160 ID, Number160 parentID, String entryName) {
 		
+		blocks = new ArrayList<Number160>();
+		meta = new Meta();
+		
 		readOnly = false;
 		this.type = TYPE.FILE;		
 
 		this.ID = ID;
-		this.parentID = parentID;
 		this.entryName = entryName;
 
 		this.size = 0;
 		
-		blocks = new ArrayList<Number160>();
 	}
 	
 	//empty constructor
 	public File() {
-		blocks = new ArrayList<Number160>();
+		
 	}
 	
 	public boolean getReadOnly() {
@@ -81,18 +82,18 @@ public class File extends Entry {
 	}
 	
 	public long getAtime() {
-		return atime;
+		return meta.getAtime();
 	}
 
 	public void setAtime(long atime) {
-		this.atime = atime;
+		meta.setAtime(atime);
 	}
 
 	public long getCtime() {
-		return ctime;
+		return meta.getCtime();
 	}
 
 	public void setCtime(long ctime) {
-		this.ctime = ctime;
+		meta.setCtime(ctime);
 	}
 }

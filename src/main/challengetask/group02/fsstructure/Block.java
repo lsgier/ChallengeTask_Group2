@@ -1,8 +1,6 @@
 package challengetask.group02.fsstructure;
 
 import java.io.Serializable;
-
-import challengetask.group02.Constants;
 import net.tomp2p.peers.Number160;
 
 public class Block implements Serializable {
@@ -28,7 +26,7 @@ public class Block implements Serializable {
 	
 	//empty constructor
 	public Block() {
-		data = new byte[Constants.BLOCK_SIZE];
+		data = new byte[File.BLOCK_SIZE];
 	}	
 	
 	public Number160 getID() {

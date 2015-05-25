@@ -37,13 +37,12 @@ public class TreeController implements ITreeController {
             throw new NoSuchFileOrDirectoryException("Tried to get entry with ID null.");
         }
 
-        FutureGet futureGet = peer.get(ID).start();
+        FutureGet futureGet = peer.get(ID).getLatest().start();
         futureGet.awaitUninterruptibly();
         if (futureGet.isEmpty()) {
             System.out.println("getEntryFromID did not get a result -> faulty fs");
             throw new NoSuchFileOrDirectoryException("");
         }
-
         return (Entry) futureGet.data().object();
     }
 
@@ -203,7 +202,7 @@ public class TreeController implements ITreeController {
 
         if (dirEntry.getChildren().isEmpty()) {
             DHTPutGetHelper helper = new DHTPutGetHelper(peer);
-            helper.removeAndDeleteChild(parentEntry, dirEntry);
+            helper.removeEntry(parentEntry, dirEntry);
         } else {
             throw new DirectoryNotEmptyException(path);
         }
@@ -217,7 +216,7 @@ public class TreeController implements ITreeController {
 
         DHTPutGetHelper helper = new DHTPutGetHelper(peer);
         helper.clearAndDeleteFile(file);
-        helper.removeAndDeleteChild(parent, file);
+        helper.removeEntry(parent, file);
     }
 
     //used for the locking logic

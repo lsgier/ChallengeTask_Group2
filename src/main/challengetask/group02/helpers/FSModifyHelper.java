@@ -70,7 +70,6 @@ import java.util.Random;
         try {
             /*entry.setDirtyBit(true);
             put(entry);*/
-
             vUpdateParentRemoveChild(parent, entry);
 
         } catch (IOException e) {
@@ -205,6 +204,8 @@ import java.util.Random;
             throws ClassNotFoundException, InterruptedException, IOException {
         Pair<Number640, Byte> pair2 = null;
         for (int i = 0; i < 5; i++) {
+            System.out.println("vUpdateParentAddChild: starting with child " + child.getEntryName());
+
             Pair<Number160, Data> pair = getAndUpdate(parentDir, child);
             if (pair == null) {
                 System.out
@@ -217,6 +218,7 @@ import java.util.Random;
             pair2 = checkVersions(fp.rawResult());
             // 1 is PutStatus.OK_PREPARED
             if (pair2 != null && pair2.element1() == 1) {
+                System.out.println("vUpdateParentAddChild: things went ok with child " + child.getEntryName());
                 break;
             }
             System.out.println("get delay or fork - put");
@@ -226,7 +228,7 @@ import java.util.Random;
             Thread.sleep(RND.nextInt(500));
         }
         if (pair2 != null && pair2.element1() == 1) {
-        //stored
+            System.out.println("vUpdateParentAddChild: stored the child " + child.getEntryName());
             FuturePut fp = peer.put(parentDir.getID())
                     .versionKey(pair2.element0().versionKey()).putConfirm()
                     .data(new Data()).start().awaitUninterruptibly();
@@ -247,6 +249,7 @@ import java.util.Random;
             Data newData = new Data(parentDir);
             Number160 v = pair.element0().versionKey();
             long version = v.timestamp() + 1;
+            System.out.println("getAndUPdate: child " + child.getEntryName() + " parent version: " + version);
             newData.addBasedOn(v);
             //since we create a new version, we can access old versions as well
             return new Pair<Number160, Data>(new Number160(version,

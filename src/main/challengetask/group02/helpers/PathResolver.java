@@ -73,6 +73,9 @@ public class PathResolver {
         }
         resultEntry = currentDirectory;
         cache.put(path, resultEntry);
+
+        //System.out.println(peer.storageLayer().get());
+
         return resultEntry;
     }
 

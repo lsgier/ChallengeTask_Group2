@@ -53,9 +53,24 @@ import java.util.Random;
 
     public void removeEntry(Directory parent, Entry entry) throws ClassNotFoundException {
         try {
-            entry.setDirtyBit(true);
-            put(entry);
+            /*entry.setDirtyBit(true);
+            put(entry);*/
             removeEntry(entry);
+            vUpdateParentRemoveChild(parent, entry);
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeEntryFromParent(Directory parent, Entry entry) throws ClassNotFoundException {
+        try {
+            /*entry.setDirtyBit(true);
+            put(entry);*/
+
             vUpdateParentRemoveChild(parent, entry);
 
         } catch (IOException e) {
@@ -139,12 +154,15 @@ import java.util.Random;
     }
 
     public int moveEntry(Directory newParent, Directory oldParent, Entry entry, String newName) {
-        addNewEntry(newParent, entry);
         try {
-            removeEntry(oldParent, entry);
+            removeEntryFromParent(oldParent, entry);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        entry.setEntryName(newName);
+        addNewEntry(newParent, entry);
+
         return 0;
     }
 

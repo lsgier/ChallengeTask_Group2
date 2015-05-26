@@ -33,8 +33,6 @@ Also, runner scripts can be used (located in `runner` directory):
 In all scripts inside `runner` it is assumed that commands are run from the project root directory and that jar file is inside `target` directory. Simply removing `cd target` from runner scripts and copying them with the jar in the same directory will do the trick.
 
 ## How it works ##
-Here can put the link to presentation.
-
 The documentation for FuseJNA can be found on its github page, the particular details of TomP2P library could be known from numerous examples.
 
 For more details, check wiki.

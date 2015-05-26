@@ -37,5 +37,11 @@ The documentation for FuseJNA can be found on its github page, the particular de
 
 For more details, check wiki.
 
+## Further development ##
+There's a lot to improve. Performance issues are not resolved yet. 
+In addition, it was never tested on more then 20 peers and only few reading and writing at the same time, and this can be an issue. 
+
+Shutdown and reconnect routines have to be implemented.
+
 ## Development Workflow ##
 [Link to the board](https://trello.com/b/ylcjsnyd/challenge-task)

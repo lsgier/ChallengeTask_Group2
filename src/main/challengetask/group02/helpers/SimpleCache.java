@@ -150,6 +150,13 @@ public class SimpleCache<T> {
 		return this.objects.get(name);
 	}
 
+	//TODO does this work?
+	public void remove(final String name) {
+		this.objects.remove(name);
+		this.expire.remove(name);
+
+	}
+
 	/**
 	 * Convenience method.
 	 */

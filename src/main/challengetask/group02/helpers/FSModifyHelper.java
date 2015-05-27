@@ -42,8 +42,8 @@ import java.util.Random;
         this.peer = peer;
     }
 
+    //methods for the TreeController
     public int addNewEntry(Directory parentDir, Entry child) {
-
         try {
             put(child);
             vUpdateParentAddChild(parentDir, child);
@@ -52,24 +52,45 @@ import java.util.Random;
         }
         return 0;
     }
+    public int updateEntryName(Directory parent, Entry entry, String newName) {
+        try {
 
-    public Entry getEntryByID(Number160 ID) throws IOException, ClassNotFoundException {
-        FutureGet futureGet = peer.get(ID).getLatest().start();
-        futureGet.awaitUninterruptibly();
+            parent.renameChild(entry.getEntryName(), newName);
+            xPut(parent);
 
-        if (futureGet.isEmpty()) {
-            System.out.println("getEntryFromID did not get a result -> faulty fs");
+            entry.setEntryName(newName);
+            put(entry);
+
+        } catch (Exception e) {
+        }
+        return 0;
+    }
+    public int moveEntry(Directory newParent, Directory oldParent, Entry entry, String newName) {
+        try {
+            detachEntryFromParent(oldParent, entry);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
 
-        return (Entry) futureGet.data().object();
-    }
+        entry.setEntryName(newName);
+        addNewEntry(newParent, entry);
 
+        return 0;
+    }
+    public void removeEntry(Entry entry) {
+        //TODO asynchronous
+
+        cache.remove(entry.getID().toString());
+        FutureRemove future = peer.remove(entry.getID()).all().start();
+        //future.awaitUninterruptibly();
+    }
     public void removeEntry(Directory parent, Entry entry) throws ClassNotFoundException {
         try {
             /*entry.setDirtyBit(true);
             put(entry);*/
             removeEntry(entry);
             vUpdateParentRemoveChild(parent, entry);
+
 
         } catch (IOException e) {
 
@@ -78,8 +99,82 @@ import java.util.Random;
             e.printStackTrace();
         }
     }
+    /**
+     * This method deletes (removes from DHT) all the blocks of the file, so that the file object can be safely deleted.
+     *
+     * @param file The file to be cleared.
+     */
+    public void clearAndDeleteFile(File file) {
+        file.setDirtyBit(true);
+        try {
+            put(file);
+            for (Number160 number160 : file.getBlocks()) {
+                //TODO asynchronous: callbacks are counted, after all deletions called back, resume with deleting the file
+                FutureRemove future = peer.remove(number160).start();
+                //future.awaitUninterruptibly();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void flushFile(File file) {
+        file.setReadOnly(false);
+        file.setModifierPeer(null);
+        try {
+            put(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    public void removeEntryFromParent(Directory parent, Entry entry) throws ClassNotFoundException {
+    //method for the PathResolver
+    public Entry getEntryByID(Number160 ID) throws IOException, ClassNotFoundException {
+        if (cache.get(ID.toString()) != null) {
+            //ENABLE OR DISABLE CACHE
+            return cache.get(ID.toString());
+        }
+
+        FutureGet futureGet = peer.get(ID).getLatest().start();
+        futureGet.awaitUninterruptibly();
+
+        if (futureGet.isEmpty()) {
+            System.out.println("getEntryFromID did not get a result -> faulty fs");
+        }
+        cache.put(ID.toString(), (Entry) futureGet.data().object());
+        return (Entry) futureGet.data().object();
+    }
+
+    //method for the FileContentController
+    public void putFile(Number160 ID, File file) {
+        try {
+            put(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void putBlock(Number160 ID, Block block) {
+        try {
+            put(block);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public Block getBlockDHT(Number160 ID) {
+        Block block;
+        try {
+            FutureGet futureGet = peer.get(ID).start();
+            futureGet.awaitUninterruptibly();
+            block = (Block) futureGet.data().object();
+            return block;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void detachEntryFromParent(Directory parent, Entry entry) throws ClassNotFoundException {
         try {
             /*entry.setDirtyBit(true);
             put(entry);*/
@@ -97,25 +192,12 @@ import java.util.Random;
     private void put(Entry entry) throws IOException {
         FuturePut futurePut = peer.put(entry.getID()).data(new Data(entry)).start();
         futurePut.awaitUninterruptibly();
+        cache.put(entry.getID().toString(), entry);
     }
 
     private void put(Block block) throws IOException {
         FuturePut futurePut = peer.put(block.getID()).data(new Data(block)).start();
         futurePut.awaitUninterruptibly();
-    }
-
-    public int updateEntryName(Directory parent, Entry entry, String newName) {
-        try {
-
-            parent.renameChild(entry.getEntryName(), newName);
-            xPut(parent);
-
-            entry.setEntryName(newName);
-            put(entry);
-
-        } catch (Exception e) {
-        }
-        return 0;
     }
 
     private void xPut(Entry entry) throws IOException {
@@ -133,85 +215,8 @@ import java.util.Random;
         FuturePut fp = peer.put(entry.getID())
                 .versionKey(pair2.element0().versionKey()).putConfirm()
                 .data(new Data()).start().awaitUninterruptibly();
-    }
 
-    public void putFile(Number160 ID, File file) {
-        try {
-            put(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void putBlock(Number160 ID, Block block) {
-        try {
-            put(block);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Block getBlockDHT(Number160 ID) {
-        Block block;
-        try {
-            FutureGet futureGet = peer.get(ID).start();
-            futureGet.awaitUninterruptibly();
-            block = (Block) futureGet.data().object();
-            return block;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public int moveEntry(Directory newParent, Directory oldParent, Entry entry, String newName) {
-        try {
-            removeEntryFromParent(oldParent, entry);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        entry.setEntryName(newName);
-        addNewEntry(newParent, entry);
-
-        return 0;
-    }
-
-    public void removeEntry(Entry entry) {
-        //TODO asynchronous
-        FutureRemove future = peer.remove(entry.getID()).all().start();
-        future.awaitUninterruptibly();
-    }
-
-    /**
-     * This method deletes (removes from DHT) all the blocks of the file, so that the file object can be safely deleted.
-     *
-     * @param file The file to be cleared.
-     */
-    public void clearAndDeleteFile(File file) {
-        file.setDirtyBit(true);
-        try {
-            put(file);
-            for (Number160 number160 : file.getBlocks()) {
-                //TODO asynchronous: callbacks are counted, after all deletions called back, resume with deleting the file
-                FutureRemove future = peer.remove(number160).start();
-                future.awaitUninterruptibly();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void flushFile(File file) {
-        file.setReadOnly(false);
-        file.setModifierPeer(null);
-        try {
-            put(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        cache.put(entry.getID().toString(), entry);
     }
 
     private void vUpdateParentAddChild(Directory parentDir, Entry child)
@@ -289,6 +294,7 @@ import java.util.Random;
             // if not removed, a low ttl will eventually get rid of it
             peer.remove(parentDir.getID()).versionKey(pair.element0()).start()
                     .awaitUninterruptibly();
+            cache.put(parentDir.getID().toString(), parentDir);
             try {
                 Thread.sleep(RND.nextInt(500));
             } catch (InterruptedException e) {

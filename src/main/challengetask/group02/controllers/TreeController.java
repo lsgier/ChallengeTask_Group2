@@ -25,21 +25,18 @@ import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
 public class TreeController implements ITreeController {
 
     private final FSModifyHelper helper;
-    private final PathResolver pathResolver;
-
-    PeerDHT peer;
+    private PeerDHT peer;
 
     public TreeController(PeerDHT peer) {
         this.peer = peer;
         helper = new FSModifyHelper(peer);
-        pathResolver = new PathResolver(peer);
     }
 
     //methods to view and traverse the tree
 
     @Override
     public Entry resolvePath(String path) throws IOException, ClassNotFoundException, FsException {
-        return pathResolver.resolvePath(path);
+        return PathResolver.resolvePath(path, helper);
     }
 
     @Override

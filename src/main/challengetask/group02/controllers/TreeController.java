@@ -35,6 +35,8 @@ public class TreeController implements ITreeController {
         pathResolver = new PathResolver(peer);
     }
 
+    //methods to view and traverse the tree
+
     @Override
     public Entry resolvePath(String path) throws IOException, ClassNotFoundException, FsException {
         return pathResolver.resolvePath(path);
@@ -58,6 +60,21 @@ public class TreeController implements ITreeController {
             throw new NotADirectoryException(path);
         }
     }
+
+    @Override
+    public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, FsException {
+
+        Directory dir = getDirectory(path);
+
+        return new ArrayList<>(dir.getChildren().keySet());
+
+        //Hashtable<String, Number160> children = dir.getChildren(FILE);
+        //children.putAll(dir.getChildren(DIRECTORY));
+
+        //return new ArrayList<>(children.keySet());
+    }
+
+    //methods to modify the tree
 
     @Override
     public void createDir(String path) throws ClassNotFoundException, FsException, IOException {
@@ -103,19 +120,6 @@ public class TreeController implements ITreeController {
 
 
         helper.addNewEntry(parentEntry, newFile);
-    }
-
-    @Override
-    public ArrayList<String> readDir(String path) throws IOException, ClassNotFoundException, FsException {
-
-        Directory dir = getDirectory(path);
-
-        return new ArrayList<>(dir.getChildren().keySet());
-
-       // Hashtable<String, Number160> children = dir.getChildren(FILE);
-        //children.putAll(dir.getChildren(DIRECTORY));
-
-        //return new ArrayList<>(children.keySet());
     }
 
     @Override

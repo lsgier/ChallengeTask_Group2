@@ -36,7 +36,7 @@ public class PathResolver {
     public Entry resolvePath(String path) throws IOException, ClassNotFoundException, FsException {
         Path subPaths = Paths.get(path);
 
-        Entry resultEntry = cache.get(path);
+        Entry resultEntry = null; //= cache.get(path);
         if (resultEntry != null) {
             return resultEntry;
         }

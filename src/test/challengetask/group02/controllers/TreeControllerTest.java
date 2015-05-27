@@ -61,6 +61,7 @@ public class TreeControllerTest {
 
     @Test
     public void testFindEntryGetRoot() throws Exception {
+        //TODO move to new testclass for pathresolver
         Directory root = (Directory) controller.resolvePath("/");
         assertEquals(rootName, root.getEntryName());
     }

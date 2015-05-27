@@ -132,7 +132,11 @@ import java.util.Random;
 
     public void putBlock(Number160 ID, Block block) {
         try {
-            put(block);
+
+            FuturePut futurePut = peer.put(block.getID()).data(new Data(block)).start();
+
+            futurePut.awaitUninterruptibly();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

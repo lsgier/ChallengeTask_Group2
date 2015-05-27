@@ -9,17 +9,17 @@ public class Block implements Serializable {
 	//used to identify the position of a block within a file
 	private long seq_number; 
 	//used for error detection
-	private long checksum; 
+	//private long checksum;
 	private int size;
 	private byte[] data;
 
 	private static final long serialVersionUID = 1L;
 
-	public Block(Number160 ID, long seq_number, long checksum, int size, byte[] data) {
+	public Block(Number160 ID, long seq_number, int size, byte[] data) {
 		
 		this.ID = ID;
 		this.seq_number = seq_number;
-		this.checksum = checksum;
+		//this.checksum = checksum;
 		this.data = data;	
 		this.size = size;
 	}		
@@ -45,13 +45,13 @@ public class Block implements Serializable {
 		this.seq_number = seq_number;
 	}
 
-	public long getChecksum() {
+	/*public long getChecksum() {
 		return checksum;
-	}
+	}*/
 
-	public void setChecksum(long checksum) {
+	/*public void setChecksum(long checksum) {
 		this.checksum = checksum;
-	}
+	}*/
 
 	public int getSize() {
 		return size;

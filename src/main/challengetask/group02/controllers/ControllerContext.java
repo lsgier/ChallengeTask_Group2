@@ -3,6 +3,7 @@ package challengetask.group02.controllers;
 import challengetask.group02.controllers.exceptions.*;
 import challengetask.group02.fsstructure.Entry;
 import challengetask.group02.fsstructure.File;
+import challengetask.group02.helpers.SimpleCache;
 import net.fusejna.StructStat;
 import net.tomp2p.dht.PeerDHT;
 
@@ -11,6 +12,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class ControllerContext {
+
+    SimpleCache<File> cache = new SimpleCache<>(1);
 
     private final IFileContentController fileContentController;
     private final ITreeController treeController;
@@ -59,13 +62,19 @@ public class ControllerContext {
     }
 
     public int writeFile(String path, ByteBuffer buf, long bufSize, long writeOffset) throws ClassNotFoundException, FsException, IOException {
-        File file = treeController.getFile(path);
-        return this.fileContentController.writeFile(file, buf, bufSize, writeOffset);
+        if (cache.get(path) != null){
+            return this.fileContentController.writeFile(cache.get(path), buf, bufSize, writeOffset, cache);
+        } else {
+            File file = treeController.getFile(path);
+            cache.put(path, file);
+            return this.fileContentController.writeFile(file, buf, bufSize, writeOffset, cache);
+        }
     }
 
     //used for the locking logic
 	public void whenFileClosed(String path) throws ClassNotFoundException, FsException, IOException {
 		treeController.whenFileClosed(path);
+        fileContentController.flush(path);
 	}
 	
 	public void updateFileMetaData(String path, final StructStat.StatWrapper stat) throws ClassNotFoundException, FsException, IOException {

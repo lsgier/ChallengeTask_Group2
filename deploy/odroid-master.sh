@@ -7,9 +7,5 @@ PRIVATE_KEY="odroid.priv"
 
 
 
-for i in $IPS;
-do
-  echo "Execute $CMD on $i..."
-  ssh -o "StrictHostKeyChecking no" -i "$PRIVATE_KEY" "root@$i" "cd /root/group2 && ./run.sh mount"
-done
+  ssh -o "StrictHostKeyChecking no" -i "$PRIVATE_KEY" "root@192.168.1.119" "cd /root/group2 && ./run.sh mount"
 

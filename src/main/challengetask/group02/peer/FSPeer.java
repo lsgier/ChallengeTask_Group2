@@ -1,7 +1,9 @@
 package challengetask.group02.peer;
 
 import challengetask.group02.controllers.ControllerContext;
+import challengetask.group02.fsstructure.Block;
 import challengetask.group02.fsstructure.Directory;
+import challengetask.group02.fsstructure.File;
 import challengetask.group02.fuseimpl.Fuse;
 import net.tomp2p.connection.*;
 import net.tomp2p.dht.*;
@@ -48,6 +50,8 @@ public class FSPeer {
             initLogger("master.");
             startServer();
             createRoot();
+
+
         }
 
         if (args.length > 1){
@@ -63,6 +67,12 @@ public class FSPeer {
             }
             startClient(serverIP, port);
         }
+
+
+
+
+
+
 
         new Fuse(new ControllerContext(peerDHT), mountPoint).run(logger);
     }
@@ -90,7 +100,7 @@ public class FSPeer {
         Bindings b = new Bindings().addProtocol(StandardProtocolFamily.INET).addAddress(InetAddress.getByName("127.0.0.1"));
         peerDHT = new PeerBuilderDHT(new PeerBuilder(new Number160(rnd)).ports(4000).start()).start();
 
-        new IndirectReplication(peerDHT).replicationFactor(3).start();
+       // new IndirectReplication(peerDHT).replicationFactor(3).start();
 
         System.out.println("Server started Listening to: " + DiscoverNetworks.discoverInterfaces(b));
         System.out.println("address visible to outside is " + peerDHT.peerAddress());
@@ -114,7 +124,7 @@ public class FSPeer {
         Bindings b = new Bindings().addProtocol(StandardProtocolFamily.INET).addAddress(InetAddress.getByName("127.0.0.1"));
 
         peerDHT = new PeerBuilderDHT(new PeerBuilder(new Number160(rnd)).ports(port).start()).start();
-        new IndirectReplication(peerDHT).replicationFactor(3).start();
+       // new IndirectReplication(peerDHT).replicationFactor(3).start();
         System.out.println("Client started and Listening to: " + DiscoverNetworks.discoverInterfaces(b));
         System.out.println("address visible to outside is " + peerDHT.peerAddress());
 

@@ -4,9 +4,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
-import java.util.zip.CRC32;
+//import java.util.zip.CRC32;
 
-import challengetask.group02.controllers.exceptions.CRCException;
+//import challengetask.group02.controllers.exceptions.CRCException;
+import challengetask.group02.helpers.SimpleCache;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import challengetask.group02.fsstructure.Block;
@@ -19,15 +20,23 @@ public class FileContentController implements IFileContentController {
 	
 	private PeerDHT peer;
 	private FSModifyHelper dhtPutGetHelper;
+
+	private byte[] writeBuffer;
+	private Number160 writeBufferBlockId;
+	private int writeBufferCounter;
 	
 	public FileContentController(PeerDHT peer) {
+
+		writeBuffer = new byte[File.BLOCK_SIZE];
+		writeBufferBlockId = null;
+		writeBufferCounter = 0;
 		
 		this.peer = peer;
 		dhtPutGetHelper = new FSModifyHelper(this.peer);
 	}	
 	
 	@Override
-	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset) throws BusyException {
+	public int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset, SimpleCache<File> cache) throws BusyException {
 		
 		if(file.getReadOnly() == true) {			
 			if( file.getModifierPeer().compareTo(peer.peerID()) != 0) {
@@ -64,23 +73,36 @@ public class FileContentController implements IFileContentController {
 
 		for(int index = startBlock; index <= endBlock; index++) {
 						
-			CRC32 crc32 = new CRC32();
+		//	CRC32 crc32 = new CRC32();
 			Block block;
-			int bytesToWrite = 0;			
+			int bytesToWrite = 0;
+
+			//if bufferBlockId == null then get block from dht and put it inside buffer
+			//if the block do not exists, create block, append to file, write file, write block, update file cache
 			
 			//if the block doesn't exist, create a new one
-			if(index > blockCount - 1) {
-				Number160 ID = Number160.createHash(UUID.randomUUID().hashCode());
-				block = new Block();			
-				block.setChecksum(index);
-				block.setID(ID);
-				blockCount ++;
-				blockCreated = true;
+
+			if (writeBufferBlockId == null){
+				if (index > blockCount - 1) {
+					Number160 ID = Number160.createHash(UUID.randomUUID().hashCode());
+					block = new Block();
+					//	block.setChecksum(index);
+					block.setID(ID);
+					blockCount++;
+					blockCreated = true;
+				} else {
+					//if the block exists, fetch it
+					block = dhtPutGetHelper.getBlockDHT(blockIDs.get(index));
+					blockCreated = false;
+				}
+				writeBufferBlockId = block.getID();
+				if (blockCreated == false){
+					writeBuffer = block.getData().clone();
+				}
 			} else {
-				//if the block exists, fetch it
-				block = dhtPutGetHelper.getBlockDHT(blockIDs.get(index));
-				blockCreated = false;				
-			}			
+				block = new Block();
+				block.setID(writeBufferBlockId);
+			}
 			
 			//we have to make a distinction between which block we are visiting at the moment
 			if(startBlock == endBlock) {
@@ -100,12 +122,15 @@ public class FileContentController implements IFileContentController {
 				}
 			}
 
-			System.arraycopy(content, position, block.getData(), (int) writeOffset % File.BLOCK_SIZE, bytesToWrite);
+			System.arraycopy(content, position, writeBuffer, (int) writeOffset % File.BLOCK_SIZE, bytesToWrite);
+			writeBufferCounter = (int) writeOffset % File.BLOCK_SIZE + bytesToWrite;
 
-			crc32.update(block.getData());
-			block.setChecksum(crc32.getValue());
-
-			dhtPutGetHelper.putBlock(block.getID(), block);
+			if (writeBufferCounter == File.BLOCK_SIZE){
+				block.setData(writeBuffer.clone());
+				dhtPutGetHelper.putBlock(block.getID(), block);
+				writeBufferCounter = 0;
+				writeBufferBlockId = null;
+			}
 
 			if (blockCreated){
 				file.addBlock(block.getID());
@@ -121,14 +146,15 @@ public class FileContentController implements IFileContentController {
 		//update meta information
 		file.setCtime(System.currentTimeMillis()/1000L);
 		file.setAtime(System.currentTimeMillis()/1000L);
-		dhtPutGetHelper.putFile(file.getID(), file);		
+
+		dhtPutGetHelper.putFile(file.getID(), file);
 		
 		//the size of the content that was written		
 		return position;
 	}		
 	
 	@Override
-	public byte[] readFile(File file, long size, long offset) throws CRCException {
+	public byte[] readFile(File file, long size, long offset) /*throws CRCException */{
 		
 		//We don't need to read the whole file, but only "size" bytes, starting from "offset"
 		byte[] content = new byte[(int)size];
@@ -162,15 +188,15 @@ public class FileContentController implements IFileContentController {
 						
 			Number160 ID = blocks.get(index);
 			Block block = dhtPutGetHelper.getBlockDHT(ID);
-			CRC32 crc32 = new CRC32();
+			//CRC32 crc32 = new CRC32();
 			int bytesToRead = 0;
 			
 			//first check if CRC is correct
-			crc32.update(block.getData());
+			/*crc32.update(block.getData());
 			if(! (crc32.getValue() == block.getChecksum()) ) {
 				throw new CRCException(file.getEntryName());
 			}
-			
+			*/
 			//since we read sequential, sequence number checking doesn't make sense in this case			
 			//we have to do case distinction, if we only have one block to read, it's easily done.
 			if(startBlock == endBlock) {
@@ -203,5 +229,17 @@ public class FileContentController implements IFileContentController {
 		dhtPutGetHelper.putFile(file.getID(), file);
 				
 		return content;
+	}
+
+	@Override
+	public void flush(String path) {
+		if (writeBufferBlockId != null){
+		Block block = new Block();
+		block.setID(writeBufferBlockId);
+		block.setData(writeBuffer.clone());
+		dhtPutGetHelper.putBlock(block.getID(), block);
+		writeBufferCounter = 0;
+		writeBufferBlockId = null;
+		}
 	}
 }

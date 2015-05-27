@@ -61,6 +61,7 @@ public class TreeControllerTest {
 
     @Test
     public void testFindEntryGetRoot() throws Exception {
+        //TODO move to new testclass for pathresolver
         Directory root = (Directory) controller.resolvePath("/");
         assertEquals(rootName, root.getEntryName());
     }
@@ -176,7 +177,7 @@ public class TreeControllerTest {
         controller.createDir("/movingTestFrom/dirToMove");
 
         try {
-            controller.renameEntry("/movingTestFrom/dirToMove", "/movingTestTo");
+            controller.renameEntry("/movingTestFrom/dirToMove", "/movingTestTo/dirToMove");
         } catch (FsException e) {
             fail("Testing MOVE DIR failed: " + e.getClass().getName() + " " + e.getMessage());
         }
@@ -197,7 +198,7 @@ public class TreeControllerTest {
             controller.createFile("/movingTestFrom/fileToMove");
 
             //move the file
-            controller.renameEntry("/movingTestFrom/fileToMove", "/movingTestTo/");
+            controller.renameEntry("/movingTestFrom/fileToMove", "/movingTestTo/fileToMove");
         } catch (FsException e) {
             fail("Testing MOVE FILE failed: "+e.getClass().getName() + " " + e.getMessage());
         }

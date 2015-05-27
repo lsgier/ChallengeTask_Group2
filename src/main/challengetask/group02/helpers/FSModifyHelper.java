@@ -33,8 +33,10 @@ import java.util.Random;
  * */
 
  public class FSModifyHelper {
-    PeerDHT peer;
+    private PeerDHT peer;
     private Random RND = new Random(42L);
+    private SimpleCache<Entry> cache = new SimpleCache<>(1);
+
 
     public FSModifyHelper(PeerDHT peer) {
         this.peer = peer;
@@ -49,6 +51,17 @@ import java.util.Random;
         } catch (Exception e) {
         }
         return 0;
+    }
+
+    public Entry getEntryByID(Number160 ID) throws IOException, ClassNotFoundException {
+        FutureGet futureGet = peer.get(ID).getLatest().start();
+        futureGet.awaitUninterruptibly();
+
+        if (futureGet.isEmpty()) {
+            System.out.println("getEntryFromID did not get a result -> faulty fs");
+        }
+
+        return (Entry) futureGet.data().object();
     }
 
     public void removeEntry(Directory parent, Entry entry) throws ClassNotFoundException {

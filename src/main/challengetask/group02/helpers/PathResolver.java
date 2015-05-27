@@ -9,10 +9,13 @@ import challengetask.group02.fsstructure.Entry;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
+import net.tomp2p.storage.Data;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
 
 import static challengetask.group02.fsstructure.Entry.TYPE.DIRECTORY;
 import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
@@ -74,7 +77,42 @@ public class PathResolver {
         resultEntry = currentDirectory;
         cache.put(path, resultEntry);
 
-        //System.out.println(peer.storageLayer().get());
+        NavigableMap<Number640, Data> storage = (peer.storageLayer().get());
+
+        Set<Map.Entry<Number640, Data>> entrySet = storage.entrySet();
+
+        for(Map.Entry<Number640, Data> entry: entrySet){
+
+            Number640 x = entry.getKey();
+            Number160 version = x.versionKey();
+
+
+
+            if (entry.getValue().object().getClass().getName() != "challengetask.group02.fsstructure.Block"){
+                Entry e = (Entry)entry.getValue().object();
+
+                System.out.println("id: " + e.getID() + " version: " + version + " name: " + e.getEntryName());
+
+                if (e.getType() == Entry.TYPE.DIRECTORY){
+                    System.out.println("dir detected, listing children: ");
+                    Directory dir = (Directory) e;
+                    Hashtable<String, Number160> children = dir.getChildren();
+
+                    Iterator<Map.Entry<String, Number160>> it = children.entrySet().iterator();
+
+                    while (it.hasNext()) {
+                        Map.Entry<String, Number160> nxt = it.next();
+
+                        // Remove entry if key is null or equals 0.
+                        System.out.println(nxt.getValue());
+                    }
+
+                }
+            }
+
+
+        }
+
 
         return resultEntry;
     }

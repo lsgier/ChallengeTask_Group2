@@ -25,26 +25,15 @@ import static challengetask.group02.fsstructure.Entry.TYPE.FILE;
 
 public class PathResolver {
 
-    PeerDHT peer;
-
-    SimpleCache<Entry> cache = new SimpleCache<>(1);
-
-    public PathResolver(PeerDHT peer) {
-        this.peer = peer;
-    }
-
-    public Entry resolvePath(String path) throws IOException, ClassNotFoundException, FsException {
+    public static Entry resolvePath(String path, FSModifyHelper helper) throws IOException, ClassNotFoundException, FsException {
         Path subPaths = Paths.get(path);
 
-        Entry resultEntry = null; //= cache.get(path);
-        if (resultEntry != null) {
-            return resultEntry;
-        }
+        Entry resultEntry;
 
         //first, get the root directory
         Directory currentDirectory;
         try {
-            currentDirectory = (Directory) getEntry(Number160.ZERO);
+            currentDirectory = (Directory) getEntry(Number160.ZERO, helper);
         } catch (NoSuchFileOrDirectoryException e) {
             throw new FsException("No root node was found. Probably not connected to a P2P network with a running file system.");
         }
@@ -58,8 +47,7 @@ public class PathResolver {
             currentChildDirID = currentDirectory.getChild(dir.toString(), DIRECTORY);
 
             if (currentChildFileID != null && subPaths.endsWith(dir)) {
-                resultEntry = getEntry(currentChildFileID);
-                cache.put(path, resultEntry);
+                resultEntry = getEntry(currentChildFileID, helper);
                 return resultEntry;
             }
             else if (currentChildFileID != null && !subPaths.endsWith(dir)) {
@@ -68,31 +56,20 @@ public class PathResolver {
             else if (currentChildDirID == null) {
                 throw new NoSuchFileOrDirectoryException(dir.toString());
             } else {
-                currentDirectory = (Directory) getEntry(currentChildDirID);
+                currentDirectory = (Directory) getEntry(currentChildDirID, helper);
             }
         }
         resultEntry = currentDirectory;
-        cache.put(path, resultEntry);
-
-        //System.out.println(peer.storageLayer().get());
 
         return resultEntry;
     }
 
-    private Entry getEntry(Number160 ID) throws IOException, ClassNotFoundException, NoSuchFileOrDirectoryException {
+    private static Entry getEntry(Number160 ID, FSModifyHelper helper) throws IOException, ClassNotFoundException, NoSuchFileOrDirectoryException {
         if (ID == null) {
             System.err.println("BUG: trying to get Entry with ID null!");
             throw new NoSuchFileOrDirectoryException("Tried to get entry with ID null.");
         }
 
-        FutureGet futureGet = peer.get(ID).getLatest().start();
-        futureGet.awaitUninterruptibly();
-
-        if (futureGet.isEmpty()) {
-            System.out.println("getEntryFromID did not get a result -> faulty fs");
-            throw new NoSuchFileOrDirectoryException("");
-        }
-
-        return (Entry) futureGet.data().object();
+        return helper.getEntryByID(ID);
     }
 }

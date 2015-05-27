@@ -12,13 +12,25 @@ public class SimpleCacheTest {
 
     @Test
     public void testCache() {
-        SimpleCache<Entry> cache = new SimpleCache<>(1);
+        SimpleCache<Directory> cache = new SimpleCache<>(1);
 
         Directory dir = new Directory(Number160.ZERO, "test");
 
         assertEquals(null, cache.get("/test"));
 
         cache.put("/test", dir);
+
+
+        System.out.println(cache.get("/test").getEntryName());
+
+        dir.setEntryName("lalalalalal refereeeence");
+        System.out.println(cache.get("/test").getEntryName());
+
+        Directory lala = cache.get("/test");
+
+        lala.setEntryName("kajshbdfkjashbdfk");
+
+        System.out.println(cache.get("/test").getEntryName());
 
         assertEquals(dir, cache.get("/test"));
 

@@ -8,6 +8,7 @@ import java.util.Random;
 
 import challengetask.group02.controllers.exceptions.BusyException;
 import challengetask.group02.controllers.exceptions.CRCException;
+import challengetask.group02.helpers.SimpleCache;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.PeerBuilder;
@@ -567,7 +568,9 @@ public class FileContentControllerTest {
 		buf.position(0);
 		
 		System.out.println("Peer 5 is writing "+(long)arr.length+" Bytes of data into the DHT");
-		int bytesWritten = fcc.writeFile(file, buf, (long)arr.length, 0);			
+
+		int bytesWritten = fcc.writeFile(file, buf, (long)arr.length, 0, new SimpleCache<File>(1));
+		fcc.flush("");
 		
 		//relevant objects have been created
 		assertNotEquals(file.getBlocks().size(), 0);

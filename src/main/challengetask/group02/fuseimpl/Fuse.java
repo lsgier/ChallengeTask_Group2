@@ -199,7 +199,11 @@ public class Fuse extends FuseFilesystemAdapterAssumeImplemented {
         }
         if (Objects.equals(e.getClass().getName(), NotAFileException.class.getName())) {
             return -ErrorCodes.EISDIR();
-        } else {
+        }
+        if (Objects.equals(e.getClass().getName(), FileExistsException.class.getName())) {
+            return -ErrorCodes.EEXIST();
+        }
+        else {
         	return -1;
         }
     }

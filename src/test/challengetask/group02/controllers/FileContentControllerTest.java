@@ -570,7 +570,7 @@ public class FileContentControllerTest {
 		System.out.println("Peer 5 is writing "+(long)arr.length+" Bytes of data into the DHT");
 
 		int bytesWritten = fcc.writeFile(file, buf, (long)arr.length, 0, new SimpleCache<File>(1));
-		fcc.flush("");
+		fcc.flush("", file);
 		
 		//relevant objects have been created
 		assertNotEquals(file.getBlocks().size(), 0);

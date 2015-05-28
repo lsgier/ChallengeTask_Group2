@@ -74,7 +74,7 @@ public class ControllerContext {
     //used for the locking logic
 	public void whenFileClosed(String path) throws ClassNotFoundException, FsException, IOException {
 		treeController.whenFileClosed(path);
-        fileContentController.flush(path);
+        fileContentController.flush(path, treeController.getFile(path));
 	}
 	
 	public void updateFileMetaData(String path, final StructStat.StatWrapper stat) throws ClassNotFoundException, FsException, IOException {

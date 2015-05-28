@@ -11,5 +11,5 @@ public interface IFileContentController {
     int writeFile(File file, ByteBuffer buffer, long bufSize, long writeOffset, SimpleCache<File> cache) throws BusyException;
     byte[] readFile(File file, long size, long offset) throws CRCException;
 
-    void flush(String path);
+    void flush(String path, File file);
 }
